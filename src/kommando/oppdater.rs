@@ -37,10 +37,11 @@ pub async fn kjor(args: &OppdaterArgs, ktx: &Kontekst) -> Result<Utgangskode, Ap
         Utdataformat::Tabell if !args.stille => {
             for kilde in &hentet {
                 anstream::println!(
-                    "{} {}: {} oppføringer",
+                    "{} {}: {} oppføringer, {} matchet katalogen",
                     "✓".green(),
                     kilde.id.visningsnavn(),
-                    kilde.nye_oppforinger.unwrap_or(0)
+                    kilde.nye_oppforinger.unwrap_or(0),
+                    kilde.matchet.unwrap_or(0)
                 );
             }
         }

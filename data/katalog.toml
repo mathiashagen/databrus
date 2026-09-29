@@ -1,12 +1,751 @@
 # Innebygd produktkatalog (SPEC §6.2).
 #
-# Dette er et startsett. EAN-er (gtin) er bevisst tomme til de er hentet fra
-# en verifisert kilde i M1 – et feil EAN er verre enn ingen EAN.
+# Generert fra Kassalapps energidrikkategori (2026-09-29) og kuratert for hånd:
+# sportsdrikker, proteindrikker, pulver og paller er utelatt, merker og
+# skrivefeil fra butikkene er rettet. `# kilde:` viser navnene butikkene bruker.
 #
 # Brukere kan overstyre eller legge til produkter i <konfigmappe>/katalog.toml.
 # Oppføringer med samme `id` erstatter den innebygde.
 
 [[produkt]]
+# kilde: Arendals Monkey Boy 0,33l | Monkey Boy 0,33l boks Arendals Bryggeri | Monkey Up Energy Drink 0.33l Arendals
+id = "monkey-boy-330-boks"
+navn = "Monkey Boy"
+merke = "arendals"
+smak = "original"
+sukkerfri = false
+volum_ml = 330
+beholder = "boks"
+gtin = ["7072217003771"]
+
+[[produkt]]
+# kilde: Monkey Up Tropical 0,33l Arendals Bryggeri | Monkey Up! Tropical 0,33l boks
+id = "monkey-up-tropical-330-boks"
+navn = "Monkey Up! Tropical"
+merke = "arendals"
+smak = "tropical"
+sukkerfri = false
+volum_ml = 330
+beholder = "boks"
+gtin = ["7072217004747"]
+
+[[produkt]]
+# kilde: Monkey Boy Zero Energidrikk 0,33l | Monkey Up Zero 0.33l Arendals | Monkey Up! Zero 0,33l boks Arendals
+id = "monkey-up-zero-330-boks"
+navn = "Monkey Up! Zero"
+merke = "arendals"
+smak = "original"
+sukkerfri = true
+volum_ml = 330
+beholder = "boks"
+gtin = ["7072217004044"]
+
+[[produkt]]
+# kilde: Bang Candy Apple Crisp 0,5 l | Bang Candy Apple Crisp 0,50l bx | Bang Candy Apple Crisp 0,5l boks
+id = "bang-candy-apple-crisp-500-boks"
+navn = "Bang Candy Apple Crisp"
+merke = "bang"
+smak = "candy-apple-crisp"
+sukkerfri = true
+volum_ml = 500
+beholder = "boks"
+gtin = ["8720211192487"]
+
+[[produkt]]
+# kilde: Bang Peach Mango 0,5l
+id = "bang-peach-mango-500-boks"
+navn = "Bang Peach Mango"
+merke = "bang"
+smak = "peach-mango"
+sukkerfri = true
+volum_ml = 500
+beholder = "boks"
+gtin = ["8720211192449"]
+
+[[produkt]]
+# kilde: Bang Rainbow Unicorn 0,5 l | Bang Rainbow Unicorn 0,50l bx | Bang Rainbow Unicorn 0,5l | Bang Rainbow Unicorn 0,5l boks
+id = "bang-rainbow-unicorn-500-boks"
+navn = "Bang Rainbow Unicorn"
+merke = "bang"
+smak = "rainbow-unicorn"
+sukkerfri = true
+volum_ml = 500
+beholder = "boks"
+gtin = ["8720211192425"]
+
+[[produkt]]
+# kilde: Battery 0,5 l Black | Battery Black 0,5 l | Battery Black 0,5l boks
+id = "battery-black-500-boks"
+navn = "Battery Black"
+merke = "battery"
+smak = "black"
+sukkerfri = false
+volum_ml = 500
+beholder = "boks"
+gtin = ["6415600579292"]
+
+[[produkt]]
+# kilde: BATTERY BLUEBERRY 0.5 l bx | Battery Blueberry 0,5l boks | Battery Blueberry 0.50 | Battery Blueberry Limited Edition, 0,5 l
+id = "battery-blueberry-500-boks"
+navn = "Battery Blueberry"
+merke = "battery"
+smak = "blueberry"
+sukkerfri = false
+volum_ml = 500
+beholder = "boks"
+gtin = ["6415600574051"]
+
+[[produkt]]
+# kilde: Battery Charged Fresh Exotic Fruits 0,5l boks
+id = "battery-charged-fresh-exotic-fruits-500-boks"
+navn = "Battery Charged Fresh Exotic Fruits"
+merke = "battery"
+smak = "charged-fresh-exotic-fruits"
+sukkerfri = true
+volum_ml = 500
+beholder = "boks"
+gtin = ["6415600594240"]
+
+[[produkt]]
+# kilde: BATTERY CHARGED Nectarine/apricot 0.5l bx | Battery Charged Nectarine/Apricot 0,5l boks | Battery boks, Charged Nectarine Apricot
+id = "battery-charged-nectarine-apricot-500-boks"
+navn = "Battery Charged Nectarine Apricot"
+merke = "battery"
+smak = "charged-nectarine-apricot"
+sukkerfri = true
+volum_ml = 500
+beholder = "boks"
+gtin = ["6415600591188"]
+
+[[produkt]]
+# kilde: Battery Charged Peachy Blue 0,5l boks
+id = "battery-charged-peachy-blue-500-boks"
+navn = "Battery Charged Peachy Blue"
+merke = "battery"
+smak = "charged-peachy-blue"
+sukkerfri = true
+volum_ml = 500
+beholder = "boks"
+gtin = ["6415600587105"]
+
+[[produkt]]
+# kilde: Battery Charged Raspberry&Pomegran 0,5l boks
+id = "battery-charged-raspberry-pomegran-500-boks"
+navn = "Battery Charged Raspberry&Pomegran"
+merke = "battery"
+smak = "charged-raspberry-pomegran"
+sukkerfri = true
+volum_ml = 500
+beholder = "boks"
+gtin = ["6415600590327"]
+
+[[produkt]]
+# kilde: BATTERY ENERGIDRIKK 0,5L | BATTERY ENERGY 0.5 l bx | Battery 0,5 l | Battery Energi Drink 0,50 | Battery Energi Drink 0,5l | Battery Energy 0,5l boks | Battery Energy Drink 0,5 l
+id = "battery-energy-500-boks"
+navn = "Battery Energy"
+merke = "battery"
+smak = "energy"
+sukkerfri = false
+volum_ml = 500
+beholder = "boks"
+gtin = ["7044610806228"]
+
+[[produkt]]
+# kilde: BATTERY ENERGY PEACHBERRY 0.5 l bx | BATTERY PEACHBERRY 0,50L | Battery 0,5 l Peach Berry | Battery Energy Peachberry 0,5l boks | Battery Peachberry 0,5 l | Battery Peachberry 0,5l | Battery Peachberry 0.50
+id = "battery-energy-peachberry-500-boks"
+navn = "Battery Energy Peachberry"
+merke = "battery"
+smak = "energy-peachberry"
+sukkerfri = false
+volum_ml = 500
+beholder = "boks"
+gtin = ["6415600543712"]
+
+[[produkt]]
+# kilde: BATTERY FRESH 0,50L | BATTERY FRESH 0.5 l bx | Battery Fresh 0,5 l | Battery Fresh 0,5l | Battery Fresh 0,5l boks | Battery Fresh, Energy Drink 0,5 l | Battery Frsh 0,50
+id = "battery-fresh-500-boks"
+navn = "Battery Fresh"
+merke = "battery"
+smak = "fresh"
+sukkerfri = false
+volum_ml = 500
+beholder = "boks"
+gtin = ["7044610799490"]
+
+[[produkt]]
+# kilde: BATTERY JUICED BREEZE 0.5 | Battery 0,5 l Juiced breeze | Battery Juiced Breeze 0,5 l | Battery Juiced Breeze 0,5l | Battery Juiced Breeze 0,5l boks | Battery Juiced Breeze 0.5
+id = "battery-juiced-breeze-500-boks"
+navn = "Battery Juiced Breeze"
+merke = "battery"
+smak = "juiced-breeze"
+sukkerfri = false
+volum_ml = 500
+beholder = "boks"
+gtin = ["6415600557993"]
+
+[[produkt]]
+# kilde: BATTERY JUICED EXOTIC 0.5 l bx | BATTERY JUICED EXOTIC 0.50 | Battery 0,5 l Juiced Exotic | Battery Juiced Exotic 0,5 l | Battery Juiced Exotic 0,5l | Battery Juiced Exotic 0,5l boks | Battery Juiced Exotic 0.50
+id = "battery-juiced-exotic-500-boks"
+navn = "Battery Juiced Exotic"
+merke = "battery"
+smak = "juiced-exotic"
+sukkerfri = false
+volum_ml = 500
+beholder = "boks"
+gtin = ["6415600560443"]
+
+[[produkt]]
+# kilde: Battery Juiced Sour Apple 0,5 l | Battery Juiced Sour Apple 0,5l boks | Battery Juiced Sour Apple 0.5
+id = "battery-juiced-sour-apple-500-boks"
+navn = "Battery Juiced Sour Apple"
+merke = "battery"
+smak = "juiced-sour-apple"
+sukkerfri = false
+volum_ml = 500
+beholder = "boks"
+gtin = ["6415600576062"]
+
+[[produkt]]
+# kilde: BATTERY NOCAL REG 0.50 | Battery No Calorie 0,5 l | Battery No Calorie 0,5l | Battery No Calorie 0,5l boks | Battery Nocal Reg 0.50
+id = "battery-no-calorie-500-boks"
+navn = "Battery No Calorie"
+merke = "battery"
+smak = "no-calorie"
+sukkerfri = true
+volum_ml = 500
+beholder = "boks"
+gtin = ["6415600556835"]
+
+[[produkt]]
+# kilde: BATTERY NOCAL LEMON+LIME 0.50 | Battery No Cal 0,5 l Lemon & Lime | Battery No Calorie Lemon+Lime 0,5l boks | Battery NoCal Lemon&Lime 0,5 l | Battery Nocal Lemon+lime 0.50 | Battery Nocal Lemon/Lime 0,5l
+id = "battery-no-calorie-lemon-lime-500-boks"
+navn = "Battery No Calorie Lemon Lime"
+merke = "battery"
+smak = "no-calorie-lemon-lime"
+sukkerfri = true
+volum_ml = 500
+beholder = "boks"
+gtin = ["6415600565547"]
+
+[[produkt]]
+# kilde: Battery No Calori 0,5 l Strawberry mint | Battery No Calorie Sizzle 0,5l boks | Battery NoCal Strawberry Mint 0,5 l | Battery Nocal Strawberry Mint 0.50
+id = "battery-no-calorie-sizzle-500-boks"
+navn = "Battery No Calorie Sizzle"
+merke = "battery"
+smak = "no-calorie-sizzle"
+sukkerfri = true
+volum_ml = 500
+beholder = "boks"
+gtin = ["6415600572507"]
+
+[[produkt]]
+# kilde: Battery Pearberry 0,5l boks
+id = "battery-pearberry-500-boks"
+navn = "Battery Pearberry"
+merke = "battery"
+smak = "pearberry"
+sukkerfri = false
+volum_ml = 500
+beholder = "boks"
+gtin = ["6415600590358"]
+
+[[produkt]]
+# kilde: BATTERY PULSE 0.5 l bx | BATTERY PULSE 0.50 | Battery 0,5 l Pulse | Battery Pulse 0,5 l | Battery Pulse 0,5l | Battery Pulse 0,5l boks | Battery Pulse 0.50
+id = "battery-pulse-500-boks"
+navn = "Battery Pulse"
+merke = "battery"
+smak = "pulse"
+sukkerfri = false
+volum_ml = 500
+beholder = "boks"
+gtin = ["6415600568401"]
+
+[[produkt]]
+# kilde: BATTERY REMIX 0.50 | Battery Remix 0,5 l | Battery Remix 0,5l | Battery Remix 0,5l boks | Battery Remix 0.50
+id = "battery-remix-500-boks"
+navn = "Battery Remix"
+merke = "battery"
+smak = "remix"
+sukkerfri = false
+volum_ml = 500
+beholder = "boks"
+gtin = ["6415600555098"]
+
+[[produkt]]
+# kilde: BATTERY RISE 0.50 | Battery 0,5 l Rise | Battery Rise 0,5 l | Battery Rise 0,5l | Battery Rise 0,5l boks | Battery Rise 0.50
+id = "battery-rise-500-boks"
+navn = "Battery Rise"
+merke = "battery"
+smak = "rise"
+sukkerfri = false
+volum_ml = 500
+beholder = "boks"
+gtin = ["6415600570503"]
+
+[[produkt]]
+# kilde: Battery Whirl Sugar 0,5l boks
+id = "battery-whirl-sugar-500-boks"
+navn = "Battery Whirl Sugar"
+merke = "battery"
+smak = "whirl-sugar"
+sukkerfri = false
+volum_ml = 500
+beholder = "boks"
+gtin = ["6415600593335"]
+
+[[produkt]]
+# kilde: BATTERY ZERO LEMON YUZU 0.5 l bx | Battery Zero Lemon Lime Yuzu 0,5l boks
+id = "battery-zero-lemon-lime-yuzu-500-boks"
+navn = "Battery Zero Lemon Lime Yuzu"
+merke = "battery"
+smak = "zero-lemon-lime-yuzu"
+sukkerfri = true
+volum_ml = 500
+beholder = "boks"
+gtin = ["6415600581530"]
+
+[[produkt]]
+# kilde: Battery 0,5 l boks Zero mango coconut | Battery Zero Mango&Coconut 0,5l boks
+id = "battery-zero-mango-coconut-500-boks"
+navn = "Battery Zero Mango&Coconut"
+merke = "battery"
+smak = "zero-mango-coconut"
+sukkerfri = true
+volum_ml = 500
+beholder = "boks"
+gtin = ["6415600581592"]
+
+[[produkt]]
+# kilde: BOKS Energy Zero sugar, 0,5 l | Boks Energy 0.5l bx | Boks Energy 0.5l bx 1/3 Pall 360stk | boks Energy 0,5l boks
+id = "boks-energy-500-boks"
+navn = "Boks Energy"
+merke = "boks"
+smak = "original"
+sukkerfri = true
+volum_ml = 500
+beholder = "boks"
+gtin = ["7070293082840"]
+
+[[produkt]]
+# kilde: Boks Energy Yuzu 500 ml | boks Energy Yuzu 0,5l boks
+id = "boks-energy-yuzu-500-boks"
+navn = "Boks Energy Yuzu"
+merke = "boks"
+smak = "yuzu"
+sukkerfri = true
+volum_ml = 500
+beholder = "boks"
+gtin = ["7070293084257"]
+
+[[produkt]]
+# kilde: (fra flerpakning) Burn Apple/Kiwi 0,5l boks
+id = "burn-apple-kiwi-500-boks"
+navn = "Burn Apple Kiwi"
+merke = "burn"
+smak = "apple-kiwi"
+sukkerfri = false
+volum_ml = 500
+beholder = "boks"
+gtin = []
+
+[[produkt]]
+# kilde: BURN FRUIT PUNCH 500ML BX | Burn Fruit Punch 0,5l boks | Burn Fruit Punch 500ml bx | Burn Fruitpunch 0,5 l
+id = "burn-fruit-punch-500-boks"
+navn = "Burn Fruit Punch"
+merke = "burn"
+smak = "fruit-punch"
+sukkerfri = false
+volum_ml = 500
+beholder = "boks"
+gtin = ["5060895745122"]
+
+[[produkt]]
+# kilde: BURN ORIGINAL 0.25 l bx | Burn Original 0,25l boks | Burn Original 250ml Slim bx
+id = "burn-original-250-boks"
+navn = "Burn Original"
+merke = "burn"
+smak = "original"
+sukkerfri = false
+volum_ml = 250
+beholder = "boks"
+gtin = ["5060895746860"]
+
+[[produkt]]
+# kilde: (fra flerpakning) Burn Original 0,5l boks
+id = "burn-original-500-boks"
+navn = "Burn Original"
+merke = "burn"
+smak = "original"
+sukkerfri = false
+volum_ml = 500
+beholder = "boks"
+gtin = []
+
+[[produkt]]
+# kilde: BURN WHITE CITRUS Zero sugar 0.25l bx | Burn White Citrus Zero Sugar 0,25l boks
+id = "burn-white-citrus-zero-sugar-250-boks"
+navn = "Burn White Citrus Zero Sugar"
+merke = "burn"
+smak = "white-citrus"
+sukkerfri = true
+volum_ml = 250
+beholder = "boks"
+gtin = ["5061013964265"]
+
+[[produkt]]
+# kilde: Burn Peach Zero 0,5 l | Burn Peach Zero 0,5l | Burn Zero Peach 0,5l boks
+id = "burn-zero-peach-500-boks"
+navn = "Burn Zero Peach"
+merke = "burn"
+smak = "zero-peach"
+sukkerfri = true
+volum_ml = 500
+beholder = "boks"
+gtin = ["5060608744206"]
+
+[[produkt]]
+# kilde: BURN RASPBERRY ZERO SUGAR 500ML BX | Burn Raspberry Zero 0,5l | Burn Zero Raspberry 0,5l boks
+id = "burn-zero-raspberry-500-boks"
+navn = "Burn Zero Raspberry"
+merke = "burn"
+smak = "zero-raspberry"
+sukkerfri = true
+volum_ml = 500
+beholder = "boks"
+gtin = ["5060608747726"]
+
+[[produkt]]
+# kilde: Cult Dragon Sukkerfri 0,5l boks
+id = "cult-dragon-sukkerfri-500-boks"
+navn = "Cult Dragon Sukkerfri"
+merke = "cult"
+smak = "dragon"
+sukkerfri = true
+volum_ml = 500
+beholder = "boks"
+gtin = ["7030019541266"]
+
+[[produkt]]
+# kilde: Cult Flaming Mango 0,5l boks | Cult Flaming Mangoes 50cl bx
+id = "cult-flaming-mango-500-boks"
+navn = "Cult Flaming Mango"
+merke = "cult"
+smak = "flaming-mango"
+sukkerfri = true
+volum_ml = 500
+beholder = "boks"
+gtin = ["5741000220863"]
+
+[[produkt]]
+# kilde: Cult Juicy Pear 0,5l boks
+id = "cult-juicy-pear-500-boks"
+navn = "Cult Juicy Pear"
+merke = "cult"
+smak = "juicy-pear"
+sukkerfri = true
+volum_ml = 500
+beholder = "boks"
+gtin = ["7030019542164"]
+
+[[produkt]]
+# kilde: CULT MIAMI ICE 0.5 l bx | Cult Miami Ice 0,5l boks | Cult Miami Ice 50cl bx
+id = "cult-miami-ice-500-boks"
+navn = "Cult Miami Ice"
+merke = "cult"
+smak = "miami-ice"
+sukkerfri = true
+volum_ml = 500
+beholder = "boks"
+gtin = ["5741000220887"]
+
+[[produkt]]
+# kilde: Cult Original 0,5l boks | Cult Original 50cl
+id = "cult-original-500-boks"
+navn = "Cult Original"
+merke = "cult"
+smak = "original"
+sukkerfri = true
+volum_ml = 500
+beholder = "boks"
+gtin = ["5741000221020"]
+
+[[produkt]]
+# kilde: Cult Original Sugarfree 50 cl | Cult Original Sukkerfri 0,5l boks
+id = "cult-original-sukkerfri-500-boks"
+navn = "Cult Original Sukkerfri"
+merke = "cult"
+smak = "original"
+sukkerfri = true
+volum_ml = 500
+beholder = "boks"
+gtin = ["5741000221044"]
+
+[[produkt]]
+# kilde: Cult Peachy 0,5l boks
+id = "cult-peachy-500-boks"
+navn = "Cult Peachy"
+merke = "cult"
+smak = "peachy"
+sukkerfri = true
+volum_ml = 500
+beholder = "boks"
+gtin = ["7030019541716"]
+
+[[produkt]]
+# kilde: Cult Wild Cat 0,5l boks
+id = "cult-wild-cat-500-boks"
+navn = "Cult Wild Cat"
+merke = "cult"
+smak = "wild-cat"
+sukkerfri = true
+volum_ml = 500
+beholder = "boks"
+gtin = ["5741000227251"]
+
+[[produkt]]
+# kilde: Cult Zen Monkey 0,5l boks | Cult Zen Monkey 50cl bx
+id = "cult-zen-monkey-500-boks"
+navn = "Cult Zen Monkey"
+merke = "cult"
+smak = "zen-monkey"
+sukkerfri = true
+volum_ml = 500
+beholder = "boks"
+gtin = ["5741000220849"]
+
+[[produkt]]
+# kilde: Explo Blueberry Melon Bomb Sukkerfi 0.5l bx | Explo Blueberry Melon Bomb Sukkerfi 0.5l bx Brett | Explo Blueberry Melon Bomb Sukkerfri 0,5l boks Mack
+id = "explo-blueberry-melon-bomb-sukkerfri-500-boks"
+navn = "Explo Blueberry Melon Bomb Sukkerfri"
+merke = "explo"
+smak = "blueberry-melon-bomb"
+sukkerfri = true
+volum_ml = 500
+beholder = "boks"
+gtin = ["7037120028679"]
+
+[[produkt]]
+# kilde: Explo Bubblegum Fizz Sukkerfri 0,5l boks Mack | Explo Bubblegum Fizz Sukkerfri 0.5l bx
+id = "explo-bubblegum-fizz-sukkerfri-500-boks"
+navn = "Explo Bubblegum Fizz Sukkerfri"
+merke = "explo"
+smak = "bubblegum-fizz"
+sukkerfri = true
+volum_ml = 500
+beholder = "boks"
+gtin = ["7037120030122"]
+
+[[produkt]]
+# kilde: Explo Chug Sukkerfri 0,5l boks Mack
+id = "explo-chug-sukkerfri-500-boks"
+navn = "Explo Chug Sukkerfri"
+merke = "explo"
+smak = "chug"
+sukkerfri = true
+volum_ml = 500
+beholder = "boks"
+gtin = ["7037120030566"]
+
+[[produkt]]
+# kilde: Explo Cold Fusion Sukkerfri 0,5l boks Mack | Explo Cold Fusion Sukkerfri 0.5l bx
+id = "explo-cold-fusion-sukkerfri-500-boks"
+navn = "Explo Cold Fusion Sukkerfri"
+merke = "explo"
+smak = "cold-fusion"
+sukkerfri = true
+volum_ml = 500
+beholder = "boks"
+gtin = ["7037120029232"]
+
+[[produkt]]
+# kilde: Explo Exotic Sukkerfri 0,5l boks Mack | Explo Exotic Sukkerfri 0.5l bx
+id = "explo-exotic-sukkerfri-500-boks"
+navn = "Explo Exotic Sukkerfri"
+merke = "explo"
+smak = "exotic"
+sukkerfri = true
+volum_ml = 500
+beholder = "boks"
+gtin = ["7037120024480"]
+
+[[produkt]]
+# kilde: Explo 6am Sunrise Juiced 0.5l bx | Explo Juiced 6am Sunrice 0,5l boks Mack
+id = "explo-juiced-6am-sunrise-500-boks"
+navn = "Explo Juiced 6am Sunrise"
+merke = "explo"
+smak = "juiced-6am-sunrise"
+sukkerfri = false
+volum_ml = 500
+beholder = "boks"
+gtin = ["7037120029287"]
+
+[[produkt]]
+# kilde: Explo Kiwi Strawberry Sukkerfri 0,5l boks Mack | Explo Kiwi Strawberry Sukkerfri 0.5l bx | Mack Explo Kiwi/Strawberry 0,5l
+id = "explo-kiwi-strawberry-sukkerfri-500-boks"
+navn = "Explo Kiwi Strawberry Sukkerfri"
+merke = "explo"
+smak = "kiwi-strawberry"
+sukkerfri = true
+volum_ml = 500
+beholder = "boks"
+gtin = ["7037120026996"]
+
+[[produkt]]
+# kilde: Explo Mango Passion Sukkerfri 0,5l boks Mack | Explo Mango/passion Sukkerfri 0.5l bx | Explo Mango/passion Sukkerfri 0.5l bx Brett | Mack Explo Mango/Passion 0,5l
+id = "explo-mango-passion-sukkerfri-500-boks"
+navn = "Explo Mango Passion Sukkerfri"
+merke = "explo"
+smak = "mango-passion"
+sukkerfri = true
+volum_ml = 500
+beholder = "boks"
+gtin = ["7037120024114"]
+
+[[produkt]]
+# kilde: Mack Explo Orange Madness 0,5l
+id = "explo-orange-madness-500-boks"
+navn = "Explo Orange Madness"
+merke = "explo"
+smak = "orange-madness"
+sukkerfri = true
+volum_ml = 500
+beholder = "boks"
+gtin = ["7037120024510"]
+
+[[produkt]]
+# kilde: Explo Pristine Sukkerfri 0,5l boks Mack | Explo Pristine Sukkerfri 0.5l bx
+id = "explo-pristine-sukkerfri-500-boks"
+navn = "Explo Pristine Sukkerfri"
+merke = "explo"
+smak = "pristine"
+sukkerfri = true
+volum_ml = 500
+beholder = "boks"
+gtin = ["7037120030177"]
+
+[[produkt]]
+# kilde: Explo Santa Power 0,5l boks Mack
+id = "explo-santa-power-500-boks"
+navn = "Explo Santa Power"
+merke = "explo"
+smak = "santa-power"
+sukkerfri = true
+volum_ml = 500
+beholder = "boks"
+gtin = ["7037120026033"]
+
+[[produkt]]
+# kilde: Explo Savage 0,5l boks Mack | Explo Savage Sukkerfri 0.5l bx
+id = "explo-savage-500-boks"
+navn = "Explo Savage"
+merke = "explo"
+smak = "savage"
+sukkerfri = true
+volum_ml = 500
+beholder = "boks"
+gtin = ["7037120029607"]
+
+[[produkt]]
+# kilde: Explo Sour Apple Sukkerfri 0,5l boks Mack | Explo Sour Apple Sukkerfri 0.5l bx
+id = "explo-sour-apple-sukkerfri-500-boks"
+navn = "Explo Sour Apple Sukkerfri"
+merke = "explo"
+smak = "sour-apple"
+sukkerfri = true
+volum_ml = 500
+beholder = "boks"
+gtin = ["7037120025661"]
+
+[[produkt]]
+# kilde: Explo X Winter 0,5l boks Mack
+id = "explo-x-winter-500-boks"
+navn = "Explo X Winter"
+merke = "explo"
+smak = "x-winter"
+sukkerfri = true
+volum_ml = 500
+beholder = "boks"
+gtin = ["7037120032287"]
+
+[[produkt]]
+# kilde: Froosh Energidrikk Bringebær 330ml boks
+id = "froosh-bringebaer-330-boks"
+navn = "Froosh Bringebær"
+merke = "froosh"
+smak = "bringebaer"
+sukkerfri = false
+volum_ml = 330
+beholder = "boks"
+gtin = ["7350153720540"]
+
+[[produkt]]
+# kilde: Froosh Energidrikk Eple&Pære 330ml boks
+id = "froosh-eple-paere-330-boks"
+navn = "Froosh Eple&Pære"
+merke = "froosh"
+smak = "eple-paere"
+sukkerfri = false
+volum_ml = 330
+beholder = "boks"
+gtin = ["7350153720557"]
+
+[[produkt]]
+# kilde: Froosh Energidrikk Fersken&Pasjonsfrukt 330ml boks
+id = "froosh-fersken-pasjonsfrukt-330-boks"
+navn = "Froosh Fersken&Pasjonsfrukt"
+merke = "froosh"
+smak = "fersken-pasjonsfrukt"
+sukkerfri = false
+volum_ml = 330
+beholder = "boks"
+gtin = ["7350153720533"]
+
+[[produkt]]
+# kilde: Intelligent Energizer Apple 0,33l boks
+id = "intelligent-energizer-apple-330-boks"
+navn = "Intelligent Energizer Apple"
+merke = "intelligent-energizer"
+smak = "apple"
+sukkerfri = false
+volum_ml = 330
+beholder = "boks"
+gtin = ["7090064870032"]
+
+[[produkt]]
+# kilde: Intelligent Energizer Original 0,33l boks
+id = "intelligent-energizer-original-330-boks"
+navn = "Intelligent Energizer Original"
+merke = "intelligent-energizer"
+smak = "original"
+sukkerfri = true
+volum_ml = 330
+beholder = "boks"
+gtin = ["7090064870001"]
+
+[[produkt]]
+# kilde: Intelligent Energizer Tropical 0,33l boks
+id = "intelligent-energizer-tropical-330-boks"
+navn = "Intelligent Energizer Tropical"
+merke = "intelligent-energizer"
+smak = "tropical"
+sukkerfri = true
+volum_ml = 330
+beholder = "boks"
+gtin = ["7090064870063"]
+
+[[produkt]]
+# kilde: (fra flerpakning) Monster Aussie Lemonade 0,5l boks
+id = "monster-aussie-lemonade-500-boks"
+navn = "Monster Aussie Lemonade"
+merke = "monster"
+smak = "aussie-lemonade"
+sukkerfri = false
+volum_ml = 500
+beholder = "boks"
+gtin = []
+
+[[produkt]]
+# kilde: (fra flerpakning) Monster Energy 0,5l boks
 id = "monster-energy-500-boks"
 navn = "Monster Energy"
 merke = "monster"
@@ -15,103 +754,1274 @@ smak_alias = ["green", "gronn"]
 sukkerfri = false
 volum_ml = 500
 beholder = "boks"
+gtin = []
 
 [[produkt]]
-id = "monster-ultra-white-500-boks"
-navn = "Monster Ultra White"
+# kilde: Monster Energy Rossi 0,5l
+id = "monster-energy-rossi-500-boks"
+navn = "Monster Energy Rossi"
 merke = "monster"
-linje = "Ultra"
-smak = "white"
-smak_alias = ["zero ultra", "ultra zero", "ultra white"]
+smak = "energy-rossi"
+sukkerfri = false
+volum_ml = 500
+beholder = "boks"
+gtin = ["5060335636287"]
+
+[[produkt]]
+# kilde: MONSTER Lh44 zero 0.5l bx | Monster Full Throttle Zero 0,5l boks | Monster Lewis Hamilton Zero Sugar 0,5 l | Monster Lh44 Zero 0,5l boks | Monster Lh44 Zero 500ml bx
+id = "monster-full-throttle-zero-500-boks"
+navn = "Monster Full Throttle Zero"
+merke = "monster"
+smak = "full-throttle-zero"
 sukkerfri = true
 volum_ml = 500
 beholder = "boks"
+gtin = ["5060896625638"]
 
 [[produkt]]
-id = "monster-ultra-paradise-500-boks"
-navn = "Monster Ultra Paradise"
+# kilde: MONSTER JUICED BAD APPLE 0.5 l bx | Monster 500 ml energidrikk Bad apple | Monster Juiced Bad Apple 0,5l boks
+id = "monster-juiced-bad-apple-500-boks"
+navn = "Monster Juiced Bad Apple"
 merke = "monster"
-linje = "Ultra"
-smak = "paradise"
+smak = "juiced-bad-apple"
+sukkerfri = false
+volum_ml = 500
+beholder = "boks"
+gtin = ["5061013945219"]
+
+[[produkt]]
+# kilde: MONSTER JUICED KHAOTIC 0.5 l bx | Monster Juiced Khaotic 0,5l | Monster Juiced Khaotic 0,5l boks | Monster Juiced Khaotic 500ml bx | Monster Khaotic 0,5 l
+id = "monster-juiced-khaotic-500-boks"
+navn = "Monster Juiced Khaotic"
+merke = "monster"
+smak = "juiced-khaotic"
+sukkerfri = false
+volum_ml = 500
+beholder = "boks"
+gtin = ["5060896622644"]
+
+[[produkt]]
+# kilde: MONSTER JUICED MONARCH 0.5 l bx | MONSTER JUICED MONARCH 500ML | Monster Juiced Monarch 0,5l | Monster Juiced Monarch 0,5l boks | Monster Juiced Monarch 500ml | Monster Monarch 0,5 l
+id = "monster-juiced-monarch-500-boks"
+navn = "Monster Juiced Monarch"
+merke = "monster"
+smak = "juiced-monarch"
+sukkerfri = false
+volum_ml = 500
+beholder = "boks"
+gtin = ["5060751216070"]
+
+[[produkt]]
+# kilde: (fra flerpakning) Monster Juiced Rio Punch 0,5l boks
+id = "monster-juiced-rio-punch-500-boks"
+navn = "Monster Juiced Rio Punch"
+merke = "monster"
+smak = "juiced-rio-punch"
+sukkerfri = false
+volum_ml = 500
+beholder = "boks"
+gtin = []
+
+[[produkt]]
+# kilde: MONSTER Lando norris zs 0.5l bx | Monster Lando Norris Zs 0,5l boks
+id = "monster-lando-norris-zs-500-boks"
+navn = "Monster Lando Norris Zs"
+merke = "monster"
+smak = "lando-norris-zs"
 sukkerfri = true
 volum_ml = 500
 beholder = "boks"
+gtin = ["5056784907580"]
 
 [[produkt]]
+# kilde: (fra flerpakning) Monster Mango Loco 0,5l boks
 id = "monster-mango-loco-500-boks"
 navn = "Monster Mango Loco"
 merke = "monster"
-linje = "Juiced"
 smak = "mango-loco"
 smak_alias = ["mango"]
 sukkerfri = false
 volum_ml = 500
 beholder = "boks"
+gtin = []
 
 [[produkt]]
-id = "red-bull-energy-drink-250-boks"
-navn = "Red Bull Energy Drink"
-merke = "red-bull"
-smak = "original"
-sukkerfri = false
-volum_ml = 250
-beholder = "boks"
-
-[[produkt]]
-id = "red-bull-sugarfree-250-boks"
-navn = "Red Bull Sugarfree"
-merke = "red-bull"
-smak = "sugarfree"
-smak_alias = ["sukkerfri"]
+# kilde: MONSTER MULE 500ML BX | Monster Mule 0,5l | Monster Mule 0,5l boks | Monster Mule 500ml bx
+id = "monster-mule-500-boks"
+navn = "Monster Mule"
+merke = "monster"
+smak = "mule"
 sukkerfri = true
-volum_ml = 250
+volum_ml = 500
 beholder = "boks"
+gtin = ["5060751215936"]
 
 [[produkt]]
-id = "burn-original-500-boks"
-navn = "Burn Original"
-merke = "burn"
-smak = "original"
+# kilde: MONSTER NITRO SUPER DRY 500ML BX | Monster Nitro Super Dry 0,5l | Monster Nitro Super Dry 0,5l boks | Monster Nitro Super Dry 500ml bx
+id = "monster-nitro-super-dry-500-boks"
+navn = "Monster Nitro Super Dry"
+merke = "monster"
+smak = "nitro-super-dry"
 sukkerfri = false
 volum_ml = 500
 beholder = "boks"
+gtin = ["5060751218678"]
 
 [[produkt]]
+# kilde: (fra flerpakning) Monster Pacific Punch 0,5l
+id = "monster-pacific-punch-500-boks"
+navn = "Monster Pacific Punch"
+merke = "monster"
+smak = "pacific-punch"
+sukkerfri = false
+volum_ml = 500
+beholder = "boks"
+gtin = []
+
+[[produkt]]
+# kilde: MONSTER ENERGY PIPELINE 0.5 l | MONSTER PIPELINE PUNCH 500ML BX | Monster Pipeline Punch 0,5 l | Monster Pipeline Punch 0,5l | Monster Pipeline Punch 0,5l boks | Monster Pipeline Punch 500ml bx | Monster energidrikk 500 ml, Pipeline Punch
+id = "monster-pipeline-punch-500-boks"
+navn = "Monster Pipeline Punch"
+merke = "monster"
+smak = "pipeline-punch"
+sukkerfri = false
+volum_ml = 500
+beholder = "boks"
+gtin = ["5060639126095"]
+
+[[produkt]]
+# kilde: Monster Reserve Pineapple 0,5l boks | Monster Reserve White Pineapple 500ml bx
+id = "monster-reserve-pineapple-500-boks"
+navn = "Monster Reserve Pineapple"
+merke = "monster"
+smak = "reserve-pineapple"
+sukkerfri = false
+volum_ml = 500
+beholder = "boks"
+gtin = ["5060896628851"]
+
+[[produkt]]
+# kilde: MONSTER Ultra black 0.5l bx | Monster Ultra Black 0,5 l | Monster Ultra Black 0,5l boks
+id = "monster-ultra-black-500-boks"
+navn = "Monster Ultra Black"
+merke = "monster"
+smak = "ultra-black"
+sukkerfri = true
+volum_ml = 500
+beholder = "boks"
+gtin = ["5060947542440"]
+
+[[produkt]]
+# kilde: Monster Ultra Fantasy Ruby Red 0,5l boks
+id = "monster-ultra-fantasy-ruby-red-500-boks"
+navn = "Monster Ultra Fantasy Ruby Red"
+merke = "monster"
+smak = "ultra-fantasy-ruby-red"
+sukkerfri = true
+volum_ml = 500
+beholder = "boks"
+gtin = ["5056784910023"]
+
+[[produkt]]
+# kilde: MONSTER ULTRA FIESTA 0.5 l bx | MONSTER ULTRA FIESTA MANGO 500ML BX | Monster 500 ml energidrikk Ultra Fiesta | Monster Ultra Fiesta 0,5l | Monster Ultra Fiesta 0,5l boks | Monster Ultra Fiesta Mango 0,5 l | Monster Ultra Fiesta Mango 500ml bx
+id = "monster-ultra-fiesta-500-boks"
+navn = "Monster Ultra Fiesta"
+merke = "monster"
+smak = "ultra-fiesta"
+sukkerfri = true
+volum_ml = 500
+beholder = "boks"
+gtin = ["5060751215073"]
+
+[[produkt]]
+# kilde: MONSTER ULTRA GOLD 0.5 l bx | Monster Ultra Gold 0,5 l | Monster Ultra Gold 0,5l boks | Monster Ultra Gold 500ml bx
+id = "monster-ultra-gold-500-boks"
+navn = "Monster Ultra Gold"
+merke = "monster"
+smak = "ultra-gold"
+sukkerfri = true
+volum_ml = 500
+beholder = "boks"
+gtin = ["5060896624808"]
+
+[[produkt]]
+# kilde: MONSTER ULTRA PARADISE 0.5 l | MONSTER ULTRA PARADISE 500ML BX | Monster 500 ml energidrikk Ultra Paradise | Monster Energy Ultra Paradise 0,5l | Monster Ultra Paradise 0,5l boks | Monster Ultra Paradise 500ml bx
+id = "monster-ultra-paradise-500-boks"
+navn = "Monster Ultra Paradise"
+merke = "monster"
+smak = "ultra-paradise"
+sukkerfri = true
+volum_ml = 500
+beholder = "boks"
+gtin = ["5060639126378"]
+
+[[produkt]]
+# kilde: (fra flerpakning) Monster Ultra Peachy Keen 0,5l boks
+id = "monster-ultra-peachy-keen-500-boks"
+navn = "Monster Ultra Peachy Keen"
+merke = "monster"
+smak = "ultra-peachy-keen"
+sukkerfri = true
+volum_ml = 500
+beholder = "boks"
+gtin = []
+
+[[produkt]]
+# kilde: Monster Ultra Rosa 0,5 l | Monster Ultra Rosa 0,5l boks | Monster Ultra Rosa 500ml bx
+id = "monster-ultra-rosa-500-boks"
+navn = "Monster Ultra Rosa"
+merke = "monster"
+smak = "ultra-rosa"
+sukkerfri = true
+volum_ml = 500
+beholder = "boks"
+gtin = ["5060947541214"]
+
+[[produkt]]
+# kilde: (fra flerpakning) Monster Ultra Strawberry 0,5l boks
+id = "monster-ultra-strawberry-500-boks"
+navn = "Monster Ultra Strawberry"
+merke = "monster"
+smak = "ultra-strawberry"
+sukkerfri = true
+volum_ml = 500
+beholder = "boks"
+gtin = []
+
+[[produkt]]
+# kilde: Monster Ultra Watermelon 0,5 l | Monster Ultra Watermelon 0,5l | Monster Ultra Watermelon 0,5l boks | Monster Ultra Watermelon uten Sukker 500ml bx
+id = "monster-ultra-watermelon-500-boks"
+navn = "Monster Ultra Watermelon"
+merke = "monster"
+smak = "ultra-watermelon"
+sukkerfri = true
+volum_ml = 500
+beholder = "boks"
+gtin = ["5060896621869"]
+
+[[produkt]]
+# kilde: (fra flerpakning) Monster Ultra White 0,5l boks
+id = "monster-ultra-white-500-boks"
+navn = "Monster Ultra White"
+merke = "monster"
+smak = "ultra-white"
+smak_alias = ["zero ultra", "ultra zero"]
+sukkerfri = true
+volum_ml = 500
+beholder = "boks"
+gtin = []
+
+[[produkt]]
+# kilde: MONSTER Valentino rossi zs 0.5l bx | Monster Valentino Rossi Zs 0,5l boks
+id = "monster-valentino-rossi-zs-500-boks"
+navn = "Monster Valentino Rossi Zs"
+merke = "monster"
+smak = "valentino-rossi-zs"
+sukkerfri = true
+volum_ml = 500
+beholder = "boks"
+gtin = ["5056784909140"]
+
+[[produkt]]
+# kilde: Monster Viking Berry 0,5l boks
+id = "monster-viking-berry-500-boks"
+navn = "Monster Viking Berry"
+merke = "monster"
+smak = "viking-berry"
+sukkerfri = false
+volum_ml = 500
+beholder = "boks"
+gtin = ["5056784912188"]
+
+[[produkt]]
+# kilde: (fra flerpakning) Monster Zero Sugar 0,5l boks
+id = "monster-zero-sugar-500-boks"
+navn = "Monster Zero Sugar"
+merke = "monster"
+smak = "original"
+sukkerfri = true
+volum_ml = 500
+beholder = "boks"
+gtin = []
+
+[[produkt]]
+# kilde: Nocco Appelsin & Pasjonsfrukt 0,33l | Nocco Bcaa Cloudy Soda 0,33l boks
+id = "nocco-bcaa-cloudy-soda-330-boks"
+navn = "Nocco Bcaa Cloudy Soda"
+merke = "nocco"
+smak = "bcaa-cloudy-soda"
+sukkerfri = true
+volum_ml = 330
+beholder = "boks"
+gtin = ["7340131602845"]
+
+[[produkt]]
+# kilde: Berruba 330ml Nocco Nocco
+id = "nocco-berruba-330-boks"
+navn = "Nocco Berruba"
+merke = "nocco"
+smak = "berruba"
+sukkerfri = true
+volum_ml = 330
+beholder = "boks"
+gtin = ["7340131605808"]
+
+[[produkt]]
+# kilde: NOCCO BLOOD ORANGE DEL SOL 330ML | Nocco Blood Orange 0,33l | Nocco Blood Orange Del Sol 0,33 l | Nocco Blood Orange Del Sol 0,33l boks
+id = "nocco-blood-orange-del-sol-330-boks"
+navn = "Nocco Blood Orange Del Sol"
+merke = "nocco"
+smak = "blood-orange-del-sol"
+sukkerfri = true
+volum_ml = 330
+beholder = "boks"
+gtin = ["7340131602609"]
+
+[[produkt]]
+# kilde: Nocco Caribbean 0,33l | Nocco Caribbean 0,33l boks
 id = "nocco-caribbean-330-boks"
 navn = "Nocco Caribbean"
 merke = "nocco"
-linje = "BCAA"
 smak = "caribbean"
 sukkerfri = true
 volum_ml = 330
 beholder = "boks"
+gtin = ["7340131602517"]
 
 [[produkt]]
+# kilde: Nocco Christmas 0,33l | Nocco Christmas Edition 0,33l boks | Nocco Skum Nisse
+id = "nocco-christmas-edition-330-boks"
+navn = "Nocco Christmas Edition"
+merke = "nocco"
+smak = "christmas-edition"
+sukkerfri = true
+volum_ml = 330
+beholder = "boks"
+gtin = ["7340131602357"]
+
+[[produkt]]
+# kilde: Nocco Electrolyte Lemon Lime u/Sukker 355ml boks
+id = "nocco-electrolyte-lemon-lime-u-sukker-355-boks"
+navn = "Nocco Electrolyte Lemon Lime u Sukker"
+merke = "nocco"
+smak = "electrolyte-lemon-lime"
+sukkerfri = true
+volum_ml = 355
+beholder = "boks"
+gtin = ["7340131607192"]
+
+[[produkt]]
+# kilde: Nocco Golden Era 0,33l boks
+id = "nocco-golden-era-330-boks"
+navn = "Nocco Golden Era"
+merke = "nocco"
+smak = "golden-era"
+sukkerfri = true
+volum_ml = 330
+beholder = "boks"
+gtin = ["7340131603835"]
+
+[[produkt]]
+# kilde: NOCCO GOLDEN GRAPE DEL SOL | Nocco Golden Grape 0,33l | Nocco Golden Grape 0,33l boks | Nocco Golden Grape Del Sol 0,33 l
+id = "nocco-golden-grape-330-boks"
+navn = "Nocco Golden Grape"
+merke = "nocco"
+smak = "golden-grape"
+sukkerfri = true
+volum_ml = 330
+beholder = "boks"
+gtin = ["7340131603071"]
+
+[[produkt]]
+# kilde: Nocco Grand Sour 0,33l boks
+id = "nocco-grand-sour-330-boks"
+navn = "Nocco Grand Sour"
+merke = "nocco"
+smak = "grand-sour"
+sukkerfri = true
+volum_ml = 330
+beholder = "boks"
+gtin = ["7340131605143"]
+
+[[produkt]]
+# kilde: Nocco Juicy Breeze 0,33l boks | Nocco V15 2022 0,33l
+id = "nocco-juicy-breeze-330-boks"
+navn = "Nocco Juicy Breeze"
+merke = "nocco"
+smak = "juicy-breeze"
+sukkerfri = true
+volum_ml = 330
+beholder = "boks"
+gtin = ["7340131603088"]
+
+[[produkt]]
+# kilde: Limón Del Sol - 0,33l (Inkl. pant) | NOCCO LIMON 0.33L | NOCCO SUMMER 0.33 l bx | Nocco Limon Del Sol 0,33l boks | Nocco Limón Del Sol 0,33 l | Nocco Summer 0,33l
+id = "nocco-limon-del-sol-330-boks"
+navn = "Nocco Limon Del Sol"
+merke = "nocco"
+smak = "limon-del-sol"
+sukkerfri = true
+volum_ml = 330
+beholder = "boks"
+gtin = ["7340131601916"]
+
+[[produkt]]
+# kilde: Nocco Mango 0,33l
+id = "nocco-mango-330-boks"
+navn = "Nocco Mango"
+merke = "nocco"
+smak = "mango"
+sukkerfri = true
+volum_ml = 330
+beholder = "boks"
+gtin = ["7340131602579"]
+
+[[produkt]]
+# kilde: NOCCO MIAMI 330ML | Nocco Miami 0,33l | Nocco Miami 0,33l boks
 id = "nocco-miami-330-boks"
 navn = "Nocco Miami"
 merke = "nocco"
-linje = "BCAA"
 smak = "miami"
-smak_alias = ["miami strawberry", "jordbaer"]
+smak_alias = ["jordbaer", "strawberry"]
 sukkerfri = true
 volum_ml = 330
 beholder = "boks"
+gtin = ["7340131602470"]
 
 [[produkt]]
-id = "battery-original-330-boks"
-navn = "Battery Energy Drink"
-merke = "battery"
-smak = "original"
+# kilde: Nocco Pearade 0,33l boks | Pearade - 0,33l (Inkl. pant)
+id = "nocco-pearade-330-boks"
+navn = "Nocco Pearade"
+merke = "nocco"
+smak = "pearade"
+sukkerfri = true
+volum_ml = 330
+beholder = "boks"
+gtin = ["7340131603477"]
+
+[[produkt]]
+# kilde: Nocco Pære 0,33l | Nocco Pære 0,33l boks
+id = "nocco-paere-330-boks"
+navn = "Nocco Pære"
+merke = "nocco"
+smak = "paere"
+sukkerfri = true
+volum_ml = 330
+beholder = "boks"
+gtin = ["7340131602524"]
+
+[[produkt]]
+# kilde: NOCCO RAMONADE 0.33L | NOCCO RAMONADE 0.33l bx | Nocco Ramonade 0,33 l | Nocco Ramonade 0,33l boks | Nocco Ramonade 0.33l | Ramonade - 0,33l (Inkl. pant)
+id = "nocco-ramonade-330-boks"
+navn = "Nocco Ramonade"
+merke = "nocco"
+smak = "ramonade"
+sukkerfri = true
+volum_ml = 330
+beholder = "boks"
+gtin = ["7340131603385"]
+
+[[produkt]]
+# kilde: Nocco Raspberry Blast 0,33l boks
+id = "nocco-raspberry-blast-330-boks"
+navn = "Nocco Raspberry Blast"
+merke = "nocco"
+smak = "raspberry-blast"
+sukkerfri = true
+volum_ml = 330
+beholder = "boks"
+gtin = ["7340131602555"]
+
+[[produkt]]
+# kilde: Nocco Skumtomte 0,33l boks | Nocco Skumtomte 330 ml
+id = "nocco-skumtomte-330-boks"
+navn = "Nocco Skumtomte"
+merke = "nocco"
+smak = "skumtomte"
+sukkerfri = true
+volum_ml = 330
+beholder = "boks"
+gtin = ["7340131600209"]
+
+[[produkt]]
+# kilde: Nocco Stellar Blend 0,33l boks
+id = "nocco-stellar-blend-330-boks"
+navn = "Nocco Stellar Blend"
+merke = "nocco"
+smak = "stellar-blend"
+sukkerfri = true
+volum_ml = 330
+beholder = "boks"
+gtin = ["7340131605983"]
+
+[[produkt]]
+# kilde: Nocco Sunny Soda 0,33l
+id = "nocco-sunny-soda-330-boks"
+navn = "Nocco Sunny Soda"
+merke = "nocco"
+smak = "sunny-soda"
+sukkerfri = true
+volum_ml = 330
+beholder = "boks"
+gtin = ["7340131602449"]
+
+[[produkt]]
+# kilde: Classic 0,33l Norwegian Energy | Norwegian Energy Classic 0,33l boks
+id = "norwegian-energy-classic-330-boks"
+navn = "Norwegian Energy Classic"
+merke = "norwegian-energy"
+smak = "classic"
 sukkerfri = false
 volum_ml = 330
 beholder = "boks"
+gtin = ["7072638000106"]
 
 [[produkt]]
-id = "battery-no-calories-330-boks"
-navn = "Battery No Calories"
-merke = "battery"
-smak = "no-calories"
-smak_alias = ["sukkerfri", "zero"]
+# kilde: Norwegian Energy Tare 0.33l bx | Norwegian en Tare 0.33l boks
+id = "norwegian-energy-tare-330-boks"
+navn = "Norwegian Energy Tare"
+merke = "norwegian-energy"
+smak = "tare"
+sukkerfri = false
+volum_ml = 330
+beholder = "boks"
+gtin = ["7072638000168"]
+
+[[produkt]]
+# kilde: POWERKING ENERGIDRIKK 250 ml boks | Powerking Energidrikk 250ml boks
+id = "powerking-250-boks"
+navn = "Powerking"
+merke = "powerking"
+smak = "original"
+sukkerfri = false
+volum_ml = 250
+beholder = "boks"
+gtin = ["7611612221771"]
+
+[[produkt]]
+# kilde: POWERKING ENERGIDRIKK ZERO 250 ml boks | Powerking Zero Energidrikk 250ml boks
+id = "powerking-zero-250-boks"
+navn = "Powerking Zero"
+merke = "powerking"
+smak = "zero"
+sukkerfri = true
+volum_ml = 250
+beholder = "boks"
+gtin = ["7611612221788"]
+
+[[produkt]]
+# kilde: Prime Energi 330 ml Blue raspberry | Prime Energy Blue Raspberry 0,33l boks
+id = "prime-energy-blue-raspberry-330-boks"
+navn = "Prime Energy Blue Raspberry"
+merke = "prime"
+smak = "energy-blue-raspberry"
 sukkerfri = true
 volum_ml = 330
 beholder = "boks"
+gtin = ["7640427570033"]
+
+[[produkt]]
+# kilde: Prime Energi 330 ml Original | Prime Energy Original 0,33l boks
+id = "prime-energy-original-330-boks"
+navn = "Prime Energy Original"
+merke = "prime"
+smak = "energy-original"
+sukkerfri = true
+volum_ml = 330
+beholder = "boks"
+gtin = ["7640427570019"]
+
+[[produkt]]
+# kilde: Prime Energi 330 ml Strawberry watermelon | Prime Energy Strawberry Watermelon 0,33l boks
+id = "prime-energy-strawberry-watermelon-330-boks"
+navn = "Prime Energy Strawberry Watermelon"
+merke = "prime"
+smak = "energy-strawberry-watermelon"
+sukkerfri = true
+volum_ml = 330
+beholder = "boks"
+gtin = ["7640427570040"]
+
+[[produkt]]
+# kilde: Red Bull Blue Edition 250ml boks
+id = "red-bull-blue-edition-250-boks"
+navn = "Red Bull Blue Edition"
+merke = "red-bull"
+smak = "blue-edition"
+sukkerfri = false
+volum_ml = 250
+beholder = "boks"
+gtin = ["90435058", "90448652"]
+
+[[produkt]]
+# kilde: RED BULL REGULAR 250 ml boks | Red Bull 250 ml Energi drink | Red Bull 250ml | Red Bull Energidrikk 250 ml | Red Bull Energidrikk 250ml boks | Red Bull Regular 250ml boks
+id = "red-bull-energy-drink-250-boks"
+navn = "Red Bull Energy Drink"
+merke = "red-bull"
+smak = "original"
+smak_alias = ["regular", "original"]
+sukkerfri = false
+volum_ml = 250
+beholder = "boks"
+gtin = ["90433917"]
+
+[[produkt]]
+# kilde: RED BULL REGULAR 355 ml bx | Red Bull 0,355l | Red Bull 1/3 Display Reg 355 (300 Cans) | Red Bull Energidrikk 355ml | Red Bull Energidrikk 355ml boks | Red Bull Regular 355ml boks
+id = "red-bull-energy-drink-355-boks"
+navn = "Red Bull Energy Drink"
+merke = "red-bull"
+smak = "original"
+smak_alias = ["regular", "original"]
+sukkerfri = false
+volum_ml = 355
+beholder = "boks"
+gtin = ["9002490241247"]
+
+[[produkt]]
+# kilde: RED BULL REGULAR 473ml bx | Red Bull 0,473l | Red Bull 1/3 Display Reg 473 (360 Cans) | Red Bull Energidrikk 473 ml | Red Bull Energidrikk 473ml boks | Red Bull Regular 473ml boks
+id = "red-bull-energy-drink-473-boks"
+navn = "Red Bull Energy Drink"
+merke = "red-bull"
+smak = "original"
+smak_alias = ["regular", "original"]
+sukkerfri = false
+volum_ml = 473
+beholder = "boks"
+gtin = ["9002490241407"]
+
+[[produkt]]
+# kilde: RED BULL Green edition 250ml bx | Red Bull Energidrikk Green Edition Dragefrukt, 250 ml | Red Bull Energidrikk Green Edition Dragefruktsmak 250 ml | Red Bull Green Edition 250ml boks
+id = "red-bull-green-edition-250-boks"
+navn = "Red Bull Green Edition"
+merke = "red-bull"
+smak = "green-edition"
+sukkerfri = false
+volum_ml = 250
+beholder = "boks"
+gtin = ["90454318"]
+
+[[produkt]]
+# kilde: RED BULL Lilac edition 250ml | Red Bull 250 ml Spring EDT Myske & grapefruktsmak | Red Bull Lilac Edition 250ml
+id = "red-bull-lilac-edition-250-boks"
+navn = "Red Bull Lilac Edition"
+merke = "red-bull"
+smak = "lilac-edition"
+sukkerfri = false
+volum_ml = 250
+beholder = "boks"
+gtin = ["90474125"]
+
+[[produkt]]
+# kilde: Red Bull Energidrikk Peach Edition Fersken, 250 ml | Red Bull Energidrikk Peach Edition Ferskensmak 250 ml | Red Bull Peach 250ml boks | Red Bull The Peach Edition 0,25l
+id = "red-bull-peach-250-boks"
+navn = "Red Bull Peach"
+merke = "red-bull"
+smak = "peach"
+sukkerfri = false
+volum_ml = 250
+beholder = "boks"
+gtin = ["90435843"]
+
+[[produkt]]
+# kilde: RED BULL PURPLE EDITION 250 ml bx | Red Bull 250 ml Purple edition | Red Bull Purple Edition 250ml boks
+id = "red-bull-purple-edition-250-boks"
+navn = "Red Bull Purple Edition"
+merke = "red-bull"
+smak = "purple-edition"
+sukkerfri = false
+volum_ml = 250
+beholder = "boks"
+gtin = ["90456275"]
+
+[[produkt]]
+# kilde: Red Bull Red Editon 0,473l
+id = "red-bull-red-edition-473-boks"
+navn = "Red Bull Red Edition"
+merke = "red-bull"
+smak = "red-edition"
+sukkerfri = false
+volum_ml = 473
+beholder = "boks"
+gtin = ["9002490251246"]
+
+[[produkt]]
+# kilde: Red Bull 250 ml Summer Edition Juneberry | Red Bull Energidrikk Summer Edition Juneberry-smak 250ml | Red Bull Sea Blue 250 ml | Red Bull Sea Blue Juneberry 250ml
+id = "red-bull-sea-blue-juneberry-250-boks"
+navn = "Red Bull Sea Blue Juneberry"
+merke = "red-bull"
+smak = "sea-blue-juneberry"
+sukkerfri = false
+volum_ml = 250
+beholder = "boks"
+gtin = ["90454523"]
+
+[[produkt]]
+# kilde: RED BULL Spring edition 473ml | Red Bull Spring Edition 473ml
+id = "red-bull-spring-edition-473-boks"
+navn = "Red Bull Spring Edition"
+merke = "red-bull"
+smak = "spring-edition"
+sukkerfri = false
+volum_ml = 473
+beholder = "boks"
+gtin = ["9002490279837"]
+
+[[produkt]]
+# kilde: Red Bull Spring Edition 2026 473ml
+id = "red-bull-spring-edition-2026-473-boks"
+navn = "Red Bull Spring Edition 2026"
+merke = "red-bull"
+smak = "spring-edition-2026"
+sukkerfri = true
+volum_ml = 473
+beholder = "boks"
+gtin = ["9002490293192"]
+
+[[produkt]]
+# kilde: RED BULL SUKKERFRI 250 ml boks | Red Bull Energidrikk Sukkerfri 250 ml | Red Bull Energidrikk Sukkerfri 250ml boks | Red Bull Sugar Free 250ml | Red Bull Sukkerfri 250ml boks | Red bull 250 ml Energi u/sukker
+id = "red-bull-sukkerfri-250-boks"
+navn = "Red Bull Sukkerfri"
+merke = "red-bull"
+smak = "original"
+sukkerfri = true
+volum_ml = 250
+beholder = "boks"
+gtin = ["90433924"]
+
+[[produkt]]
+# kilde: RED BULL SUKKERFRI 355 ml bx | Red Bull Energidrikk Sukkerfri 355 ml | Red Bull Energidrikk Sukkerfri 355ml | Red Bull Energidrikk Sukkerfri 355ml boks | Red Bull Sukkerfri 0,355l | Red Bull Sukkerfri 355ml boks
+id = "red-bull-sukkerfri-355-boks"
+navn = "Red Bull Sukkerfri"
+merke = "red-bull"
+smak = "original"
+sukkerfri = true
+volum_ml = 355
+beholder = "boks"
+gtin = ["9002490257231"]
+
+[[produkt]]
+# kilde: (fra flerpakning) Red Bull Energidrikk Sukkerfri 473ml boks
+id = "red-bull-sukkerfri-473-boks"
+navn = "Red Bull Sukkerfri"
+merke = "red-bull"
+smak = "original"
+sukkerfri = true
+volum_ml = 473
+beholder = "boks"
+gtin = []
+
+[[produkt]]
+# kilde: RED BULL Aprikos edition sukkerfri 250ml | Red Bull 250 ml u/sukker Apricot edition | Red Bull Energidrikk Sf Aprikos 250ml boks
+id = "red-bull-sukkerfri-aprikos-250-boks"
+navn = "Red Bull Sukkerfri Aprikos"
+merke = "red-bull"
+smak = "aprikos"
+sukkerfri = true
+volum_ml = 250
+beholder = "boks"
+gtin = ["90456282"]
+
+[[produkt]]
+# kilde: Red Bull Sukkerfri Edition Cherry Sakura Smak 250ml
+id = "red-bull-sukkerfri-edition-cherry-sakura-smak-250-boks"
+navn = "Red Bull Sukkerfri Edition Cherry Sakura Smak"
+merke = "red-bull"
+smak = "edition-cherry-sakura-smak"
+sukkerfri = true
+volum_ml = 250
+beholder = "boks"
+gtin = ["90493171"]
+
+[[produkt]]
+# kilde: RED BULL Sukkerfri white peach 250ml bx | Red Bull 250 ml Zero, Summer EDT White peach | Red Bull Sukkerfri Peach Edition 0,25l
+id = "red-bull-sukkerfri-peach-edition-250-boks"
+navn = "Red Bull Sukkerfri Peach Edition"
+merke = "red-bull"
+smak = "peach-edition"
+sukkerfri = true
+volum_ml = 250
+beholder = "boks"
+gtin = ["90474651"]
+
+[[produkt]]
+# kilde: Red Bull 250 ml u/sukker Pink edition | Red Bull Sukkerfri Pink Edition 250ml
+id = "red-bull-sukkerfri-pink-edition-250-boks"
+navn = "Red Bull Sukkerfri Pink Edition"
+merke = "red-bull"
+smak = "pink-edition"
+sukkerfri = true
+volum_ml = 250
+beholder = "boks"
+gtin = ["90474118"]
+
+[[produkt]]
+# kilde: RED BULL Sukkerfri pink edition 473ml | Red Bull Sukkerfri Pink Edition 473ml
+id = "red-bull-sukkerfri-pink-edition-473-boks"
+navn = "Red Bull Sukkerfri Pink Edition"
+merke = "red-bull"
+smak = "pink-edition"
+sukkerfri = true
+volum_ml = 473
+beholder = "boks"
+gtin = ["9002490279776"]
+
+[[produkt]]
+# kilde: RED BULL SUKKERFRI Summer edition 473ml | Red Bull Sukkerfri Summer Edition 473ml boks
+id = "red-bull-sukkerfri-summer-edition-473-boks"
+navn = "Red Bull Sukkerfri Summer Edition"
+merke = "red-bull"
+smak = "summer-edition"
+sukkerfri = true
+volum_ml = 473
+beholder = "boks"
+gtin = ["9002490282332"]
+
+[[produkt]]
+# kilde: Red Bull 250 ml Summer Edition Curuba & hylleblomst | Red Bull Summer Edition 250ml boks
+id = "red-bull-summer-edition-250-boks"
+navn = "Red Bull Summer Edition"
+merke = "red-bull"
+smak = "summer-edition"
+sukkerfri = false
+volum_ml = 250
+beholder = "boks"
+gtin = ["90456794"]
+
+[[produkt]]
+# kilde: RED BULL Summer edition 473ml bx | Red Bull Summer Edition 473ml boks
+id = "red-bull-summer-edition-473-boks"
+navn = "Red Bull Summer Edition"
+merke = "red-bull"
+smak = "summer-edition"
+sukkerfri = false
+volum_ml = 473
+beholder = "boks"
+gtin = ["9002490271855"]
+
+[[produkt]]
+# kilde: RED BULL VANNMELON 250 ml boks | Red Bull Energidrikk Red Edition Vannmelon, 250 ml | Red Bull Energidrikk Red Edition Vannmelonsmak 250ml | Red Bull Vannmelon 250ml | Red Bull Vannmelon 250ml boks
+id = "red-bull-vannmelon-250-boks"
+navn = "Red Bull Vannmelon"
+merke = "red-bull"
+smak = "vannmelon"
+sukkerfri = false
+volum_ml = 250
+beholder = "boks"
+gtin = ["90446573"]
+
+[[produkt]]
+# kilde: Red Bull 250 ml Winter Edition 2022 | Red Bull Vinterpæresmak 250ml boks | Red Bull Winter Edition Pære, 250 ml
+id = "red-bull-vinterpaeresmak-250-boks"
+navn = "Red Bull Vinterpæresmak"
+merke = "red-bull"
+smak = "vinterpaeresmak"
+sukkerfri = false
+volum_ml = 250
+beholder = "boks"
+gtin = ["90454820"]
+
+[[produkt]]
+# kilde: Red Bull Winter Edition 0,25l
+id = "red-bull-winter-edition-250-boks"
+navn = "Red Bull Winter Edition"
+merke = "red-bull"
+smak = "winter-edition"
+sukkerfri = false
+volum_ml = 250
+beholder = "boks"
+gtin = ["90448379", "90486319", "90453809"]
+
+[[produkt]]
+# kilde: RED BULL Winter edition 473ml bx | Red Bull Winter Edition 473ml (Inkl.pant) | Red Bull Winter Edition 473ml boks
+id = "red-bull-winter-edition-473-boks"
+navn = "Red Bull Winter Edition"
+merke = "red-bull"
+smak = "winter-edition"
+sukkerfri = false
+volum_ml = 473
+beholder = "boks"
+gtin = ["9002490286118"]
+
+[[produkt]]
+# kilde: Red Bull 250 ml Winter Edition Iced berries & cream | Red Bull Winter Edition Sukkerfri 250ml boks
+id = "red-bull-winter-edition-sukkerfri-250-boks"
+navn = "Red Bull Winter Edition Sukkerfri"
+merke = "red-bull"
+smak = "winter-edition"
+sukkerfri = true
+volum_ml = 250
+beholder = "boks"
+gtin = ["90457258"]
+
+[[produkt]]
+# kilde: RED BULL Winter edition sukkerfri 473ml bx | Red Bull Winter Edition Sukkerfri 473ml boks
+id = "red-bull-winter-edition-sukkerfri-473-boks"
+navn = "Red Bull Winter Edition Sukkerfri"
+merke = "red-bull"
+smak = "winter-edition"
+sukkerfri = true
+volum_ml = 473
+beholder = "boks"
+gtin = ["9002490274610"]
+
+[[produkt]]
+# kilde: RED BULL YELLOW EDITION 250 ml boks | Red Bull Energidrikk Yellow Edition 250ml boks | Red Bull Energidrikk Yellow Edition Tropisk 250 ml | Red Bull Energidrikk Yellow Edition Tropisk, 250 ml | Red Bull Yellow Edition 250ml | Red Bull Yellow Edition 250ml boks | Red bull 250 ml Energi yellow
+id = "red-bull-yellow-edition-250-boks"
+navn = "Red Bull Yellow Edition"
+merke = "red-bull"
+smak = "yellow-edition"
+sukkerfri = false
+volum_ml = 250
+beholder = "boks"
+gtin = ["90435027"]
+
+[[produkt]]
+# kilde: Red Bull 250 ml Energi Zero | Red Bull Zero 250ml
+id = "red-bull-zero-250-boks"
+navn = "Red Bull Zero"
+merke = "red-bull"
+smak = "zero"
+sukkerfri = true
+volum_ml = 250
+beholder = "boks"
+gtin = ["90474101"]
+
+[[produkt]]
+# kilde: RED BULL Zero 437ml | Red Bull Zero 473ml boks | Red Bull Zero Calories 473ml (Inkl.pant)
+id = "red-bull-zero-473-boks"
+navn = "Red Bull Zero"
+merke = "red-bull"
+smak = "zero"
+sukkerfri = true
+volum_ml = 473
+beholder = "boks"
+gtin = ["9002490279745"]
+
+[[produkt]]
+# kilde: Reign Bcca Melon Mania 0,5l boks | Reign Melon Mania 500ml Can
+id = "reign-melon-mania-500-boks"
+navn = "Reign Melon Mania"
+merke = "reign"
+smak = "melon-mania"
+sukkerfri = true
+volum_ml = 500
+beholder = "boks"
+gtin = ["5060608741359"]
+
+[[produkt]]
+# kilde: Reign Orange Dreamsicle 0,5l | Reign Orange Dreamsicle 0,5l boks | Reign Orange Dreamsicle 500ml bx
+id = "reign-orange-dreamsicle-500-boks"
+navn = "Reign Orange Dreamsicle"
+merke = "reign"
+smak = "orange-dreamsicle"
+sukkerfri = true
+volum_ml = 500
+beholder = "boks"
+gtin = ["5060895740721"]
+
+[[produkt]]
+# kilde: Reign Peach Fizz 0,5l | Reign Peach Fizz 0,5l boks | Reign Peach Fizz 500ml bx
+id = "reign-peach-fizz-500-boks"
+navn = "Reign Peach Fizz"
+merke = "reign"
+smak = "peach-fizz"
+sukkerfri = true
+volum_ml = 500
+beholder = "boks"
+gtin = ["5060895740738"]
+
+[[produkt]]
+# kilde: Reign Bcaa Razzle Berry 0,5l boks | Reign Razzle Berry 0,5l | Reign Razzle Berry 500ml Can
+id = "reign-razzle-berry-500-boks"
+navn = "Reign Razzle Berry"
+merke = "reign"
+smak = "razzle-berry"
+sukkerfri = true
+volum_ml = 500
+beholder = "boks"
+gtin = ["5060608741847"]
+
+[[produkt]]
+# kilde: Revo Energi Drikk 250ml boks
+id = "revo-250-boks"
+navn = "Revo"
+merke = "revo"
+smak = "original"
+sukkerfri = false
+volum_ml = 250
+beholder = "boks"
+gtin = ["5600439418213"]
+
+[[produkt]]
+# kilde: Energidrikk Tørst 250 ml | Tørst Energidrikk 0,25l boks | Tørst Energidrikk 250ml
+id = "torst-250-boks"
+navn = "Tørst"
+merke = "torst"
+smak = "original"
+sukkerfri = false
+volum_ml = 250
+beholder = "boks"
+gtin = ["7090041230064"]
+
+[[produkt]]
+# kilde: Trst Energidrikk 0,5l | Tørst Energidrikk 0,5l boks | Tørst Energidrikk 500ml | Tørst energidrikk 500 ml Original
+id = "torst-500-boks"
+navn = "Tørst"
+merke = "torst"
+smak = "original"
+sukkerfri = false
+volum_ml = 500
+beholder = "boks"
+gtin = ["7090041230095"]
+
+[[produkt]]
+# kilde: Tørst Energidrikk Hunter Taylor Grape 0,25l boks | Tørst energidrikk 250 ml Grapefrukt
+id = "torst-hunter-taylor-grape-250-boks"
+navn = "Tørst Hunter Taylor Grape"
+merke = "torst"
+smak = "hunter-taylor-grape"
+sukkerfri = false
+volum_ml = 250
+beholder = "boks"
+gtin = ["7090041230798"]
+
+[[produkt]]
+# kilde: Tørst Juleenergi 0,25l boks
+id = "torst-juleenergi-250-boks"
+navn = "Tørst Juleenergi"
+merke = "torst"
+smak = "juleenergi"
+sukkerfri = true
+volum_ml = 250
+beholder = "boks"
+gtin = ["7090041230330"]
+
+[[produkt]]
+# kilde: Tørst Energidrikk Mandarin 0,5l boks
+id = "torst-mandarin-500-boks"
+navn = "Tørst Mandarin"
+merke = "torst"
+smak = "mandarin"
+sukkerfri = true
+volum_ml = 500
+beholder = "boks"
+gtin = ["7090041230767"]
+
+[[produkt]]
+# kilde: Tørst Energidrikk Mojito 0,25l boks | Tørst energidrikk 250 ml Mojito
+id = "torst-mojito-250-boks"
+navn = "Tørst Mojito"
+merke = "torst"
+smak = "mojito"
+sukkerfri = false
+volum_ml = 250
+beholder = "boks"
+gtin = ["7090041230828"]
+
+[[produkt]]
+# kilde: Tørst Energidrikk Papaya Sukkerfri 0,5l boks | Tørst energidrikk 500 ml Papaya mango
+id = "torst-papaya-sukkerfri-500-boks"
+navn = "Tørst Papaya Sukkerfri"
+merke = "torst"
+smak = "papaya"
+sukkerfri = true
+volum_ml = 500
+beholder = "boks"
+gtin = ["7090041230613"]
+
+[[produkt]]
+# kilde: Tørst Energi Sitrus Guarana Sukkerfri 250ml | Tørst Energidrikk Sitrus Sukkerfri 0,25l boks
+id = "torst-sitrus-sukkerfri-250-boks"
+navn = "Tørst Sitrus Sukkerfri"
+merke = "torst"
+smak = "sitrus"
+sukkerfri = true
+volum_ml = 250
+beholder = "boks"
+gtin = ["7090041230200"]
+
+[[produkt]]
+# kilde: Tørst Energidrikk Sukkerfri 0,25l boks | Tørst Energidrikk Sukkerfri 250ml
+id = "torst-sukkerfri-250-boks"
+navn = "Tørst Sukkerfri"
+merke = "torst"
+smak = "original"
+sukkerfri = true
+volum_ml = 250
+beholder = "boks"
+gtin = ["7090041230057"]
+
+[[produkt]]
+# kilde: Trst Energidrikk Uten Sukker 0,5l | Tørst Energidrikk Sukkerfri 0,5l boks | Tørst Energidrikk Sukkerfri 500ml | Tørst energidrikk 500 ml sukkerfri
+id = "torst-sukkerfri-500-boks"
+navn = "Tørst Sukkerfri"
+merke = "torst"
+smak = "original"
+sukkerfri = true
+volum_ml = 500
+beholder = "boks"
+gtin = ["7090041230293"]
+
+[[produkt]]
+# kilde: Energidrikk 250 ml Tropikal mango sukkerfri Tørst | Tørst Energidrikk Tropical Mango Sukkerfri 0,25l boks
+id = "torst-tropical-mango-sukkerfri-250-boks"
+navn = "Tørst Tropical Mango Sukkerfri"
+merke = "torst"
+smak = "tropical-mango"
+sukkerfri = true
+volum_ml = 250
+beholder = "boks"
+gtin = ["7090041230491"]
+
+[[produkt]]
+# kilde: Tørst Energidrikk Wild Berry 0,5l boks | Tørst Energidrikk Wild Berry 500ml | Tørst Wild Berry 0,5l | Tørst energidrikk 500 ml Wild Berry
+id = "torst-wild-berry-500-boks"
+navn = "Tørst Wild Berry"
+merke = "torst"
+smak = "wild-berry"
+sukkerfri = false
+volum_ml = 500
+beholder = "boks"
+gtin = ["7090041230385"]
+
+[[produkt]]
+# kilde: Tørst Energidrikk Wild Berry Sukkerfri 0,5l boks | Tørst Energidrikk Wild Berry Sukkerfri 500ml | Tørst energidrikk 500 ml Wild berry sukkerfri
+id = "torst-wild-berry-sukkerfri-500-boks"
+navn = "Tørst Wild Berry Sukkerfri"
+merke = "torst"
+smak = "wild-berry"
+sukkerfri = true
+volum_ml = 500
+beholder = "boks"
+gtin = ["7090041230583"]
+
+[[produkt]]
+# kilde: Tørst Energidrikk Wild Passion u/Sukker 0,5l boks
+id = "torst-wild-passion-u-sukker-500-boks"
+navn = "Tørst Wild Passion u Sukker"
+merke = "torst"
+smak = "wild-passion"
+sukkerfri = true
+volum_ml = 500
+beholder = "boks"
+gtin = ["7090041230910"]
+
+[[flerpakning]]
+gtin = "5060466516366"
+produkt = "burn-apple-kiwi-500-boks"
+antall = 12
+
+[[flerpakning]]
+gtin = "5060466519008"
+produkt = "burn-original-500-boks"
+antall = 4
+
+[[flerpakning]]
+gtin = "5060466516304"
+produkt = "burn-original-500-boks"
+antall = 24
+
+[[flerpakning]]
+gtin = "5060947542921"
+produkt = "monster-aussie-lemonade-500-boks"
+antall = 24
+
+[[flerpakning]]
+gtin = "5060517881412"
+produkt = "monster-energy-500-boks"
+antall = 4
+
+[[flerpakning]]
+gtin = "5060166693732"
+produkt = "monster-energy-500-boks"
+antall = 24
+
+[[flerpakning]]
+gtin = "5056784902363"
+produkt = "monster-juiced-rio-punch-500-boks"
+antall = 24
+
+[[flerpakning]]
+gtin = "5060947544000"
+produkt = "monster-mango-loco-500-boks"
+antall = 4
+
+[[flerpakning]]
+gtin = "5060517889937"
+produkt = "monster-mango-loco-500-boks"
+antall = 24
+
+[[flerpakning]]
+gtin = "5060639126200"
+produkt = "monster-pacific-punch-500-boks"
+antall = 24
+
+[[flerpakning]]
+gtin = "5060639126088"
+produkt = "monster-pipeline-punch-500-boks"
+antall = 24
+
+[[flerpakning]]
+gtin = "5060639126361"
+produkt = "monster-ultra-paradise-500-boks"
+antall = 24
+
+[[flerpakning]]
+gtin = "5060947547483"
+produkt = "monster-ultra-peachy-keen-500-boks"
+antall = 24
+
+[[flerpakning]]
+gtin = "5056784903766"
+produkt = "monster-ultra-strawberry-500-boks"
+antall = 24
+
+[[flerpakning]]
+gtin = "5060517887735"
+produkt = "monster-ultra-white-500-boks"
+antall = 4
+
+[[flerpakning]]
+gtin = "5060337502238"
+produkt = "monster-ultra-white-500-boks"
+antall = 24
+
+[[flerpakning]]
+gtin = "5061013940566"
+produkt = "monster-zero-sugar-500-boks"
+antall = 24
+
+[[flerpakning]]
+gtin = "9002490241148"
+produkt = "red-bull-energy-drink-250-boks"
+antall = 4
+
+[[flerpakning]]
+gtin = "9002490240356"
+produkt = "red-bull-energy-drink-250-boks"
+antall = 24
+
+[[flerpakning]]
+gtin = "9002490200381"
+produkt = "red-bull-sukkerfri-250-boks"
+antall = 4
+
+[[flerpakning]]
+gtin = "9002490240370"
+produkt = "red-bull-sukkerfri-250-boks"
+antall = 24
+
+[[flerpakning]]
+gtin = "9002490241438"
+produkt = "red-bull-sukkerfri-473-boks"
+antall = 24
+
+[[flerpakning]]
+gtin = "9002490263089"
+produkt = "red-bull-yellow-edition-250-boks"
+antall = 4
+
+[[flerpakning]]
+gtin = "7030660366065"
+produkt = "torst-250-boks"
+antall = 24

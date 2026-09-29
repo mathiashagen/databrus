@@ -127,13 +127,21 @@ mod tests {
     fn innebygd_katalog_er_gyldig() {
         let katalog = Katalog::innebygd().unwrap();
         katalog.valider().unwrap();
-        assert!(katalog.produkter.iter().any(|p| p.merke == "monster"));
+        for merke in ["monster", "red-bull", "burn", "nocco", "battery"] {
+            assert!(
+                katalog.produkter.iter().any(|p| p.merke == merke),
+                "mangler {merke}"
+            );
+        }
+        // Katalogen skal ha ekte EAN-er, ellers matcher ingenting.
+        assert!(katalog.alle_gtin().len() > 150);
     }
 
     #[test]
     fn overstyring_erstatter_og_legger_til() {
         let mut katalog = Katalog::innebygd().unwrap();
         let antall = katalog.produkter.len();
+        let antall_gtin = katalog.alle_gtin().len();
         let egen = Katalog::fra_toml(
             r#"
             [[produkt]]
@@ -171,7 +179,7 @@ mod tests {
             katalog.finn(&id).unwrap().navn,
             "Monster Ultra White (egen)"
         );
-        assert_eq!(katalog.alle_gtin().len(), 2);
+        assert_eq!(katalog.alle_gtin().len(), antall_gtin + 2);
     }
 
     #[test]

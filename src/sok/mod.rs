@@ -132,9 +132,78 @@ mod tests {
     use crate::cli::KjedeValg;
     use crate::katalog::Katalog;
 
+    /// En fast testkatalog, slik at kurateringen av den innebygde katalogen ikke brekker
+    /// testene.
+    const TESTKATALOG: &str = r#"
+        [[produkt]]
+        id = "monster-energy-500-boks"
+        navn = "Monster Energy"
+        merke = "monster"
+        smak = "original"
+        smak_alias = ["green"]
+        sukkerfri = false
+        volum_ml = 500
+        beholder = "boks"
+
+        [[produkt]]
+        id = "monster-ultra-white-500-boks"
+        navn = "Monster Ultra White"
+        merke = "monster"
+        smak = "ultra-white"
+        sukkerfri = true
+        volum_ml = 500
+        beholder = "boks"
+
+        [[produkt]]
+        id = "monster-ultra-paradise-500-boks"
+        navn = "Monster Ultra Paradise"
+        merke = "monster"
+        smak = "ultra-paradise"
+        sukkerfri = true
+        volum_ml = 500
+        beholder = "boks"
+
+        [[produkt]]
+        id = "monster-mango-loco-500-boks"
+        navn = "Monster Mango Loco"
+        merke = "monster"
+        smak = "mango-loco"
+        smak_alias = ["mango"]
+        sukkerfri = false
+        volum_ml = 500
+        beholder = "boks"
+
+        [[produkt]]
+        id = "red-bull-energy-drink-250-boks"
+        navn = "Red Bull Energy Drink"
+        merke = "red-bull"
+        smak = "original"
+        sukkerfri = false
+        volum_ml = 250
+        beholder = "boks"
+
+        [[produkt]]
+        id = "red-bull-sukkerfri-250-boks"
+        navn = "Red Bull Sukkerfri"
+        merke = "red-bull"
+        smak = "original"
+        sukkerfri = true
+        volum_ml = 250
+        beholder = "boks"
+
+        [[produkt]]
+        id = "nocco-miami-330-boks"
+        navn = "Nocco Miami"
+        merke = "nocco"
+        smak = "miami"
+        sukkerfri = true
+        volum_ml = 330
+        beholder = "boks"
+    "#;
+
     fn treff(args: SokArgs) -> Vec<String> {
         let filter = Sokefilter::fra_args(&args, &Konfig::default());
-        Katalog::innebygd()
+        Katalog::fra_toml(TESTKATALOG)
             .unwrap()
             .produkter
             .into_iter()

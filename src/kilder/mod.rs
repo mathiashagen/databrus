@@ -160,6 +160,9 @@ pub struct KildeInfo {
     /// Oppføringer hentet i denne kjøringen.
     #[serde(skip)]
     pub nye_oppforinger: Option<usize>,
+    /// Hvor mange av dem som matchet et katalogprodukt.
+    #[serde(skip)]
+    pub matchet: Option<usize>,
 }
 
 impl KildeInfo {
@@ -179,6 +182,7 @@ impl KildeInfo {
             hentet: siste_vellykkede,
             feil,
             nye_oppforinger: None,
+            matchet: None,
         }
     }
 }
@@ -258,7 +262,7 @@ pub async fn oppfrisk(
             let fullfort = modell::na();
             match svar {
                 Ok(oppforinger) => {
-                    let antall = lagre(lager, katalog, &indeks, &oppforinger, fullfort)?;
+                    let (antall, matchet) = lagre(lager, katalog, &indeks, &oppforinger, fullfort)?;
                     lager.logg_henting(id, startet, fullfort, Ok(antall))?;
                     info.push(KildeInfo {
                         id,
@@ -266,6 +270,7 @@ pub async fn oppfrisk(
                         hentet: Some(fullfort),
                         feil: None,
                         nye_oppforinger: Some(antall),
+                        matchet: Some(matchet),
                     });
                 }
                 Err(feil) => {
@@ -288,6 +293,7 @@ pub async fn oppfrisk(
                         hentet: lager.siste_vellykkede_henting(id)?,
                         feil: Some(melding),
                         nye_oppforinger: None,
+                        matchet: None,
                     });
                 }
             }
@@ -298,17 +304,19 @@ pub async fn oppfrisk(
     Ok(info)
 }
 
-/// Lagrer en kildes oppføringer med endringsbasert historikk.
+/// Lagrer en kildes oppføringer med endringsbasert historikk. Gir (antall, matchet).
 fn lagre(
     lager: &mut Lager,
     katalog: &Katalog,
     indeks: &GtinIndeks,
     oppforinger: &[RaaOppforing],
     na: Timestamp,
-) -> Result<usize, AppFeil> {
+) -> Result<(usize, usize), AppFeil> {
     lager.synk_katalog(katalog)?;
+    let mut matchet = 0;
     for oppforing in oppforinger {
         let treff = match_oppforing(indeks, oppforing);
+        matchet += usize::from(treff.is_some());
         let id = lager.lagre_oppforing(oppforing, treff.as_ref(), na)?;
         // Observasjonstiden er når kilden så prisen, ikke når vi hentet den (SPEC §4.5).
         // Et tidspunkt i fremtiden stoler vi ikke på.
@@ -316,7 +324,7 @@ fn lagre(
         // Fornuftssjekken (SPEC §5.5) kobles på i M1, når prisene beregnes ved lagring.
         lager.registrer_pris(id, &Prisobservasjon::fra(oppforing), observert)?;
     }
-    Ok(oppforinger.len())
+    Ok((oppforinger.len(), matchet))
 }
 
 fn advarsel(id: KildeId, melding: &str) {

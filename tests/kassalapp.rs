@@ -156,8 +156,8 @@ async fn endret_svarformat_gir_skjemafeil() {
     assert!(matches!(feil, KildeFeil::Skjemaendring(_)), "{feil:?}");
 }
 
-/// Hele kjeden gjennom binæren: `oppdater` henter og lagrer, og `produkter --ukjente`
-/// viser de lagrede oppføringene (katalogen har ingen EAN-er ennå, så ingen matcher).
+/// Hele kjeden gjennom binæren: `oppdater` henter, matcher mot den innebygde katalogen
+/// og lagrer. Alle fixture-radene har EAN-er som finnes i katalogen.
 #[tokio::test(flavor = "multi_thread")]
 async fn oppdater_lagrer_i_databasen() {
     let server = MockServer::start().await;
@@ -185,10 +185,10 @@ async fn oppdater_lagrer_i_databasen() {
     .await
     .unwrap();
 
-    oppdater
-        .success()
-        .stdout(predicate::str::contains("Kassalapp: 14 oppføringer"));
+    oppdater.success().stdout(predicate::str::contains(
+        "Kassalapp: 14 oppføringer, 14 matchet katalogen",
+    ));
     let utdata = ukjente.success().get_output().stdout.clone();
     let json: serde_json::Value = serde_json::from_slice(&utdata).unwrap();
-    assert_eq!(json["ukjente"].as_array().unwrap().len(), 14);
+    assert_eq!(json["ukjente"].as_array().unwrap().len(), 0);
 }

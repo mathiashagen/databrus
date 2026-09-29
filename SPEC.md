@@ -307,7 +307,7 @@ Produkt {
 
 ### 6.2 Catalog file
 
-- Bundled into the binary (`include_str!("../data/katalog.toml")`), covering Red Bull, Monster, Burn, Nocco, Battery and the store brands, with known EANs.
+- Bundled into the binary (`include_str!("../data/katalog.toml")`). Generated from Kassalapp's energy drink category and curated by hand (2026-09-29): 172 products, 24 multipacks and 187 EANs across Red Bull, Monster, Burn, Nocco, Battery, Tørst, Explo, Cult and smaller brands. Sports drinks, protein drinks, powders and pallets that Kassalapp files under energy drinks are left out. Sugar-free comes from the sugar content (< 0,5 g per 100 ml), not from the name. With this catalog, 679 of 810 Kassalapp listings match by EAN; the rest are the left-out products and Engrossnett trays without EANs.
 - A user override file at `<konfigmappe>/katalog.toml` is merged over the bundled one (matched by `id`). This lets users fix or add entries without a new release.
 - Multipack GTINs map to `(produkt_id, antall)`.
 
