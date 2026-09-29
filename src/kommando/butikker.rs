@@ -17,7 +17,11 @@ struct Butikk {
     navn: &'static str,
     gruppe: Option<&'static str>,
     kilder: Vec<KildeId>,
+    /// Siste vellykkede henting fra en kilde som dekker kjeden.
     sist_hentet: Option<Timestamp>,
+    /// Når den nyeste prisen for kjeden ble observert hos kilden. Kan være mye eldre enn
+    /// `sist_hentet` (SPEC §4.5).
+    nyeste_pris: Option<Timestamp>,
 }
 
 #[derive(Debug, Serialize)]
@@ -32,6 +36,7 @@ pub fn kjor(ktx: &Kontekst) -> Result<Utgangskode, AppFeil> {
     for kilde in &aktive {
         sist_hentet.push((kilde.id(), lager.siste_vellykkede_henting(kilde.id())?));
     }
+    let nyeste_pris = lager.nyeste_pris_per_kjede()?;
 
     let butikker: Vec<Butikk> = Kjede::ALLE
         .into_iter()
@@ -52,6 +57,7 @@ pub fn kjor(ktx: &Kontekst) -> Result<Utgangskode, AppFeil> {
                 gruppe: kjede.gruppe(),
                 kilder: dekker,
                 sist_hentet: sist,
+                nyeste_pris: nyeste_pris.get(&kjede).copied(),
             }
         })
         .collect();
@@ -61,22 +67,32 @@ pub fn kjor(ktx: &Kontekst) -> Result<Utgangskode, AppFeil> {
         Utdataformat::JsonLinjer => json::skriv_linjer(&Hode::ny(), &butikker)?,
         Utdataformat::Tabell => {
             let na = modell::na();
-            let mut t = tabell::ny(&["Kjede", "Valg", "Gruppe", "Kilder", "Sist hentet"]);
-            for b in &butikker {
-                let kilder: Vec<_> = b.kilder.iter().map(|k| k.slug()).collect();
-                let sist = b.sist_hentet.map_or_else(
-                    || "aldri hentet".to_owned(),
+            let siden = |t: Option<Timestamp>, ingen: &str| {
+                t.map_or_else(
+                    || ingen.to_owned(),
                     |t| {
                         let timer = u32::try_from(na.duration_since(t).as_hours()).unwrap_or(0);
                         format!("{} siden", format::alder(timer))
                     },
-                );
+                )
+            };
+            let mut t = tabell::ny(&[
+                "Kjede",
+                "Valg",
+                "Gruppe",
+                "Kilder",
+                "Sist hentet",
+                "Nyeste pris",
+            ]);
+            for b in &butikker {
+                let kilder: Vec<_> = b.kilder.iter().map(|k| k.slug()).collect();
                 t.add_row(vec![
                     b.navn.to_owned(),
                     b.kjede.slug().to_owned(),
                     b.gruppe.unwrap_or("–").to_owned(),
                     kilder.join(", "),
-                    sist,
+                    siden(b.sist_hentet, "aldri hentet"),
+                    siden(b.nyeste_pris, "–"),
                 ]);
             }
             tabell::skriv(&t)?;

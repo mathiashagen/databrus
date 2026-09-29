@@ -35,6 +35,12 @@ pub enum KildeFeil {
     #[error("mangler API-nøkkel")]
     ManglerApiNokkel,
 
+    #[error("API-nøkkelen ble avvist (HTTP {status})")]
+    AvvistNokkel { status: u16 },
+
+    #[error("ugyldig URL: {0}")]
+    UgyldigUrl(String),
+
     #[error("HTTP {status}")]
     Http { status: u16 },
 
@@ -68,7 +74,7 @@ pub trait Kilde: Send + Sync {
 
 pub fn alle() -> Vec<Box<dyn Kilde>> {
     vec![
-        Box::new(kassalapp::Kassalapp),
+        Box::new(kassalapp::Kassalapp::fra_miljo()),
         Box::new(oda::Oda),
         Box::new(rema::Rema),
         Box::new(coop::Coop),
@@ -266,7 +272,10 @@ pub async fn oppfrisk(
                     let melding = feil.to_string();
                     lager.logg_henting(id, startet, fullfort, Err(&melding))?;
                     advarsel(id, &melding);
-                    if matches!(feil, KildeFeil::ManglerApiNokkel) {
+                    if matches!(
+                        feil,
+                        KildeFeil::ManglerApiNokkel | KildeFeil::AvvistNokkel { .. }
+                    ) {
                         anstream::eprintln!(
                             "  Hent en gratis nøkkel på https://kassal.app/api og sett {},\n  \
                              eller kjør: databrus konfig sett kilder.kassalapp.api_nokkel <NØKKEL>",
@@ -301,8 +310,11 @@ fn lagre(
     for oppforing in oppforinger {
         let treff = match_oppforing(indeks, oppforing);
         let id = lager.lagre_oppforing(oppforing, treff.as_ref(), na)?;
+        // Observasjonstiden er når kilden så prisen, ikke når vi hentet den (SPEC §4.5).
+        // Et tidspunkt i fremtiden stoler vi ikke på.
+        let observert = oppforing.kilde_tidspunkt.map_or(na, |t| t.min(na));
         // Fornuftssjekken (SPEC §5.5) kobles på i M1, når prisene beregnes ved lagring.
-        lager.registrer_pris(id, &Prisobservasjon::fra(oppforing), na)?;
+        lager.registrer_pris(id, &Prisobservasjon::fra(oppforing), observert)?;
     }
     Ok(oppforinger.len())
 }

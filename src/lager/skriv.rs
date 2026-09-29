@@ -97,8 +97,9 @@ impl Lager {
             .map_err(|e| feil(&self.sti, e))
     }
 
-    /// Registrerer en prisobservasjon. Er den lik det nyeste intervallet, oppdateres bare
-    /// `sist_sett`; ellers starter et nytt intervall (SPEC §7.2).
+    /// Registrerer en prisobservasjon gjort på tidspunktet `na`. Er den lik det nyeste
+    /// intervallet, oppdateres bare `sist_sett` (aldri bakover i tid); ellers starter et
+    /// nytt intervall (SPEC §7.2).
     pub fn registrer_pris(
         &mut self,
         oppforing_id: i64,
@@ -144,7 +145,7 @@ impl Lager {
         let endring = match siste {
             Some((id, forrige)) if forrige == ny => {
                 tx.execute(
-                    "UPDATE prisintervall SET sist_sett = ?1 WHERE id = ?2",
+                    "UPDATE prisintervall SET sist_sett = MAX(sist_sett, ?1) WHERE id = ?2",
                     params![na.as_second(), id],
                 )
                 .map_err(|e| feil(&self.sti, e))?;

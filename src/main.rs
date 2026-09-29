@@ -1,7 +1,8 @@
+use std::io;
 use std::process::ExitCode;
 
 use clap::error::ErrorKind;
-use databrus::feil::Utgangskode;
+use databrus::feil::{AppFeil, Utgangskode};
 use owo_colors::OwoColorize;
 use tracing_subscriber::EnvFilter;
 
@@ -37,6 +38,10 @@ fn main() -> ExitCode {
 
     match kjoretid.block_on(databrus::kjor(cli)) {
         Ok(kode) => kode.into(),
+        // Leseren lukket røret (f.eks. `databrus produkter | head`): helt normalt.
+        Err(AppFeil::Io(feil)) if feil.kind() == io::ErrorKind::BrokenPipe => {
+            Utgangskode::Ok.into()
+        }
         Err(feil) => {
             anstream::eprintln!("{} {feil}", "feil:".red().bold());
             feil.utgangskode().into()

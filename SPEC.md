@@ -150,7 +150,7 @@ Sources run concurrently with tokio. The politeness limits in §7.4 apply per ho
 
 | Source | Role | Chains | Notes |
 |---|---|---|---|
-| **Kassalapp API** (`kassal.app/api/v1`) | Primary base prices | See §4.5 | Needs a free API key (§10.2). Fetches the whole energy drink category (`category_id=111`) page by page, plus EAN lookups for catalog products. Rate limit 60 req/min (verified, §4.5). |
+| **Kassalapp API** (`kassal.app/api/v1`) | Primary base prices | See §4.5 | Needs a free API key (§10.2). Fetches the whole energy drink category (`category_id=111`) page by page (about 11 requests). The category already has one row per store, so EAN lookups aren't needed for fetching. Rate limit 60 req/min (verified, §4.5). |
 | **Oda** | Direct adapter | Oda | Public web JSON endpoints (search and product detail). Gives availability (sold out) and campaign info. |
 | **Rema 1000 offers** | Offer overlay | Rema 1000 | Weekly offers, including Æ-app offers, which Kassalapp may lag on. The endpoint is undocumented, so it is a **research task** at implementation time. |
 | **Coop offers** | Offer overlay | Coop Extra/Obs/Mega/Prix | Weekly offer feeds per Coop chain, including member prices. The endpoint is undocumented, so it is a **research task**. |

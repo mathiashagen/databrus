@@ -6,12 +6,16 @@ use std::sync::{Arc, Mutex, PoisonError};
 use std::time::Duration;
 
 use governor::{DefaultDirectRateLimiter, Quota, RateLimiter};
+use reqwest::header::{ACCEPT, RETRY_AFTER};
+use reqwest::{Response, StatusCode, Url};
+use serde::de::DeserializeOwned;
 use tokio::sync::{OwnedSemaphorePermit, Semaphore};
 
 use super::KildeFeil;
 
 pub const MAKS_SAMTIDIGE_PER_VERT: usize = 2;
-pub const MAKS_FORSOK: u32 = 3;
+/// Nye forsøk etter det første, ved 429, 5xx og nettverksbrudd (SPEC §7.4).
+pub const MAKS_NYE_FORSOK: u32 = 3;
 const TILKOBLINGSTIDSAVBRUDD: Duration = Duration::from_secs(10);
 const TIDSAVBRUDD: Duration = Duration::from_secs(30);
 const MAKS_VENTETID: Duration = Duration::from_secs(30);
@@ -78,6 +82,63 @@ impl Http {
             Some(Arc::new(RateLimiter::direct(Quota::per_minute(per_minutt))));
     }
 
+    /// GET som JSON, med grensene per vert og nye forsøk ved 429, 5xx og nettverksbrudd.
+    /// 401/403 gir [`KildeFeil::AvvistNokkel`]; andre 4xx gis opp med én gang.
+    pub async fn hent_json<T: DeserializeOwned>(
+        &self,
+        url: &str,
+        bearer: Option<&str>,
+    ) -> Result<T, KildeFeil> {
+        let vert = Url::parse(url)
+            .ok()
+            .and_then(|u| u.host_str().map(str::to_owned))
+            .ok_or_else(|| KildeFeil::UgyldigUrl(url.to_owned()))?;
+
+        let mut forsok = 0;
+        loop {
+            let tillatelse = self.slipp_inn(&vert).await?;
+            let mut foresporsel = self.klient.get(url).header(ACCEPT, "application/json");
+            if let Some(nokkel) = bearer {
+                foresporsel = foresporsel.bearer_auth(nokkel);
+            }
+            let (feil, retry_after) = match foresporsel.send().await {
+                Ok(svar) if svar.status().is_success() => {
+                    let tekst = svar.text().await?;
+                    return serde_json::from_str(&tekst)
+                        .map_err(|feil| KildeFeil::Skjemaendring(feil.to_string()));
+                }
+                Ok(svar) => {
+                    let status = svar.status();
+                    if matches!(status, StatusCode::UNAUTHORIZED | StatusCode::FORBIDDEN) {
+                        return Err(KildeFeil::AvvistNokkel {
+                            status: status.as_u16(),
+                        });
+                    }
+                    let feil = KildeFeil::Http {
+                        status: status.as_u16(),
+                    };
+                    if status != StatusCode::TOO_MANY_REQUESTS && !status.is_server_error() {
+                        return Err(feil);
+                    }
+                    (feil, retry_after(&svar))
+                }
+                Err(feil) if feil.is_timeout() || feil.is_connect() => {
+                    (KildeFeil::Nettverk(feil), None)
+                }
+                Err(feil) => return Err(feil.into()),
+            };
+            drop(tillatelse);
+
+            if forsok >= MAKS_NYE_FORSOK {
+                return Err(feil);
+            }
+            let vent = ventetid(forsok, retry_after);
+            tracing::debug!("{vert}: {feil} – nytt forsøk om {vent:?}");
+            tokio::time::sleep(vent).await;
+            forsok += 1;
+        }
+    }
+
     /// Venter til det er lov å sende en forespørsel til `vert`. Tillatelsen gjelder til
     /// den slippes.
     pub async fn slipp_inn(&self, vert: &str) -> Result<OwnedSemaphorePermit, KildeFeil> {
@@ -95,6 +156,18 @@ impl Http {
         }
         Ok(tillatelse)
     }
+}
+
+/// `Retry-After` i sekunder. HTTP-dato-formen brukes ikke av kildene våre og ignoreres.
+fn retry_after(svar: &Response) -> Option<Duration> {
+    svar.headers()
+        .get(RETRY_AFTER)?
+        .to_str()
+        .ok()?
+        .trim()
+        .parse()
+        .ok()
+        .map(Duration::from_secs)
 }
 
 #[cfg(test)]

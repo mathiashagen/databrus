@@ -1,5 +1,7 @@
 //! Lesing. Spørringene for søk, historikk og eksport kommer i M1/M2.
 
+use std::collections::HashMap;
+
 use jiff::Timestamp;
 use rusqlite::types::Type;
 use rusqlite::{OptionalExtension, Row};
@@ -7,7 +9,7 @@ use serde::Serialize;
 
 use super::{Lager, feil};
 use crate::feil::AppFeil;
-use crate::modell::KildeId;
+use crate::modell::{KildeId, Kjede};
 
 /// Én rad fra hentingsloggen.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -44,6 +46,42 @@ impl Lager {
         self.conn
             .query_row("SELECT COUNT(*) FROM prisintervall", [], |rad| rad.get(0))
             .map_err(|e| feil(&self.sti, e))
+    }
+
+    /// Når den nyeste prisen per kjede ble observert. Rader med ukjent kjedeslug ignoreres.
+    pub fn nyeste_pris_per_kjede(&self) -> Result<HashMap<Kjede, Timestamp>, AppFeil> {
+        let mut sporring = self
+            .conn
+            .prepare(
+                "SELECT o.kjede, MAX(p.sist_sett)
+                 FROM prisintervall p JOIN oppforing o ON o.id = p.oppforing_id
+                 GROUP BY o.kjede",
+            )
+            .map_err(|e| feil(&self.sti, e))?;
+        let rader = sporring
+            .query_map([], |rad| Ok((rad.get::<_, String>(0)?, tidspunkt(rad, 1)?)))
+            .map_err(|e| feil(&self.sti, e))?;
+        let mut kart = HashMap::new();
+        for rad in rader {
+            let (slug, tid) = rad.map_err(|e| feil(&self.sti, e))?;
+            if let Some(kjede) = Kjede::fra_slug(&slug) {
+                kart.insert(kjede, tid);
+            }
+        }
+        Ok(kart)
+    }
+
+    /// Når prisen til en oppføring sist ble observert.
+    pub fn siste_pris_sett(&self, oppforing_id: i64) -> Result<Option<Timestamp>, AppFeil> {
+        self.conn
+            .query_row(
+                "SELECT MAX(sist_sett) FROM prisintervall WHERE oppforing_id = ?1",
+                [oppforing_id],
+                |rad| rad.get::<_, Option<i64>>(0),
+            )
+            .map_err(|e| feil(&self.sti, e))?
+            .map(|sek| Timestamp::from_second(sek).map_err(|e| feil(&self.sti, e)))
+            .transpose()
     }
 
     /// Det siste henteforsøket for en kilde, vellykket eller ikke.

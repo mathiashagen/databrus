@@ -324,6 +324,8 @@ pub struct RaaOppforing {
     pub kilde_produkt_id: String,
     pub gtin: Option<String>,
     pub raanavn: String,
+    /// Merket slik kilden skriver det (ofte inkonsekvent: «Red bull», «RED BULL»).
+    pub raamerke: Option<String>,
     pub raa_storrelse: Option<String>,
     /// Antall beholdere i den salgbare enheten (1 for enkeltbokser).
     pub antall: u32,
@@ -334,6 +336,8 @@ pub struct RaaOppforing {
     pub tilgjengelig: Option<bool>,
     /// Pant slik kilden oppgir den, hvis den gjør det (SPEC §5.4).
     pub pant: Option<Ore>,
+    /// Når kilden sist så denne prisen. Dette er observasjonstiden i historikken – ikke
+    /// når vi hentet – slik at en gammel pris aldri ser fersk ut (SPEC §4.5).
     pub kilde_tidspunkt: Option<Timestamp>,
 }
 

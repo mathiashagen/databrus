@@ -76,8 +76,10 @@ pub fn tolk_volum(tekst: &str) -> Option<Ml> {
             continue;
         }
         let (tall, etter_tall) = les_tall(&tegn, i);
-        let (enhet, _) = les_ord(&tegn, hopp_over(&tegn, etter_tall, &[' ']));
-        if matches!(enhet.as_str(), "ml" | "cl" | "dl" | "l" | "liter")
+        let (ord, _) = les_ord(&tegn, hopp_over(&tegn, etter_tall, &[' ']));
+        // «0,5lx4» leses som ordet «lx»; x-en hører til pakningen.
+        let enhet = ord.strip_suffix('x').unwrap_or(&ord);
+        if matches!(enhet, "ml" | "cl" | "dl" | "l" | "liter")
             && let Ok(ml) = tolk_storrelse(&format!("{tall}{enhet}"))
         {
             return Some(ml);
@@ -87,7 +89,7 @@ pub fn tolk_volum(tekst: &str) -> Option<Ml> {
     None
 }
 
-/// Finner antall beholdere i en flerpakning, f.eks. «4x0,5l», «24-pk» eller «6 pk».
+/// Finner antall beholdere i en flerpakning, f.eks. «4x0,5l», «0,5lx4», «24-pk» eller «6 pk».
 pub fn tolk_pakke(tekst: &str) -> Option<u32> {
     let tegn: Vec<char> = tekst.to_lowercase().chars().collect();
     let mut i = 0;
@@ -101,7 +103,7 @@ pub fn tolk_pakke(tekst: &str) -> Option<u32> {
         let er_pakke = matches!(
             ord.as_str(),
             "x" | "pk" | "pakk" | "pakning" | "pack" | "stk"
-        );
+        ) || etter_volum_og_x(&tegn, i);
         if er_pakke
             && let Ok(antall) = tall.parse::<u32>()
             && (2..=48).contains(&antall)
@@ -111,6 +113,21 @@ pub fn tolk_pakke(tekst: &str) -> Option<u32> {
         i = etter_tall;
     }
     None
+}
+
+/// Om tallet som starter på `i` står etter «<volum>x», som i «0,5lx4» eller «0,5 l x 4».
+fn etter_volum_og_x(tegn: &[char], i: usize) -> bool {
+    let for_tallet: String = tegn[..i].iter().collect();
+    let for_tallet = for_tallet.trim_end();
+    let Some(for_x) = for_tallet.strip_suffix('x') else {
+        return false;
+    };
+    let for_x = for_x.trim_end();
+    ["ml", "cl", "dl", "l"].iter().any(|enhet| {
+        for_x
+            .strip_suffix(enhet)
+            .is_some_and(|r| r.ends_with(|c: char| c.is_ascii_digit() || c == ' '))
+    })
 }
 
 fn er_talltegn(c: char) -> bool {
@@ -195,6 +212,9 @@ mod tests {
         assert_eq!(v("Monster 4x0,5l"), Some(500));
         assert_eq!(v("Battery 4 x 0,33 l"), Some(330));
         assert_eq!(v("Energidrikk 2 for 50"), None);
+        assert_eq!(v("Monster Mango Loco 0,5lx4 boks"), Some(500));
+        assert_eq!(v("Red Bull Energidrikk 250ml 4pk boks"), Some(250));
+        assert_eq!(v("Burn Original 4stk x 0,5l, 2l"), Some(500));
     }
 
     #[test]
@@ -205,5 +225,11 @@ mod tests {
         assert_eq!(tolk_pakke("Nocco 6 pk"), Some(6));
         assert_eq!(tolk_pakke("Monster Energy 0,5l"), None);
         assert_eq!(tolk_pakke("Burn 1x0,5l"), None);
+        assert_eq!(tolk_pakke("Monster Mango Loco 0,5lx4 boks"), Some(4));
+        assert_eq!(tolk_pakke("Monster 0,5 l x 6"), Some(6));
+        assert_eq!(tolk_pakke("Red Bull Energidrikk 250ml 4pk boks"), Some(4));
+        assert_eq!(tolk_pakke("Red Bull 4stk x 0,25l, 1l"), Some(4));
+        assert_eq!(tolk_pakke("Monster ultra peachy keen 24x0,5l"), Some(24));
+        assert_eq!(tolk_pakke("Nocco 330ml"), None);
     }
 }

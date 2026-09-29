@@ -18,6 +18,7 @@ fn oppforing(hyllepris: i64) -> RaaOppforing {
         kilde_produkt_id: "12345".into(),
         gtin: None,
         raanavn: "Monster Energy Ultra White 0,5l".into(),
+        raamerke: Some("Monster".into()),
         raa_storrelse: Some("0,5l".into()),
         antall: 1,
         hyllepris: Ore(hyllepris),
@@ -65,6 +66,27 @@ fn lik_pris_oppdaterer_bare_sist_sett() {
     assert_eq!(andre, Endring::Uendret);
     assert_eq!(lager.antall_prisintervaller().unwrap(), 1);
     assert!(lager.har_prisdata().unwrap());
+}
+
+#[test]
+fn sist_sett_gar_aldri_bakover() {
+    let mappe = TempDir::new().unwrap();
+    let mut lager = apne(&mappe);
+    let raa = oppforing(2490);
+    let id = lager.lagre_oppforing(&raa, None, tid(0)).unwrap();
+    lager
+        .registrer_pris(id, &Prisobservasjon::fra(&raa), tid(24))
+        .unwrap();
+    assert_eq!(
+        lager.nyeste_pris_per_kjede().unwrap().get(&Kjede::Kiwi),
+        Some(&tid(24))
+    );
+    // Samme pris, men kilden oppgir et eldre tidspunkt.
+    let endring = lager
+        .registrer_pris(id, &Prisobservasjon::fra(&raa), tid(2))
+        .unwrap();
+    assert_eq!(endring, Endring::Uendret);
+    assert_eq!(lager.siste_pris_sett(id).unwrap(), Some(tid(24)));
 }
 
 #[test]
