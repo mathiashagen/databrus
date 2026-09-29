@@ -14,7 +14,7 @@ use std::time::Duration;
 
 use rusqlite::Connection;
 
-pub use les::{Hentelogg, Umatchet};
+pub use les::{Hentelogg, LagretPris, Umatchet};
 pub use skriv::{Endring, Prisobservasjon};
 
 use crate::feil::AppFeil;

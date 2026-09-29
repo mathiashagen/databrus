@@ -257,6 +257,17 @@ impl Medlemsprogram {
             Medlemsprogram::KiwiPluss => "kiwi-pluss",
         }
     }
+
+    pub fn fra_slug(slug: &str) -> Option<Self> {
+        [
+            Medlemsprogram::Coop,
+            Medlemsprogram::Trumf,
+            Medlemsprogram::Ae,
+            Medlemsprogram::KiwiPluss,
+        ]
+        .into_iter()
+        .find(|p| p.slug() == slug)
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]

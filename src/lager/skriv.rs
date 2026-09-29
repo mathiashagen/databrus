@@ -87,7 +87,8 @@ impl Lager {
                     oppforing.kilde_produkt_id,
                     oppforing.gtin,
                     treff.map(|t| &t.produkt.0),
-                    treff.map_or(oppforing.antall, |t| t.antall).max(1),
+                    // Pakningen hører til oppføringen, ikke EAN-en (SPEC §6.2).
+                    oppforing.antall.max(1),
                     oppforing.raanavn,
                     treff.is_some_and(|t| t.verifisert),
                     na.as_second(),

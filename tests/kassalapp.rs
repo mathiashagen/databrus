@@ -157,9 +157,11 @@ async fn endret_svarformat_gir_skjemafeil() {
 }
 
 /// Hele kjeden gjennom binæren: `oppdater` henter, matcher mot den innebygde katalogen
-/// og lagrer. Alle fixture-radene har EAN-er som finnes i katalogen.
+/// og lagrer, og et frakoblet søk rangerer resultatet. Alle fixture-radene har EAN-er som
+/// finnes i katalogen. Søket bruker `--alle`, så testen ikke avhenger av hvor gamle
+/// fixture-tidspunktene er når den kjøres.
 #[tokio::test(flavor = "multi_thread")]
-async fn oppdater_lagrer_i_databasen() {
+async fn oppdater_og_sok() {
     let server = MockServer::start().await;
     to_sider(&server).await;
     let mappe = TempDir::new().unwrap();
@@ -177,10 +179,12 @@ async fn oppdater_lagrer_i_databasen() {
         kommando
     };
 
-    let (oppdater, ukjente) = tokio::task::spawn_blocking(move || {
+    let (oppdater, ukjente, json_sok, tabell_sok) = tokio::task::spawn_blocking(move || {
         let oppdater = databrus(&mappe, &["oppdater", "--kilde", "kassalapp"]).assert();
         let ukjente = databrus(&mappe, &["produkter", "--ukjente", "--json"]).assert();
-        (oppdater, ukjente)
+        let json_sok = databrus(&mappe, &["--frakoblet", "--alle", "--json", "monster"]).assert();
+        let tabell_sok = databrus(&mappe, &["--frakoblet", "--alle", "monster", "mango"]).assert();
+        (oppdater, ukjente, json_sok, tabell_sok)
     })
     .await
     .unwrap();
@@ -191,4 +195,35 @@ async fn oppdater_lagrer_i_databasen() {
     let utdata = ukjente.success().get_output().stdout.clone();
     let json: serde_json::Value = serde_json::from_slice(&utdata).unwrap();
     assert_eq!(json["ukjente"].as_array().unwrap().len(), 0);
+
+    // Siste fixture-side har to Monster-firepakninger fra Joker.
+    let utdata = json_sok.success().get_output().stdout.clone();
+    let json: serde_json::Value = serde_json::from_slice(&utdata).unwrap();
+    assert_eq!(json["skjemaversjon"], 1);
+    assert_eq!(json["sporring"]["tekst"], "monster");
+    assert_eq!(json["sporring"]["filtre"]["alle"], true);
+    let resultater = json["resultater"].as_array().unwrap();
+    assert_eq!(resultater.len(), 2, "{resultater:#?}");
+    let mango = resultater
+        .iter()
+        .find(|r| r["produkt"]["id"] == "monster-mango-loco-500-boks")
+        .unwrap();
+    assert_eq!(mango["kjede"], "joker");
+    assert_eq!(mango["antall_i_pakke"], 4);
+    assert_eq!(mango["hyllepris_ore"], 9960);
+    assert_eq!(mango["effektiv_enhetspris_ore"], 2490);
+    assert_eq!(mango["literpris_ore"], 4980);
+    assert_eq!(mango["minsteantall"], 4);
+    assert_eq!(mango["pant_ore"], 200);
+    assert_eq!(mango["brukt_pris"], "hyllepris");
+    assert_eq!(mango["vurdering"]["verdi"], "UKJENT");
+    assert_eq!(json["kilder"][0]["id"], "kassalapp");
+    assert_eq!(json["kilder"][0]["status"], "ok");
+
+    tabell_sok
+        .success()
+        .stdout(predicate::str::contains("Monster Mango Loco"))
+        .stdout(predicate::str::contains("24,90"))
+        .stdout(predicate::str::contains("4-pakning"))
+        .stdout(predicate::str::contains("Viser 1 av 1 treff"));
 }

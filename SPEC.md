@@ -309,14 +309,14 @@ Produkt {
 
 - Bundled into the binary (`include_str!("../data/katalog.toml")`). Generated from Kassalapp's energy drink category and curated by hand (2026-09-29): 172 products, 24 multipacks and 187 EANs across Red Bull, Monster, Burn, Nocco, Battery, Tørst, Explo, Cult and smaller brands. Sports drinks, protein drinks, powders and pallets that Kassalapp files under energy drinks are left out. Sugar-free comes from the sugar content (< 0,5 g per 100 ml), not from the name. With this catalog, 679 of 810 Kassalapp listings match by EAN; the rest are the left-out products and Engrossnett trays without EANs.
 - A user override file at `<konfigmappe>/katalog.toml` is merged over the bundled one (matched by `id`). This lets users fix or add entries without a new release.
-- Multipack GTINs map to `(produkt_id, antall)`.
+- Multipack GTINs map to `(produkt_id, antall)`. **The pack size of a listing comes from the listing's own name**, not from the GTIN: stores reuse GTINs across pack sizes (Engrossnett sells 24-trays under the single-can GTIN, and a 4-pack GTIN sometimes appears on a single can). The catalog's `antall` is only a cross-check, and a mismatch is logged at `-v`.
 
 ### 6.3 Matching pipeline
 
 For each raw listing:
 1. **GTIN match** against the catalog (including multipack GTINs) gives a verified match.
 2. **Fuzzy fallback**: normalize the name (lowercase, fold æøå, strip "energidrikk", "boks", "pant" and similar), parse the volume (`0,5l`, `500 ml`, `50cl`) and pack size (`4x0,5l`, `24-pk`), then match brand and flavor against the catalog aliases. A single clear best match above the threshold becomes a match with `verifisert = false` (shown with a `?` marker in the table).
-3. **No match**: the product is kept as an *ad hoc product*, keyed by `(source, source product ID)`, with the parsed brand, size and name. It appears in searches with its raw name and a `?`, and history is still recorded. `databrus produkter --ukjente` lists these so they can be added to the catalog.
+3. **No match**: the listing is stored, keyed by `(source, source product ID)`, and history is still recorded. `databrus produkter --ukjente` lists these so they can be added to the catalog. **Unmatched listings are not shown in searches**: with the curated catalog, almost all of them are products left out on purpose (sports and protein drinks). Listings only reach search results through a catalog match, verified (EAN) or not (fuzzy, shown with `?`).
 
 Unknown brands are included if the source categorizes them as energy drinks, or if the name contains "energy"/"energi". This keeps new store brands from disappearing.
 
@@ -567,7 +567,7 @@ aktiv = true
 ## 11. Table rendering
 
 - `comfy-table` (or `tabled`) with Unicode borders off by default: a clean column layout like the §3.4 example.
-- Columns: **Produkt**, **Str.**, **Kjede** (+ age), **Pris**, **Kr/L**, **Pant**, **Tilbud**, **Vurdering**, **Trend**.
+- Columns: **Produkt**, **Str.**, **Kjede** (+ age), **Pris**, **Kr/L**, **Pant**, **Tilbud**, **Vurdering**, **Trend**. Vurdering and Trend are added in M2, when there is history to fill them; until then they are left out rather than shown empty.
 - Adapts to width: below 100 columns, drop Trend. Below 80, drop Pant and shorten Tilbud. Product names are truncated with `…`.
 - Colors (`owo-colors` + `anstream`): cheapest row bold; `SUPERT` green, `BRA` cyan, `LURERI` red; `KAMPANJE` yellow; stale and sold-out rows dimmed; `?` (unverified match) dimmed.
 - A footer line summarizes: rows shown / total, data age, source failures.

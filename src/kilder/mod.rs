@@ -317,6 +317,19 @@ fn lagre(
     for oppforing in oppforinger {
         let treff = match_oppforing(indeks, oppforing);
         matchet += usize::from(treff.is_some());
+        // Butikkene bruker samme EAN for enkeltboks og brett (Engrossnett), og av og til
+        // en pakke-EAN for én boks. Navnet på oppføringen avgjør derfor pakningen.
+        if let Some(t) = &treff
+            && t.antall != oppforing.antall
+        {
+            tracing::debug!(
+                "{}: EAN sier {} stk, navnet «{}» sier {} – bruker navnet",
+                oppforing.kjede.slug(),
+                t.antall,
+                oppforing.raanavn,
+                oppforing.antall
+            );
+        }
         let id = lager.lagre_oppforing(oppforing, treff.as_ref(), na)?;
         // Observasjonstiden er når kilden så prisen, ikke når vi hentet den (SPEC §4.5).
         // Et tidspunkt i fremtiden stoler vi ikke på.

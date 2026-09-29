@@ -1,15 +1,17 @@
 //! Filtrering og rangering (SPEC §3.2, §6.4).
-//!
-//! Filtrene på katalognivå er på plass. Rangering av prisrader kommer i M1.
+
+pub mod rangering;
 
 use clap::ValueEnum;
+use serde::Serialize;
 
 use crate::cli::{SokArgs, utvid_kjeder};
 use crate::katalog::tolk::normaliser;
 use crate::konfig::Konfig;
 use crate::modell::{Beholder, Kjede, Ml, Ore, Produkt};
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, ValueEnum)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, ValueEnum, Serialize)]
+#[serde(rename_all = "lowercase")]
 pub enum Sortering {
     /// Literpris uten pant
     #[default]
@@ -20,6 +22,37 @@ pub enum Sortering {
     Rabatt,
     /// Produktnavn
     Navn,
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct Sporring {
+    pub tekst: String,
+    pub filtre: Filtre,
+    pub sorter: Sortering,
+}
+
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct Filtre {
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub merke: Vec<String>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub smak: Vec<String>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub storrelse_ml: Vec<u32>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub kjede: Vec<Kjede>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub sukkerfri: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub beholder: Option<Beholder>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub maks_pris_ore: Option<Ore>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub maks_literpris_ore: Option<Ore>,
+    #[serde(skip_serializing_if = "std::ops::Not::not")]
+    pub enkeltvis: bool,
+    #[serde(skip_serializing_if = "std::ops::Not::not")]
+    pub alle: bool,
 }
 
 /// Ord i fritekst som slår på sukkerfri-filteret i stedet for å søke på teksten.
@@ -83,6 +116,30 @@ impl Sokefilter {
             enkeltvis: args.enkeltvis,
             alle: args.alle,
             antall: konfig.standard_antall,
+        }
+    }
+
+    /// Søket slik det gjengis i JSON (`sporring`, SPEC §9.1). Bare filtre som er i bruk.
+    pub fn sporring(&self, tekst: &[String]) -> Sporring {
+        Sporring {
+            tekst: tekst.join(" "),
+            filtre: Filtre {
+                merke: self.merker.clone(),
+                smak: self.smaker.clone(),
+                storrelse_ml: self.storrelser.iter().map(|m| m.get()).collect(),
+                kjede: if self.kjeder.len() == Kjede::ALLE.len() {
+                    Vec::new()
+                } else {
+                    self.kjeder.clone()
+                },
+                sukkerfri: self.sukkerfri,
+                beholder: self.beholder,
+                maks_pris_ore: self.maks_pris,
+                maks_literpris_ore: self.maks_literpris,
+                enkeltvis: self.enkeltvis,
+                alle: self.alle,
+            },
+            sorter: self.sortering,
         }
     }
 

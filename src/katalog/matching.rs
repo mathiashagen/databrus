@@ -22,7 +22,8 @@ pub fn normaliser_gtin(gtin: &str) -> Option<String> {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Treff {
     pub produkt: ProduktId,
-    /// Antall beholdere i den salgbare enheten.
+    /// Pakningsstørrelsen katalogen oppgir for EAN-en. Brukes bare som kontroll –
+    /// oppføringens eget navn avgjør pakningen.
     pub antall: u32,
     /// `true` for EAN-treff, `false` for uskarpe navnetreff (vises med `?`).
     pub verifisert: bool,

@@ -142,6 +142,10 @@ mod tests {
         let mut katalog = Katalog::innebygd().unwrap();
         let antall = katalog.produkter.len();
         let antall_gtin = katalog.alle_gtin().len();
+        // Overstyringen erstatter hele produktet, også EAN-listen.
+        let erstattede_gtin = katalog
+            .finn(&ProduktId("monster-ultra-white-500-boks".into()))
+            .map_or(0, |p| p.gtin.len());
         let egen = Katalog::fra_toml(
             r#"
             [[produkt]]
@@ -179,7 +183,7 @@ mod tests {
             katalog.finn(&id).unwrap().navn,
             "Monster Ultra White (egen)"
         );
-        assert_eq!(katalog.alle_gtin().len(), antall_gtin + 2);
+        assert_eq!(katalog.alle_gtin().len(), antall_gtin - erstattede_gtin + 2);
     }
 
     #[test]

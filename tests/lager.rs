@@ -165,6 +165,65 @@ fn matchet_oppforing_peker_pa_katalogproduktet() {
     assert_eq!(ukjente[0].kilde_produkt_id, "12345");
 }
 
+/// Engrossnett selger brett under enkeltboksens EAN, og andre butikker kan bruke en
+/// pakke-EAN for én boks. Pakningen skal komme fra oppføringens navn.
+#[test]
+fn pakning_kommer_fra_navnet_ikke_ean() {
+    let mappe = TempDir::new().unwrap();
+    let mut lager = apne(&mappe);
+    let katalog = Katalog::fra_toml(
+        r#"
+        [[produkt]]
+        id = "monster-energy-500-boks"
+        navn = "Monster Energy"
+        merke = "monster"
+        smak = "original"
+        sukkerfri = false
+        volum_ml = 500
+        beholder = "boks"
+        gtin = ["5060166693732"]
+
+        [[flerpakning]]
+        gtin = "5060517881412"
+        produkt = "monster-energy-500-boks"
+        antall = 4
+        "#,
+    )
+    .unwrap();
+    lager.synk_katalog(&katalog).unwrap();
+    let indeks = GtinIndeks::bygg(&katalog);
+
+    // Brett under enkeltboksens EAN.
+    let mut brett = oppforing(73_531);
+    brett.kjede = Kjede::Engrossnett;
+    brett.kilde_produkt_id = "brett".into();
+    brett.raanavn = "Monster Energy 24x500ml".into();
+    brett.antall = 24;
+    brett.gtin = Some("5060166693732".into());
+    // Én boks under pakke-EAN-en.
+    let mut enkel = oppforing(3090);
+    enkel.kjede = Kjede::Oda;
+    enkel.kilde_produkt_id = "enkel".into();
+    enkel.raanavn = "Monster Energy 0,5 l".into();
+    enkel.gtin = Some("5060517881412".into());
+
+    for raa in [&brett, &enkel] {
+        let treff = match_oppforing(&indeks, raa).unwrap();
+        let id = lager.lagre_oppforing(raa, Some(&treff), tid(0)).unwrap();
+        lager
+            .registrer_pris(id, &Prisobservasjon::fra(raa), tid(0))
+            .unwrap();
+    }
+    let mut antall: Vec<(Kjede, u32)> = lager
+        .siste_priser()
+        .unwrap()
+        .into_iter()
+        .map(|p| (p.kjede, p.antall))
+        .collect();
+    antall.sort();
+    assert_eq!(antall, [(Kjede::Oda, 1), (Kjede::Engrossnett, 24)]);
+}
+
 #[test]
 fn hentelogg() {
     let mappe = TempDir::new().unwrap();

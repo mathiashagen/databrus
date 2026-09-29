@@ -15,6 +15,11 @@ pub fn ny(overskrifter: &[&str]) -> Table {
     tabell
 }
 
+/// Terminalbredden, eller `None` når stdout ikke er en terminal.
+pub fn terminalbredde() -> Option<u16> {
+    Table::new().width()
+}
+
 pub fn skriv(tabell: &Table) -> Result<(), AppFeil> {
     writeln!(anstream::stdout(), "{tabell}")?;
     Ok(())
