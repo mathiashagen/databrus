@@ -2,62 +2,62 @@ use std::io;
 use std::process::ExitCode;
 
 use clap::error::ErrorKind;
-use databrus::feil::{AppFeil, Utgangskode};
+use databrus::error::{AppError, ExitStatus};
 use owo_colors::OwoColorize;
 use tracing_subscriber::EnvFilter;
 
 fn main() -> ExitCode {
-    let cli = match databrus::cli::tolk() {
+    let cli = match databrus::cli::parse() {
         Ok(cli) => cli,
-        Err(feil) => {
-            let _ = feil.print();
-            // Brukerfeil gir kode 1, ikke clap sin standard 2 (som er reservert for --streng).
-            let kode = match feil.kind() {
-                ErrorKind::DisplayHelp | ErrorKind::DisplayVersion => Utgangskode::Ok,
-                _ => Utgangskode::Feil,
+        Err(error) => {
+            let _ = error.print();
+            // Usage errors exit with 1, not clap's default 2 (reserved for --streng).
+            let status = match error.kind() {
+                ErrorKind::DisplayHelp | ErrorKind::DisplayVersion => ExitStatus::Ok,
+                _ => ExitStatus::Error,
             };
-            return kode.into();
+            return status.into();
         }
     };
 
-    start_logging(cli.globale.detaljert);
+    init_logging(cli.global.verbose);
 
-    let kjoretid = match tokio::runtime::Builder::new_multi_thread()
+    let runtime = match tokio::runtime::Builder::new_multi_thread()
         .enable_all()
         .build()
     {
-        Ok(kjoretid) => kjoretid,
-        Err(feil) => {
+        Ok(runtime) => runtime,
+        Err(error) => {
             anstream::eprintln!(
-                "{} kunne ikke starte kjøretiden: {feil}",
+                "{} kunne ikke starte kjøretiden: {error}",
                 "feil:".red().bold()
             );
-            return Utgangskode::Feil.into();
+            return ExitStatus::Error.into();
         }
     };
 
-    match kjoretid.block_on(databrus::kjor(cli)) {
-        Ok(kode) => kode.into(),
-        // Leseren lukket røret (f.eks. `databrus produkter | head`): helt normalt.
-        Err(AppFeil::Io(feil)) if feil.kind() == io::ErrorKind::BrokenPipe => {
-            Utgangskode::Ok.into()
+    match runtime.block_on(databrus::run(cli)) {
+        Ok(status) => status.into(),
+        // The reader closed the pipe (e.g. `databrus produkter | head`): perfectly normal.
+        Err(AppError::Io(error)) if error.kind() == io::ErrorKind::BrokenPipe => {
+            ExitStatus::Ok.into()
         }
-        Err(feil) => {
-            anstream::eprintln!("{} {feil}", "feil:".red().bold());
-            feil.utgangskode().into()
+        Err(error) => {
+            anstream::eprintln!("{} {error}", "feil:".red().bold());
+            error.exit_status().into()
         }
     }
 }
 
-/// Diagnostikk går alltid til stderr, slik at stdout forblir ren tabell eller JSON.
-fn start_logging(detaljert: u8) {
-    let standard = match detaljert {
+/// Diagnostics always go to stderr, so stdout stays a clean table or JSON.
+fn init_logging(verbose: u8) {
+    let default = match verbose {
         0 => "warn",
         1 => "databrus=debug",
         _ => "debug",
     };
     let filter =
-        EnvFilter::try_from_env("DATABRUS_LOGG").unwrap_or_else(|_| EnvFilter::new(standard));
+        EnvFilter::try_from_env("DATABRUS_LOGG").unwrap_or_else(|_| EnvFilter::new(default));
     tracing_subscriber::fmt()
         .with_env_filter(filter)
         .with_writer(std::io::stderr)

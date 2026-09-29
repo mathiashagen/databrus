@@ -1,5 +1,8 @@
-//! Ende-til-ende-tester av binæren. Konfigurasjon og data peker alltid til en midlertidig
-//! mappe, slik at testene aldri rører brukerens filer eller nettverket.
+//! End-to-end tests of the binary. Config and data always point to a temporary directory,
+//! so the tests never touch the user's files or the network.
+//!
+//! The command lines and the expected output are Norwegian, since that is the user-facing
+//! language.
 
 use std::process::Command;
 
@@ -7,39 +10,39 @@ use assert_cmd::assert::OutputAssertExt;
 use predicates::prelude::*;
 use tempfile::TempDir;
 
-fn databrus(mappe: &TempDir) -> Command {
-    let mut kommando = Command::new(env!("CARGO_BIN_EXE_databrus"));
-    kommando
-        .env("DATABRUS_KONFIG", mappe.path().join("konfig.toml"))
-        .env("DATABRUS_DATA_DIR", mappe.path().join("data"))
+fn databrus(dir: &TempDir) -> Command {
+    let mut command = Command::new(env!("CARGO_BIN_EXE_databrus"));
+    command
+        .env("DATABRUS_KONFIG", dir.path().join("konfig.toml"))
+        .env("DATABRUS_DATA_DIR", dir.path().join("data"))
         .env_remove("KASSALAPP_API_KEY")
         .env_remove("DATABRUS_LOGG")
         .env("NO_COLOR", "1");
-    kommando
+    command
 }
 
-fn stdout_json(kommando: &mut Command) -> serde_json::Value {
-    let utdata = kommando.assert().success().get_output().stdout.clone();
-    serde_json::from_slice(&utdata).expect("gyldig JSON på stdout")
+fn stdout_json(command: &mut Command) -> serde_json::Value {
+    let output = command.assert().success().get_output().stdout.clone();
+    serde_json::from_slice(&output).expect("valid JSON on stdout")
 }
 
 #[test]
-fn hjelp() {
-    let mappe = TempDir::new().unwrap();
-    let utdata = databrus(&mappe)
+fn help() {
+    let dir = TempDir::new().unwrap();
+    let output = databrus(&dir)
         .arg("--help")
         .assert()
         .success()
         .get_output()
         .stdout
         .clone();
-    insta::assert_snapshot!(String::from_utf8(utdata).unwrap());
+    insta::assert_snapshot!(String::from_utf8(output).unwrap());
 }
 
 #[test]
-fn frakoblet_uten_data_gir_kode_3() {
-    let mappe = TempDir::new().unwrap();
-    databrus(&mappe)
+fn offline_without_data_exits_with_3() {
+    let dir = TempDir::new().unwrap();
+    databrus(&dir)
         .args(["--frakoblet", "monster", "ultra", "--storrelse", "0,5"])
         .assert()
         .code(3)
@@ -48,9 +51,9 @@ fn frakoblet_uten_data_gir_kode_3() {
 }
 
 #[test]
-fn sok_uten_data_advarer_per_kilde_og_gir_kode_3() {
-    let mappe = TempDir::new().unwrap();
-    databrus(&mappe)
+fn search_without_data_warns_per_source_and_exits_with_3() {
+    let dir = TempDir::new().unwrap();
+    databrus(&dir)
         .arg("monster")
         .assert()
         .code(3)
@@ -59,75 +62,80 @@ fn sok_uten_data_advarer_per_kilde_og_gir_kode_3() {
 }
 
 #[test]
-fn oppdater_der_alle_kilder_feiler_gir_kode_1_og_respekterer_gulvet() {
-    let mappe = TempDir::new().unwrap();
-    databrus(&mappe)
+fn update_where_all_sources_fail_exits_with_1_and_respects_the_floor() {
+    let dir = TempDir::new().unwrap();
+    databrus(&dir)
         .arg("oppdater")
         .assert()
         .code(1)
         .stderr(predicate::str::contains("alle kilder feilet"));
 
-    // Et nytt forsøk innen 15 minutter blir ikke sendt.
-    databrus(&mappe)
+    // A new attempt within 15 minutes is not sent.
+    databrus(&dir)
         .arg("oppdater")
         .assert()
         .stderr(predicate::str::contains("neste henting tidligst om"));
 }
 
 #[test]
-fn butikker_json() {
-    let mappe = TempDir::new().unwrap();
-    let json = stdout_json(databrus(&mappe).args(["butikker", "--json"]));
+fn stores_json() {
+    let dir = TempDir::new().unwrap();
+    let json = stdout_json(databrus(&dir).args(["butikker", "--json"]));
     assert_eq!(json["skjemaversjon"], 1);
-    let butikker = json["butikker"].as_array().unwrap();
-    assert_eq!(butikker.len(), 15);
-    assert_eq!(butikker[0]["kjede"], "rema");
-    assert!(butikker[0]["sist_hentet"].is_null());
+    let stores = json["butikker"].as_array().unwrap();
+    assert_eq!(stores.len(), 15);
+    assert_eq!(stores[0]["kjede"], "rema");
+    assert_eq!(stores[0]["navn"], "Rema 1000");
+    assert!(stores[0]["sist_hentet"].is_null());
+    assert!(stores[0].get("nyeste_pris").is_some());
 }
 
 #[test]
-fn butikker_json_linjer() {
-    let mappe = TempDir::new().unwrap();
-    let utdata = databrus(&mappe)
+fn stores_json_lines() {
+    let dir = TempDir::new().unwrap();
+    let output = databrus(&dir)
         .args(["--json-linjer", "butikker"])
         .assert()
         .success()
         .get_output()
         .stdout
         .clone();
-    let linjer: Vec<serde_json::Value> = String::from_utf8(utdata)
+    let lines: Vec<serde_json::Value> = String::from_utf8(output)
         .unwrap()
         .lines()
         .map(|l| serde_json::from_str(l).unwrap())
         .collect();
-    assert_eq!(linjer.len(), 16);
-    assert_eq!(linjer[0]["type"], "hode");
-    assert_eq!(linjer[0]["skjemaversjon"], 1);
-    assert_eq!(linjer[1]["type"], "resultat");
+    assert_eq!(lines.len(), 16);
+    assert_eq!(lines[0]["type"], "hode");
+    assert_eq!(lines[0]["skjemaversjon"], 1);
+    assert_eq!(lines[1]["type"], "resultat");
 }
 
 #[test]
-fn produkter_filtrerer_katalogen() {
-    let mappe = TempDir::new().unwrap();
-    let json = stdout_json(databrus(&mappe).args(["produkter", "--merke", "monster", "--json"]));
-    let produkter = json["produkter"].as_array().unwrap();
-    assert!(!produkter.is_empty());
-    assert!(produkter.iter().all(|p| p["merke"] == "monster"));
+fn products_filters_the_catalog() {
+    let dir = TempDir::new().unwrap();
+    let json = stdout_json(databrus(&dir).args(["produkter", "--merke", "monster", "--json"]));
+    let products = json["produkter"].as_array().unwrap();
+    assert!(!products.is_empty());
+    assert!(products.iter().all(|p| p["merke"] == "monster"));
+    // The catalog keys stay Norwegian in JSON.
+    assert!(products[0].get("volum_ml").is_some());
+    assert!(products[0].get("sukkerfri").is_some());
 }
 
 #[test]
-fn json_og_json_linjer_er_bruksfeil() {
-    let mappe = TempDir::new().unwrap();
-    databrus(&mappe)
+fn json_and_json_lines_is_a_usage_error() {
+    let dir = TempDir::new().unwrap();
+    databrus(&dir)
         .args(["--json", "--json-linjer", "butikker"])
         .assert()
         .code(1);
 }
 
 #[test]
-fn ugyldig_storrelse_er_bruksfeil() {
-    let mappe = TempDir::new().unwrap();
-    databrus(&mappe)
+fn invalid_size_is_a_usage_error() {
+    let dir = TempDir::new().unwrap();
+    databrus(&dir)
         .args(["--storrelse", "0,33,0,5"])
         .assert()
         .code(1)
@@ -135,30 +143,31 @@ fn ugyldig_storrelse_er_bruksfeil() {
 }
 
 #[test]
-fn konfig_init_vis_og_sett() {
-    let mappe = TempDir::new().unwrap();
-    databrus(&mappe).args(["konfig", "init"]).assert().success();
-    assert!(mappe.path().join("konfig.toml").exists());
-    databrus(&mappe).args(["konfig", "init"]).assert().code(1);
+fn config_init_show_and_set() {
+    let dir = TempDir::new().unwrap();
+    databrus(&dir).args(["konfig", "init"]).assert().success();
+    assert!(dir.path().join("konfig.toml").exists());
+    databrus(&dir).args(["konfig", "init"]).assert().code(1);
 
-    databrus(&mappe)
+    databrus(&dir)
         .args(["konfig", "sett", "standard_antall", "10"])
         .assert()
         .success();
-    databrus(&mappe)
+    databrus(&dir)
         .args(["konfig", "sett", "henting.min_intervall_minutter", "5"])
         .assert()
         .code(1);
 
-    let json = stdout_json(databrus(&mappe).args(["konfig", "vis", "--json"]));
+    let json = stdout_json(databrus(&dir).args(["konfig", "vis", "--json"]));
     assert_eq!(json["konfig"]["standard_antall"], 10);
     assert_eq!(json["konfig"]["henting"]["min_intervall_minutter"], 15);
+    assert_eq!(json["konfig"]["kilder"]["kassalapp"]["aktiv"], true);
 }
 
 #[test]
-fn api_nokkel_vises_aldri() {
-    let mappe = TempDir::new().unwrap();
-    databrus(&mappe)
+fn api_key_is_never_shown() {
+    let dir = TempDir::new().unwrap();
+    databrus(&dir)
         .args([
             "konfig",
             "sett",
@@ -168,7 +177,7 @@ fn api_nokkel_vises_aldri() {
         .assert()
         .success()
         .stderr(predicate::str::contains("hemmelig123").not());
-    databrus(&mappe)
+    databrus(&dir)
         .args(["konfig", "vis"])
         .assert()
         .success()
@@ -177,28 +186,28 @@ fn api_nokkel_vises_aldri() {
 }
 
 #[test]
-fn ugyldig_konfig_stopper_sok_men_ikke_init() {
-    let mappe = TempDir::new().unwrap();
+fn invalid_config_stops_search_but_not_init() {
+    let dir = TempDir::new().unwrap();
     std::fs::write(
-        mappe.path().join("konfig.toml"),
+        dir.path().join("konfig.toml"),
         "standard_antall = \"mange\"",
     )
     .unwrap();
-    databrus(&mappe)
+    databrus(&dir)
         .args(["--frakoblet", "monster"])
         .assert()
         .code(1)
         .stderr(predicate::str::contains("konfigurasjon"));
-    databrus(&mappe)
+    databrus(&dir)
         .args(["konfig", "init", "--tving"])
         .assert()
         .success();
 }
 
 #[test]
-fn fullforing_for_powershell() {
-    let mappe = TempDir::new().unwrap();
-    databrus(&mappe)
+fn completions_for_powershell() {
+    let dir = TempDir::new().unwrap();
+    databrus(&dir)
         .args(["fullforing", "powershell"])
         .assert()
         .success()
@@ -206,9 +215,9 @@ fn fullforing_for_powershell() {
 }
 
 #[test]
-fn ikke_implementert_gir_kode_1() {
-    let mappe = TempDir::new().unwrap();
-    databrus(&mappe)
+fn not_implemented_exits_with_1() {
+    let dir = TempDir::new().unwrap();
+    databrus(&dir)
         .args(["overvak", "liste"])
         .assert()
         .code(1)

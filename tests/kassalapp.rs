@@ -1,44 +1,44 @@
-//! Kassalapp-adapteren mot en lokal etterligning av API-et (wiremock) med ekte, nedkortede
-//! svar fra `tests/fixtures/kassalapp`. Ingen test treffer nettverket.
+//! The Kassalapp adapter against a local mock of the API (wiremock) with real, trimmed
+//! responses from `tests/fixtures/kassalapp`. No test touches the network.
 
 use std::process::Command;
 
 use assert_cmd::assert::OutputAssertExt;
-use databrus::kilder::kassalapp::Kassalapp;
-use databrus::kilder::{HenteKontekst, Http, Kilde, KildeFeil};
+use databrus::sources::kassalapp::Kassalapp;
+use databrus::sources::{FetchContext, Http, Source, SourceError};
 use predicates::prelude::*;
 use tempfile::TempDir;
 use wiremock::matchers::{header, method, path, query_param};
 use wiremock::{Mock, MockServer, ResponseTemplate};
 
-const SIDE_1: &str = include_str!("fixtures/kassalapp/kategori-energidrikk.json");
-const SISTE_SIDE: &str = include_str!("fixtures/kassalapp/kategori-energidrikk-siste-side.json");
+const PAGE_1: &str = include_str!("fixtures/kassalapp/category-energy-drinks.json");
+const LAST_PAGE: &str = include_str!("fixtures/kassalapp/category-energy-drinks-last-page.json");
 
-fn json(tekst: &str) -> ResponseTemplate {
-    ResponseTemplate::new(200).set_body_raw(tekst, "application/json")
+fn json(text: &str) -> ResponseTemplate {
+    ResponseTemplate::new(200).set_body_raw(text, "application/json")
 }
 
-fn kontekst(nokkel: Option<&str>) -> HenteKontekst {
-    HenteKontekst {
-        http: Http::ny().unwrap(),
-        api_nokkel: nokkel.map(str::to_owned),
-        gtin: Vec::new(),
+fn context(api_key: Option<&str>) -> FetchContext {
+    FetchContext {
+        http: Http::new().unwrap(),
+        api_key: api_key.map(str::to_owned),
+        gtins: Vec::new(),
     }
 }
 
-fn kilde(server: &MockServer) -> Kassalapp {
-    Kassalapp::med_basis_url(format!("{}/api/v1", server.uri()))
+fn source(server: &MockServer) -> Kassalapp {
+    Kassalapp::with_base_url(format!("{}/api/v1", server.uri()))
 }
 
-/// Side 1 har `next`, side 2 har ikke – som den ekte kategorien.
-async fn to_sider(server: &MockServer) {
+/// Page 1 has `next`, page 2 does not – like the real category.
+async fn two_pages(server: &MockServer) {
     Mock::given(method("GET"))
         .and(path("/api/v1/products"))
         .and(query_param("category_id", "111"))
         .and(query_param("size", "100"))
         .and(query_param("page", "1"))
         .and(header("authorization", "Bearer testnokkel"))
-        .respond_with(json(SIDE_1))
+        .respond_with(json(PAGE_1))
         .expect(1)
         .mount(server)
         .await;
@@ -46,32 +46,32 @@ async fn to_sider(server: &MockServer) {
         .and(path("/api/v1/products"))
         .and(query_param("page", "2"))
         .and(header("authorization", "Bearer testnokkel"))
-        .respond_with(json(SISTE_SIDE))
+        .respond_with(json(LAST_PAGE))
         .expect(1)
         .mount(server)
         .await;
 }
 
 #[tokio::test]
-async fn henter_alle_sider() {
+async fn fetches_all_pages() {
     let server = MockServer::start().await;
-    to_sider(&server).await;
+    two_pages(&server).await;
 
-    let rader = kilde(&server)
-        .hent(&kontekst(Some("testnokkel")))
+    let listings = source(&server)
+        .fetch(&context(Some("testnokkel")))
         .await
         .unwrap();
-    // 12 fra side 1 (2 Coop-rader hoppes over) og 2 fra siste side.
-    assert_eq!(rader.len(), 14);
+    // 12 from page 1 (2 Coop rows are skipped) and 2 from the last page.
+    assert_eq!(listings.len(), 14);
     assert!(
-        rader
+        listings
             .iter()
-            .any(|r| r.kilde_produkt_id == "225194" && r.antall == 4)
+            .any(|l| l.source_product_id == "225194" && l.pack_size == 4)
     );
 }
 
 #[tokio::test]
-async fn nytt_forsok_etter_serverfeil() {
+async fn retries_after_a_server_error() {
     let server = MockServer::start().await;
     Mock::given(method("GET"))
         .respond_with(ResponseTemplate::new(503))
@@ -81,20 +81,20 @@ async fn nytt_forsok_etter_serverfeil() {
         .await;
     Mock::given(method("GET"))
         .and(query_param("page", "1"))
-        .respond_with(json(SISTE_SIDE))
+        .respond_with(json(LAST_PAGE))
         .expect(1)
         .mount(&server)
         .await;
 
-    let rader = kilde(&server)
-        .hent(&kontekst(Some("testnokkel")))
+    let listings = source(&server)
+        .fetch(&context(Some("testnokkel")))
         .await
         .unwrap();
-    assert_eq!(rader.len(), 2);
+    assert_eq!(listings.len(), 2);
 }
 
 #[tokio::test]
-async fn gir_opp_etter_tre_nye_forsok() {
+async fn gives_up_after_three_retries() {
     let server = MockServer::start().await;
     Mock::given(method("GET"))
         .respond_with(ResponseTemplate::new(429).insert_header("retry-after", "0"))
@@ -102,15 +102,18 @@ async fn gir_opp_etter_tre_nye_forsok() {
         .mount(&server)
         .await;
 
-    let feil = kilde(&server)
-        .hent(&kontekst(Some("testnokkel")))
+    let error = source(&server)
+        .fetch(&context(Some("testnokkel")))
         .await
         .unwrap_err();
-    assert!(matches!(feil, KildeFeil::Http { status: 429 }), "{feil:?}");
+    assert!(
+        matches!(error, SourceError::Http { status: 429 }),
+        "{error:?}"
+    );
 }
 
 #[tokio::test]
-async fn avvist_nokkel_provas_ikke_igjen() {
+async fn a_rejected_key_is_not_retried() {
     let server = MockServer::start().await;
     Mock::given(method("GET"))
         .respond_with(ResponseTemplate::new(401))
@@ -118,93 +121,93 @@ async fn avvist_nokkel_provas_ikke_igjen() {
         .mount(&server)
         .await;
 
-    let feil = kilde(&server)
-        .hent(&kontekst(Some("feil")))
+    let error = source(&server)
+        .fetch(&context(Some("feil")))
         .await
         .unwrap_err();
     assert!(
-        matches!(feil, KildeFeil::AvvistNokkel { status: 401 }),
-        "{feil:?}"
+        matches!(error, SourceError::RejectedKey { status: 401 }),
+        "{error:?}"
     );
 }
 
 #[tokio::test]
-async fn uten_nokkel_sendes_ingenting() {
+async fn nothing_is_sent_without_a_key() {
     let server = MockServer::start().await;
     Mock::given(method("GET"))
-        .respond_with(json(SIDE_1))
+        .respond_with(json(PAGE_1))
         .expect(0)
         .mount(&server)
         .await;
 
-    let feil = kilde(&server).hent(&kontekst(None)).await.unwrap_err();
-    assert!(matches!(feil, KildeFeil::ManglerApiNokkel));
+    let error = source(&server).fetch(&context(None)).await.unwrap_err();
+    assert!(matches!(error, SourceError::MissingApiKey));
 }
 
 #[tokio::test]
-async fn endret_svarformat_gir_skjemafeil() {
+async fn a_changed_response_format_is_a_schema_error() {
     let server = MockServer::start().await;
     Mock::given(method("GET"))
-        .respond_with(json(r#"{"data": "ikke en liste"}"#))
+        .respond_with(json(r#"{"data": "not a list"}"#))
         .mount(&server)
         .await;
 
-    let feil = kilde(&server)
-        .hent(&kontekst(Some("testnokkel")))
+    let error = source(&server)
+        .fetch(&context(Some("testnokkel")))
         .await
         .unwrap_err();
-    assert!(matches!(feil, KildeFeil::Skjemaendring(_)), "{feil:?}");
+    assert!(matches!(error, SourceError::SchemaChange(_)), "{error:?}");
 }
 
-/// Hele kjeden gjennom binæren: `oppdater` henter, matcher mot den innebygde katalogen
-/// og lagrer, og et frakoblet søk rangerer resultatet. Alle fixture-radene har EAN-er som
-/// finnes i katalogen. Søket bruker `--alle`, så testen ikke avhenger av hvor gamle
-/// fixture-tidspunktene er når den kjøres.
+/// The whole chain through the binary: `oppdater` fetches, matches against the built-in
+/// catalog and stores, and an offline search ranks the result. Every fixture row has an
+/// EAN that is in the catalog. The search uses `--alle`, so the test does not depend on
+/// how old the fixture timestamps are when it runs.
 #[tokio::test(flavor = "multi_thread")]
-async fn oppdater_og_sok() {
+async fn update_and_search() {
     let server = MockServer::start().await;
-    to_sider(&server).await;
-    let mappe = TempDir::new().unwrap();
+    two_pages(&server).await;
+    let dir = TempDir::new().unwrap();
     let url = format!("{}/api/v1", server.uri());
 
-    let databrus = move |mappe: &TempDir, args: &[&str]| {
-        let mut kommando = Command::new(env!("CARGO_BIN_EXE_databrus"));
-        kommando
+    let databrus = move |dir: &TempDir, args: &[&str]| {
+        let mut command = Command::new(env!("CARGO_BIN_EXE_databrus"));
+        command
             .args(args)
-            .env("DATABRUS_KONFIG", mappe.path().join("konfig.toml"))
-            .env("DATABRUS_DATA_DIR", mappe.path().join("data"))
+            .env("DATABRUS_KONFIG", dir.path().join("konfig.toml"))
+            .env("DATABRUS_DATA_DIR", dir.path().join("data"))
             .env("DATABRUS_KASSALAPP_URL", &url)
             .env("KASSALAPP_API_KEY", "testnokkel")
             .env("NO_COLOR", "1");
-        kommando
+        command
     };
 
-    let (oppdater, ukjente, json_sok, tabell_sok) = tokio::task::spawn_blocking(move || {
-        let oppdater = databrus(&mappe, &["oppdater", "--kilde", "kassalapp"]).assert();
-        let ukjente = databrus(&mappe, &["produkter", "--ukjente", "--json"]).assert();
-        let json_sok = databrus(&mappe, &["--frakoblet", "--alle", "--json", "monster"]).assert();
-        let tabell_sok = databrus(&mappe, &["--frakoblet", "--alle", "monster", "mango"]).assert();
-        (oppdater, ukjente, json_sok, tabell_sok)
+    let (update, unmatched, json_search, table_search) = tokio::task::spawn_blocking(move || {
+        let update = databrus(&dir, &["oppdater", "--kilde", "kassalapp"]).assert();
+        let unmatched = databrus(&dir, &["produkter", "--ukjente", "--json"]).assert();
+        let json_search = databrus(&dir, &["--frakoblet", "--alle", "--json", "monster"]).assert();
+        let table_search = databrus(&dir, &["--frakoblet", "--alle", "monster", "mango"]).assert();
+        (update, unmatched, json_search, table_search)
     })
     .await
     .unwrap();
 
-    oppdater.success().stdout(predicate::str::contains(
+    update.success().stdout(predicate::str::contains(
         "Kassalapp: 14 oppføringer, 14 matchet katalogen",
     ));
-    let utdata = ukjente.success().get_output().stdout.clone();
-    let json: serde_json::Value = serde_json::from_slice(&utdata).unwrap();
+    let output = unmatched.success().get_output().stdout.clone();
+    let json: serde_json::Value = serde_json::from_slice(&output).unwrap();
     assert_eq!(json["ukjente"].as_array().unwrap().len(), 0);
 
-    // Siste fixture-side har to Monster-firepakninger fra Joker.
-    let utdata = json_sok.success().get_output().stdout.clone();
-    let json: serde_json::Value = serde_json::from_slice(&utdata).unwrap();
+    // The last fixture page has two Monster 4-packs from Joker.
+    let output = json_search.success().get_output().stdout.clone();
+    let json: serde_json::Value = serde_json::from_slice(&output).unwrap();
     assert_eq!(json["skjemaversjon"], 1);
     assert_eq!(json["sporring"]["tekst"], "monster");
     assert_eq!(json["sporring"]["filtre"]["alle"], true);
-    let resultater = json["resultater"].as_array().unwrap();
-    assert_eq!(resultater.len(), 2, "{resultater:#?}");
-    let mango = resultater
+    let results = json["resultater"].as_array().unwrap();
+    assert_eq!(results.len(), 2, "{results:#?}");
+    let mango = results
         .iter()
         .find(|r| r["produkt"]["id"] == "monster-mango-loco-500-boks")
         .unwrap();
@@ -220,7 +223,7 @@ async fn oppdater_og_sok() {
     assert_eq!(json["kilder"][0]["id"], "kassalapp");
     assert_eq!(json["kilder"][0]["status"], "ok");
 
-    tabell_sok
+    table_search
         .success()
         .stdout(predicate::str::contains("Monster Mango Loco"))
         .stdout(predicate::str::contains("24,90"))

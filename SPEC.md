@@ -30,7 +30,15 @@ Status: draft v1 spec · 2026-09-29
 ## 2. Language conventions
 
 **All user-facing surfaces are Norwegian (bokmål).** That includes subcommands, flags, help text,
-table headers, messages, config keys and JSON keys.
+table headers, messages, config keys, JSON keys, the catalog file format (`katalog.toml`) and the
+README.
+
+**The source code is English**: identifiers, module and file names, comments, tests, the database
+schema and commit messages. Where the two meet, the English Rust names carry explicit Norwegian
+names (`serde(rename)` for JSON, config and catalog keys; `#[arg(long = …)]`, `#[command(name = …)]`
+and `#[value(name = …)]` for the command line). Doc comments on clap items are the Norwegian help
+text and stay Norwegian. Tests guard the boundary: the `--help` snapshot, a check that no English
+command or flag name leaks, and key-set checks for the JSON and config contracts.
 
 - **Command names, flag names, config keys and JSON keys use only ASCII.** `æ→ae`, `ø→o`, `å→a`
   (for example `--storrelse`, `overvak`). This keeps them easy to type on any keyboard layout and
@@ -340,18 +348,23 @@ equivalent). Typed flags are then applied as exact filters. Query normalization 
 ### 7.2 Schema (SQLite via `rusqlite` with the `bundled` feature, migrations via `rusqlite_migration`)
 
 ```sql
-produkt        (id TEXT PK, merke, linje, smak, sukkerfri, volum_ml, beholder, egenmerke, ad_hoc BOOL)
-oppforing      (id INTEGER PK, kilde, kjede, kilde_produkt_id, gtin, produkt_id FK, antall,
-                raanavn, verifisert BOOL, forst_sett, sist_sett,
-                UNIQUE(kilde, kjede, kilde_produkt_id))
-prisintervall  (id INTEGER PK, oppforing_id FK, hyllepris_ore, medlemspris_ore, medlemsprogram,
-                tilbud_json, tilgjengelig BOOL, mistenkelig BOOL,
-                gyldig_fra TIMESTAMP, sist_sett TIMESTAMP)
-henting        (id INTEGER PK, kilde, startet, fullfort, status, feilmelding, antall_oppforinger)
-varsel         (id INTEGER PK, produkt_id, kjede NULL, grense_ore, grensetype, opprettet, sist_utlost)
+product         (id TEXT PK, name, brand, line, flavor, sugar_free, volume_ml, container,
+                 store_brand, ad_hoc BOOL)
+listing         (id INTEGER PK, source, chain, source_product_id, gtin, product_id FK, pack_size,
+                 raw_name, verified BOOL, first_seen, last_seen,
+                 UNIQUE(source, chain, source_product_id))
+price_interval  (id INTEGER PK, listing_id FK, shelf_price_ore, member_price_ore,
+                 membership_program, offer_json, available BOOL, suspicious BOOL,
+                 valid_from TIMESTAMP, last_seen TIMESTAMP)
+fetch_log       (id INTEGER PK, source, started, finished, status, error_message, listing_count)
+alert           (id INTEGER PK, product_id, chain NULL, threshold_ore, threshold_kind, created,
+                 last_triggered_interval)
 ```
 
-- **Change-only history**: when a fetch sees the same `(hyllepris, medlemspris, tilbud, tilgjengelig)` as the latest interval, it only updates `sist_sett`. Any change closes the old interval implicitly by inserting a new row with `gyldig_fra = now`.
+Chain, source, container and membership values are stored as their public slugs (`coop-extra`,
+`kassalapp`, `boks`, `kiwi-pluss`), and `offer_json` uses the same Norwegian keys as the JSON output.
+
+- **Change-only history**: when a fetch sees the same `(shelf price, member price, offer, available)` as the latest interval, it only updates `last_seen` (never backwards in time). Any change closes the old interval implicitly by inserting a new row with `valid_from` = the observation time.
 - **Gaps**: if `sist_sett` of the latest interval is older than 3 days when a new observation arrives, the interval is treated as ending at `sist_sett`, and the gap is left as *unknown*. It is not assumed that the price stayed the same. Statistics weight prices by the time they were known to be valid.
 - All timestamps are stored in UTC. Day boundaries (such as "30 days") use Europe/Oslo.
 - The DB is opened in WAL mode, so a scheduled fetch and an interactive search can run at the same time.
@@ -596,21 +609,24 @@ aktiv = true
 
 ```
 src/
-  main.rs            // clap entry, dispatch
-  cli/               // args, subcommands, completions
-  kilder/            // Kilde trait, kassalapp, oda, rema, coop, http (politeness, retry)
-  katalog/           // catalog loading/merging, GTIN index, name parsing, fuzzy matching
-  prising/           // øre math, offer → effective price, pant, sanity bounds
-  lager/             // SQLite, migrations, change-only writes, queries
-  historikk/         // L30/M90/ATL, verdict, deal detection, sparkline data
-  sok/               // filter + rank pipeline
-  utdata/            // table, json, ndjson, chart, csv
-  overvak/           // alerts + notifications
-  planlegg/          // schtasks / systemd / cron / launchd
-  konfig/            // config load/validate
+  main.rs            // parse args, run, map the result to an exit code
+  lib.rs             // Context and command dispatch
+  cli/               // clap definitions (Norwegian names), completions
+  commands/          // one module per command: search, deals, update, stores, products, …
+  sources/           // Source trait, kassalapp, oda, rema, coop, http (politeness, retry)
+  catalog/           // catalog loading/merging, GTIN index, name parsing, matching
+  pricing/           // øre math, offer → effective price, deposit, sanity bounds
+  db/                // SQLite, migrations, change-only writes, queries
+  history/           // L30/M90/ATL, verdict, deal detection
+  search/            // filter + ranking pipeline
+  output/            // table, JSON/NDJSON, Norwegian number formatting
+  alerts/            // price alerts
+  schedule/          // schtasks / systemd / cron / launchd
+  config/            // config load/validate, file locations
 data/katalog.toml
+migrations/
 schema/v1.json
-tests/fixtures/<kilde>/...
+tests/fixtures/<source>/...
 ```
 
 ---

@@ -1,115 +1,118 @@
-//! databrus – finn de billigste energidrikkene i Norge.
+//! databrus – find the cheapest energy drinks in Norway.
 //!
-//! All logikk bor i biblioteket; `main.rs` tolker bare argumenter og oversetter
-//! resultatet til en utgangskode. Se `SPEC.md` for spesifikasjonen.
+//! All logic lives in the library; `main.rs` only parses arguments and turns the result
+//! into an exit code. See `SPEC.md` for the specification.
+//!
+//! Source code is English. Everything the user sees – commands, flags, help text,
+//! messages, JSON keys and config keys – is Norwegian (SPEC §2).
 
+pub mod alerts;
+pub mod catalog;
 pub mod cli;
-pub mod feil;
-pub mod historikk;
-pub mod katalog;
-pub mod kilder;
-pub mod kommando;
-pub mod konfig;
-pub mod lager;
-pub mod modell;
-pub mod overvak;
-pub mod planlegg;
-pub mod prising;
-pub mod sok;
-pub mod utdata;
+pub mod commands;
+pub mod config;
+pub mod db;
+pub mod error;
+pub mod history;
+pub mod model;
+pub mod output;
+pub mod pricing;
+pub mod schedule;
+pub mod search;
+pub mod sources;
 
-use cli::{Cli, Globale, Kommando};
-use feil::{AppFeil, Utgangskode};
-use katalog::Katalog;
-use kilder::Hentemodus;
-use konfig::{Fargevalg, Konfig, Stier};
-use lager::Lager;
-use utdata::Utdataformat;
+use catalog::Catalog;
+use cli::{Cli, Command, GlobalArgs};
+use config::{ColorMode, Config, Paths};
+use db::Database;
+use error::{AppError, ExitStatus};
+use output::OutputFormat;
+use sources::FetchMode;
 
-/// Alt en kommando trenger for å kjøre.
+/// Everything a command needs to run.
 #[derive(Debug)]
-pub struct Kontekst {
-    pub globale: Globale,
-    pub stier: Stier,
-    pub konfig: Konfig,
+pub struct Context {
+    pub global: GlobalArgs,
+    pub paths: Paths,
+    pub config: Config,
 }
 
-impl Kontekst {
-    pub fn utdataformat(&self) -> Utdataformat {
-        if self.globale.json {
-            Utdataformat::Json
-        } else if self.globale.json_linjer {
-            Utdataformat::JsonLinjer
+impl Context {
+    pub fn output_format(&self) -> OutputFormat {
+        if self.global.json {
+            OutputFormat::Json
+        } else if self.global.json_lines {
+            OutputFormat::JsonLines
         } else {
-            Utdataformat::Tabell
+            OutputFormat::Table
         }
     }
 
-    pub fn hentemodus(&self) -> Hentemodus {
-        Hentemodus {
-            tving: self.globale.oppdater,
-            frakoblet: self.globale.frakoblet,
-            stille: false,
+    pub fn fetch_mode(&self) -> FetchMode {
+        FetchMode {
+            force: self.global.refresh,
+            offline: self.global.offline,
+            quiet: false,
         }
     }
 
-    pub fn apne_lager(&self) -> Result<Lager, AppFeil> {
-        Lager::apne(&self.stier.database())
+    pub fn open_database(&self) -> Result<Database, AppError> {
+        Database::open(&self.paths.database())
     }
 
-    pub fn katalog(&self) -> Result<Katalog, AppFeil> {
-        Katalog::last(&self.stier.katalog_overstyring())
+    pub fn catalog(&self) -> Result<Catalog, AppError> {
+        Catalog::load(&self.paths.catalog_override())
     }
 }
 
-/// Kjører en ferdig tolket kommandolinje.
-pub async fn kjor(cli: Cli) -> Result<Utgangskode, AppFeil> {
+/// Runs a parsed command line.
+pub async fn run(cli: Cli) -> Result<ExitStatus, AppError> {
     let Cli {
-        globale,
-        sok,
-        kommando: valgt,
+        global,
+        search,
+        command,
     } = cli;
-    let stier = Stier::finn(globale.konfig.as_deref())?;
+    let paths = Paths::find(global.config.as_deref())?;
 
-    // Disse skal virke selv når konfigurasjonsfilen er ugyldig.
-    let valgt = match valgt {
-        Some(Kommando::Fullforing { skall }) => {
-            cli::fullforing::skriv(skall)?;
-            return Ok(Utgangskode::Ok);
+    // These must work even when the config file is invalid.
+    let command = match command {
+        Some(Command::Completions { shell }) => {
+            cli::completions::write(shell)?;
+            return Ok(ExitStatus::Ok);
         }
-        Some(Kommando::Konfig(k)) => return kommando::konfig::kjor(&k, &stier, &globale),
-        annen => annen,
+        Some(Command::Config(c)) => return commands::config::run(&c, &paths, &global),
+        other => other,
     };
 
-    let konfig = Konfig::last(&stier.konfigfil)?;
-    sett_farge(globale.farge.unwrap_or(konfig.farge));
-    let ktx = Kontekst {
-        globale,
-        stier,
-        konfig,
+    let config = Config::load(&paths.config_file)?;
+    set_color(global.color.unwrap_or(config.color));
+    let ctx = Context {
+        global,
+        paths,
+        config,
     };
 
-    match valgt {
-        None => kommando::sok::kjor(&sok, &ktx).await,
-        Some(Kommando::Sok(args)) => kommando::sok::kjor(&args, &ktx).await,
-        Some(Kommando::Tilbud(args)) => kommando::tilbud::kjor(&args, &ktx).await,
-        Some(Kommando::Historikk(args)) => kommando::historikk::kjor(&args, &ktx),
-        Some(Kommando::Oppdater(args)) => kommando::oppdater::kjor(&args, &ktx).await,
-        Some(Kommando::Butikker) => kommando::butikker::kjor(&ktx),
-        Some(Kommando::Produkter(args)) => kommando::produkter::kjor(&args, &ktx),
-        Some(Kommando::Overvak(k)) => kommando::overvak::kjor(&k, &ktx),
-        Some(Kommando::Planlegg(k)) => kommando::planlegg::kjor(&k, &ktx),
-        Some(Kommando::Eksporter(args)) => kommando::eksporter::kjor(&args, &ktx),
-        // Håndtert før konfigurasjonen ble lastet.
-        Some(Kommando::Fullforing { .. } | Kommando::Konfig(_)) => Ok(Utgangskode::Ok),
+    match command {
+        None => commands::search::run(&search, &ctx).await,
+        Some(Command::Search(args)) => commands::search::run(&args, &ctx).await,
+        Some(Command::Deals(args)) => commands::deals::run(&args, &ctx).await,
+        Some(Command::History(args)) => commands::history::run(&args, &ctx),
+        Some(Command::Update(args)) => commands::update::run(&args, &ctx).await,
+        Some(Command::Stores) => commands::stores::run(&ctx),
+        Some(Command::Products(args)) => commands::products::run(&args, &ctx),
+        Some(Command::Watch(c)) => commands::watch::run(&c, &ctx),
+        Some(Command::Schedule(c)) => commands::schedule::run(&c, &ctx),
+        Some(Command::Export(args)) => commands::export::run(&args, &ctx),
+        // Handled before the config was loaded.
+        Some(Command::Completions { .. } | Command::Config(_)) => Ok(ExitStatus::Ok),
     }
 }
 
-fn sett_farge(valg: Fargevalg) {
-    let valg = match valg {
-        Fargevalg::Auto => anstream::ColorChoice::Auto,
-        Fargevalg::Alltid => anstream::ColorChoice::Always,
-        Fargevalg::Aldri => anstream::ColorChoice::Never,
+fn set_color(mode: ColorMode) {
+    let choice = match mode {
+        ColorMode::Auto => anstream::ColorChoice::Auto,
+        ColorMode::Always => anstream::ColorChoice::Always,
+        ColorMode::Never => anstream::ColorChoice::Never,
     };
-    valg.write_global();
+    choice.write_global();
 }
