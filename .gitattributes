@@ -1,0 +1,8 @@
+# Samme linjeskift (LF) i repoet og i arbeidskopien på alle plattformer, slik at
+# fixtures, snapshots og migreringer er byte-like på Windows, Linux og macOS.
+* text=auto eol=lf
+
+# Binære fixtures skal aldri konverteres.
+*.png binary
+*.gz binary
+*.sqlite binary
