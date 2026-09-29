@@ -159,9 +159,9 @@ Sources run concurrently with tokio. The politeness limits in §7.4 apply per ho
 | Source | Role | Chains | Notes |
 |---|---|---|---|
 | **Kassalapp API** (`kassal.app/api/v1`) | Primary base prices | See §4.5 | Needs a free API key (§10.2). Fetches the whole energy drink category (`category_id=111`) page by page (about 11 requests). The category already has one row per store, so EAN lookups aren't needed for fetching. Rate limit 60 req/min (verified, §4.5). |
-| **Oda** | Direct adapter | Oda | Public web JSON endpoints (search and product detail). Gives availability (sold out) and campaign info. |
-| **Rema 1000 offers** | Offer overlay | Rema 1000 | Weekly offers, including Æ-app offers, which Kassalapp may lag on. The endpoint is undocumented, so it is a **research task** at implementation time. |
-| **Coop offers** | Offer overlay | Coop Extra/Obs/Mega/Prix | Weekly offer feeds per Coop chain, including member prices. The endpoint is undocumented, so it is a **research task**. |
+| **Oda** | Direct adapter | Oda | Public JSON search API: price, per-liter price, availability, campaigns and pant. No EAN; see §4.6. |
+| ~~Rema 1000 offers~~ | – | Rema 1000 | **Not available**: prices and offers exist only in the REMA app (§4.6). |
+| ~~Coop offers~~ | – | Coop Extra/Obs/Mega/Prix | **Not available**: Coop's online store is closed, and weekly offers are flyer images (§4.6). |
 
 Each direct adapter can be turned off in config (`[kilder.rema] aktiv = false`). An adapter that
 fails its self-check (unexpected schema) disables itself for that run and warns. It never crashes
@@ -239,6 +239,34 @@ Consequences:
   is about 11 requests.
 
 ---
+
+### 4.6 Direct source research (2026-09-29)
+
+Goal: current prices for the chains Kassalapp has no fresh data for (§4.5). Only public,
+read-only sources were considered; app APIs were not reverse-engineered, and nothing behind a
+login or a customer agreement was used.
+
+| Chain | Finding | Verdict |
+|---|---|---|
+| **Oda** | `https://oda.com/api/v1/search/mixed/?q=energidrikk&type=product&page=N&size=50` returns ~79 products in 2 requests. Per product: `gross_price`, `gross_unit_price`, `availability.is_available`, `discount` (e.g. `discount_type = "mix_and_match"`, `undiscounted_gross_price`) and `promotion.title` ("3 for 2"). The detail endpoint `/api/v1/products/{id}/` adds `bottle_deposit` (pant, not included in the price). **No EAN.** | **Feasible.** |
+| **Kiwi** | No online store (`"webshop": false` in the site config); the old product page and `/tilbud` return 404, and the sitemap has only editorial pages. Offers exist only in the app and the printed flyer. | No public source. |
+| **Rema 1000** | rema.no is a marketing site with no product catalog or offers; prices and offers are only in the REMA app. | No public source. |
+| **Coop** | Coop's online store (`matlevering.coop.no`) no longer resolves. coop.no has no product catalog; the weekly offers (`/extra/tilbud`, `obs.no/kampanjer/denne-ukens-tilbud`) are flyers, not structured data. | No public source. |
+| Flyer services (Tjek: etilbudsavis/mattilbud) | Would cover Kiwi, Rema and Coop weekly offers as structured data, but the API is **customer-only** and the terms limit use to agreed services. | Only with an agreement (services@tjek.com). |
+
+**Oda's rules for automated clients** (from its `robots.txt`): the User-Agent must contain
+"bot", the program name and a company name or contact email, and clients must back off on 429
+and 5xx and respect `Retry-After`. The Oda adapter therefore uses
+`databrus-bot/<versjon> (+https://github.com/mathiashagen/databrus)`.
+
+**Matching Oda without EANs**: Kassalapp's (stale) Oda rows link Oda product ids to EANs
+(`https://oda.com/no/products/23300-…` ↔ `5060166693732`); 59 energy drinks have both. Oda
+listings whose id is known this way get a verified EAN match; the rest go through name matching
+(§6.3), with Oda's `brand` as the brand and `name_extra` ("0,5 l") as the size.
+
+**Consequence:** after Oda, Kiwi, Rema and Coop have no automated source that is both public
+and allowed. The options are a customer agreement with Tjek, prices entered by the user, or
+waiting for Kassalapp to cover them again.
 
 ## 5. Pricing model
 
@@ -662,16 +690,17 @@ tests/fixtures/<source>/...
 ## 15. Milestones
 
 1. **M1 – Core search**: config, Kassalapp adapter, catalog + GTIN matching, SQLite with change-only history, pricing math, search with filters, table + JSON output, TTL fetching, degrade/warn.
-   - **Right after M1 – source research**: find out whether Kiwi, Rema, Coop and Oda expose current prices directly (§4.5). The outcome may reorder M2 and M3.
+   - **Right after M1 – source research** (done, §4.6): only Oda has a usable public source.
 2. **M2 – History**: verdict engine, deal detection, `tilbud`, sparklines, `historikk` chart, `eksporter`.
-3. **M3 – Direct adapters**: Oda, then Rema offers and Coop offers (after the endpoint research), merge rules, member prices.
+3. **M3 – Direct adapters**: Oda (§4.6), merge rules. Rema and Coop offer adapters are dropped for lack of a public source; revisit if Tjek or the chains offer access.
 4. **M4 – Automation and release**: `planlegg` for all OSes, `overvak` + notifications, completions, cargo-dist releases, published JSON schema.
 
 ---
 
 ## 16. Risks and open questions
 
-- **Undocumented endpoints** (Rema, Coop, and Oda to a lesser degree) can change without warning. Mitigations: fixtures, schema-drift detection, per-source kill switch, and Kassalapp as the baseline.
+- **Undocumented endpoints**: Oda's JSON API is public but undocumented and can change without warning. Mitigations: fixtures, schema-drift detection, per-source kill switch, and Kassalapp as the baseline.
+- **Kiwi, Rema and Coop have no public price source** (§4.6). These are among the cheapest chains, so this is the biggest limit on the tool's usefulness.
 - **Terms of use**: the tool is for personal use with conservative request rates. Review each source's terms before publishing to crates.io, and drop any adapter whose terms forbid automated access.
 - **Kassalapp freshness and chain coverage** decide the quality of the baseline. Record `hentet` per source, so staleness is always visible. **Confirmed problem (§4.5):** Kassalapp has no fresh Kiwi, Rema, Coop or Oda prices. Direct sources for those chains are the biggest open question for the tool's usefulness.
 - **Pant rates** must be confirmed against Infinitum at implementation time. They are configurable data.
