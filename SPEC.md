@@ -517,7 +517,7 @@ Rules:
 - Money is always integer øre with an `_ore` suffix, volume is always integer ml, and timestamps are RFC 3339 UTC. Dates without a time (offer validity) are `YYYY-MM-DD` in Oslo time.
 - Enum values are lowercase ASCII slugs, except `vurdering.verdi` and `tilbudsmerke`, which are uppercase.
 - **Compatibility**: adding fields is non-breaking. Removing, renaming or changing the meaning of a field bumps `skjemaversjon`.
-- The JSON schema is published in the repo as `schema/v1.json` (generated with `schemars`) and checked in CI.
+- The JSON schema for `databrus --json` is published in the repo as `schema/v{skjemaversjon}.json` (JSON Schema 2020-12, generated with `schemars` from the Rust types, for the *serialize* contract: a field that is always written is required even when it can be `null`). Its `$id` is the raw GitHub URL of the file.
 
 ### 9.2 `--json-linjer`
 
@@ -644,7 +644,10 @@ tests/fixtures/<source>/...
 - **Snapshot tests** (`insta`): table output at several widths with and without color, JSON output, `historikk` chart.
 - **Property tests** (`proptest`): per-liter ranking is monotonic, and effective price ≤ shelf price for every valid offer.
 - **Live smoke tests** behind `--features live-tests`, run nightly in CI with the API key as a secret. A failure opens an issue and doesn't block releases.
-- **JSON schema check**: CI regenerates `schema/v1.json` and fails if it has changed while `skjemaversjon` has not.
+- **JSON schema check** (a normal test, so it runs in CI): the schema is regenerated and compared with the committed `schema/v{skjemaversjon}.json`.
+  - A **breaking** change fails until `skjemaversjon` is bumped, which starts a new file: a field removed or renamed, a type changed or widened (e.g. now nullable), a field that may now be missing, an enum value removed, or a variant of a tagged enum removed.
+  - An **additive** change (new fields, new enum values such as a new chain, new offer types) only requires regenerating the file with `DATABRUS_UPDATE_SCHEMA=1 cargo test published_schema`.
+  - Real output is validated against the schema: a unit test with offers, member prices, packs and a failed source, and the end-to-end test against actual `databrus --json` output.
 
 ---
 

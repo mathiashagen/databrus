@@ -12,6 +12,7 @@ use std::num::NonZeroU32;
 use clap::ValueEnum;
 use jiff::Timestamp;
 use jiff::civil::Date;
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 /// The current time truncated to whole seconds, the resolution used in the database and
@@ -23,7 +24,18 @@ pub fn now() -> Timestamp {
 
 /// An amount in øre (1/100 NOK).
 #[derive(
-    Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Serialize, Deserialize,
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    PartialOrd,
+    Ord,
+    Hash,
+    Default,
+    Serialize,
+    Deserialize,
+    JsonSchema,
 )]
 #[serde(transparent)]
 pub struct Ore(pub i64);
@@ -35,7 +47,9 @@ impl Ore {
 }
 
 /// A volume in millilitres. Never zero.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+#[derive(
+    Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize, JsonSchema,
+)]
 #[serde(transparent)]
 pub struct Ml(NonZeroU32);
 
@@ -53,7 +67,9 @@ impl Ml {
 }
 
 /// Identifier of a canonical product, e.g. `monster-ultra-white-500-boks`.
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+#[derive(
+    Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize, JsonSchema,
+)]
 #[serde(transparent)]
 pub struct ProductId(pub String);
 
@@ -65,7 +81,18 @@ impl fmt::Display for ProductId {
 
 /// A price source (SPEC §4.2).
 #[derive(
-    Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, ValueEnum, Serialize, Deserialize,
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    PartialOrd,
+    Ord,
+    Hash,
+    ValueEnum,
+    Serialize,
+    Deserialize,
+    JsonSchema,
 )]
 #[serde(rename_all = "kebab-case")]
 pub enum SourceId {
@@ -115,7 +142,18 @@ impl fmt::Display for SourceId {
 
 /// A grocery chain (SPEC §4.4). Prices are chain-level.
 #[derive(
-    Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, ValueEnum, Serialize, Deserialize,
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    PartialOrd,
+    Ord,
+    Hash,
+    ValueEnum,
+    Serialize,
+    Deserialize,
+    JsonSchema,
 )]
 #[serde(rename_all = "kebab-case")]
 pub enum Chain {
@@ -227,7 +265,9 @@ impl fmt::Display for Chain {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, ValueEnum, Serialize, Deserialize)]
+#[derive(
+    Debug, Clone, Copy, PartialEq, Eq, Hash, ValueEnum, Serialize, Deserialize, JsonSchema,
+)]
 pub enum Container {
     #[value(name = "boks")]
     #[serde(rename = "boks")]
@@ -247,7 +287,9 @@ impl Container {
 }
 
 /// Loyalty programmes with their own member prices (SPEC §5.3).
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, ValueEnum, Serialize, Deserialize)]
+#[derive(
+    Debug, Clone, Copy, PartialEq, Eq, Hash, ValueEnum, Serialize, Deserialize, JsonSchema,
+)]
 #[serde(rename_all = "kebab-case")]
 pub enum MembershipProgram {
     Coop,
@@ -287,7 +329,7 @@ pub struct MemberPrice {
 
 /// Offer types (SPEC §5.2). Multipacks are not offers but separate listings with a
 /// pack size above 1.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type")]
 pub enum Offer {
     /// "Nå 15,90"
@@ -322,7 +364,7 @@ pub enum Offer {
 }
 
 /// An offer with its validity, as stored and shown.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct OfferInfo {
     #[serde(flatten)]
     pub offer: Offer,
@@ -337,7 +379,7 @@ pub struct OfferInfo {
 
 /// A canonical product from the catalog (SPEC §6.1). The keys are those of the
 /// user-editable `katalog.toml`.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(deny_unknown_fields)]
 pub struct Product {
     pub id: ProductId,
@@ -396,7 +438,7 @@ pub struct RawListing {
 }
 
 /// Ranking verdict (SPEC §7.6).
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, JsonSchema)]
 pub enum Verdict {
     #[serde(rename = "SUPERT")]
     Great,
@@ -411,7 +453,7 @@ pub enum Verdict {
 }
 
 /// Badge in the Tilbud column (SPEC §7.8).
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, JsonSchema)]
 pub enum DealBadge {
     /// The source flags an active offer.
     #[serde(rename = "KAMPANJE")]
@@ -422,7 +464,7 @@ pub enum DealBadge {
 }
 
 /// Which price the ranking used.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, JsonSchema)]
 pub enum PriceBasis {
     #[serde(rename = "hyllepris")]
     Shelf,
@@ -433,7 +475,7 @@ pub enum PriceBasis {
 }
 
 /// The product part of a search result (SPEC §9.1).
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, JsonSchema)]
 pub struct ProductSummary {
     pub id: ProductId,
     #[serde(rename = "navn")]
@@ -454,7 +496,7 @@ pub struct ProductSummary {
     pub verified: bool,
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, JsonSchema)]
 pub struct VerdictInfo {
     #[serde(rename = "verdi")]
     pub value: Verdict,
@@ -465,7 +507,7 @@ pub struct VerdictInfo {
     pub coverage_days: u32,
 }
 
-#[derive(Debug, Clone, Copy, Serialize)]
+#[derive(Debug, Clone, Copy, Serialize, JsonSchema)]
 pub struct PriceRange {
     pub min_ore: Ore,
     #[serde(rename = "maks_ore")]
@@ -473,7 +515,7 @@ pub struct PriceRange {
 }
 
 /// One ranked row: a product at a chain (SPEC §9.1). This is the JSON contract.
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, JsonSchema)]
 pub struct SearchResult {
     #[serde(rename = "produkt")]
     pub product: ProductSummary,

@@ -20,6 +20,8 @@ pub mod pricing;
 pub mod schedule;
 pub mod search;
 pub mod sources;
+#[cfg(test)]
+mod test_support;
 
 use catalog::Catalog;
 use cli::{Cli, Command, GlobalArgs};

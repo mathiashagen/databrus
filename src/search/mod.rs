@@ -3,16 +3,17 @@
 pub mod ranking;
 
 use clap::ValueEnum;
+use schemars::JsonSchema;
 use serde::Serialize;
 
 use crate::catalog::parse::normalize;
 use crate::cli::{SearchArgs, expand_chains};
 use crate::config::Config;
-use crate::model::{Chain, Container, Ml, Ore, Product};
+use crate::model::{Chain, Container, Ml, Ore, Product, SearchResult};
 
 // The doc comments on the variants are clap's help text for `--sorter`, so they are
 // Norwegian.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, ValueEnum, Serialize)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, ValueEnum, Serialize, JsonSchema)]
 pub enum SortBy {
     /// Literpris uten pant
     #[default]
@@ -33,8 +34,18 @@ pub enum SortBy {
     Name,
 }
 
+/// The content of `databrus --json` next to the header (SPEC §9.1). This is the type the
+/// published schema describes.
+#[derive(Debug, Clone, Serialize, JsonSchema)]
+pub struct SearchContent<'a> {
+    #[serde(rename = "sporring")]
+    pub query: Query,
+    #[serde(rename = "resultater")]
+    pub results: &'a [SearchResult],
+}
+
 /// The query as echoed back in JSON (`sporring`, SPEC §9.1).
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, JsonSchema)]
 pub struct Query {
     #[serde(rename = "tekst")]
     pub text: String,
@@ -45,7 +56,7 @@ pub struct Query {
 }
 
 /// The filters in use. Unused filters are left out of the JSON.
-#[derive(Debug, Clone, Default, Serialize)]
+#[derive(Debug, Clone, Default, Serialize, JsonSchema)]
 pub struct Filters {
     #[serde(rename = "merke", skip_serializing_if = "Vec::is_empty")]
     pub brands: Vec<String>,

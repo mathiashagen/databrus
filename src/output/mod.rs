@@ -3,6 +3,7 @@
 pub mod format;
 pub mod json;
 pub mod results;
+pub mod schema;
 pub mod table;
 
 /// Whether stdout should have colors, as anstream decided from `--farge`, `NO_COLOR` and

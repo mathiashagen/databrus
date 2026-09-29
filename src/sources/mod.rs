@@ -15,6 +15,7 @@ use std::sync::Arc;
 use async_trait::async_trait;
 use jiff::Timestamp;
 use owo_colors::OwoColorize;
+use schemars::JsonSchema;
 use serde::Serialize;
 use tokio::task::JoinSet;
 
@@ -143,7 +144,7 @@ fn minutes_between(from: Timestamp, to: Timestamp) -> i64 {
     to.duration_since(from).as_secs() / 60
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, JsonSchema)]
 pub enum SourceState {
     #[serde(rename = "ok")]
     Ok,
@@ -154,7 +155,7 @@ pub enum SourceState {
 }
 
 /// The status of one source, as shown under `kilder` in JSON (SPEC §9.1).
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, JsonSchema)]
 pub struct SourceStatus {
     pub id: SourceId,
     pub status: SourceState,

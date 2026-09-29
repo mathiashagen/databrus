@@ -3,29 +3,20 @@
 use std::io::Write;
 
 use owo_colors::OwoColorize;
-use serde::Serialize;
 
 use crate::Context;
 use crate::cli::SearchArgs;
 use crate::error::{AppError, ExitStatus};
 use crate::history::deals;
-use crate::model::{self, SearchResult};
+use crate::model;
 use crate::output::json::{self, Envelope, Header};
 use crate::output::{self, OutputFormat, results, table};
 use crate::search::ranking::{self, SearchHits};
-use crate::search::{Query, SearchFilter, SortBy};
+use crate::search::{SearchContent, SearchFilter, SortBy};
 use crate::sources::{self, SourceState, SourceStatus};
 
 /// A row older than this counts as stale for `--streng` (SPEC §8).
 const STALE_HOURS: u32 = 24;
-
-#[derive(Serialize)]
-struct SearchContent<'a> {
-    #[serde(rename = "sporring")]
-    query: Query,
-    #[serde(rename = "resultater")]
-    results: &'a [SearchResult],
-}
 
 pub async fn run(args: &SearchArgs, ctx: &Context) -> Result<ExitStatus, AppError> {
     let filter = SearchFilter::from_args(args, &ctx.config);

@@ -223,6 +223,16 @@ async fn update_and_search() {
     assert_eq!(json["kilder"][0]["id"], "kassalapp");
     assert_eq!(json["kilder"][0]["status"], "ok");
 
+    // The real output validates against the published schema.
+    let schema: serde_json::Value =
+        serde_json::from_str(include_str!("../schema/v1.json")).unwrap();
+    let validator = jsonschema::validator_for(&schema).unwrap();
+    let errors: Vec<String> = validator
+        .iter_errors(&json)
+        .map(|e| e.to_string())
+        .collect();
+    assert!(errors.is_empty(), "{errors:#?}");
+
     table_search
         .success()
         .stdout(predicate::str::contains("Monster Mango Loco"))

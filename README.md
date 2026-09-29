@@ -39,3 +39,11 @@ $ cargo clippy --all-targets -- -D warnings
 ```
 
 Snapshot-tester bruker [insta](https://insta.rs); se over endringer med `cargo insta review`.
+
+JSON-utdataene er beskrevet av et versjonert skjema i [`schema/v1.json`](schema/v1.json).
+Skjemaet genereres fra koden, og en test sjekker at filen er oppdatert:
+
+- Nye felt eller nye verdier (f.eks. en ny kjede): kjør
+  `DATABRUS_UPDATE_SCHEMA=1 cargo test published_schema` og commit filen.
+- Brytende endringer (fjernede eller omdøpte felt, endrede typer): testen feiler til
+  `SCHEMA_VERSION` er økt, og da lages `schema/v2.json`.

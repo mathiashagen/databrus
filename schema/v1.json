@@ -1,0 +1,650 @@
+{
+  "$defs": {
+    "Chain": {
+      "enum": [
+        "rema",
+        "kiwi",
+        "meny",
+        "spar",
+        "joker",
+        "coop-extra",
+        "coop-obs",
+        "coop-mega",
+        "coop-prix",
+        "bunnpris",
+        "oda",
+        "europris",
+        "engrossnett",
+        "havaristen",
+        "fastcandy"
+      ],
+      "type": "string"
+    },
+    "Container": {
+      "enum": [
+        "boks",
+        "flaske"
+      ],
+      "type": "string"
+    },
+    "DealBadge": {
+      "oneOf": [
+        {
+          "const": "KAMPANJE",
+          "type": "string"
+        },
+        {
+          "const": "PRISFALL",
+          "type": "string"
+        }
+      ]
+    },
+    "Filters": {
+      "properties": {
+        "alle": {
+          "type": "boolean"
+        },
+        "beholder": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Container"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "enkeltvis": {
+          "type": "boolean"
+        },
+        "kjede": {
+          "items": {
+            "$ref": "#/$defs/Chain"
+          },
+          "type": "array"
+        },
+        "maks_literpris_ore": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Ore"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "maks_pris_ore": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Ore"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "merke": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "smak": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "storrelse_ml": {
+          "items": {
+            "format": "uint32",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "type": "array"
+        },
+        "sukkerfri": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        }
+      },
+      "type": "object"
+    },
+    "MembershipProgram": {
+      "enum": [
+        "coop",
+        "trumf",
+        "ae",
+        "kiwi-pluss"
+      ],
+      "type": "string"
+    },
+    "Ml": {
+      "format": "uint32",
+      "minimum": 1,
+      "type": "integer"
+    },
+    "OfferInfo": {
+      "oneOf": [
+        {
+          "properties": {
+            "pris_ore": {
+              "$ref": "#/$defs/Ore"
+            },
+            "type": {
+              "const": "fastpris",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "pris_ore"
+          ],
+          "type": "object"
+        },
+        {
+          "properties": {
+            "m": {
+              "format": "uint32",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "n": {
+              "format": "uint32",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "type": {
+              "const": "n_for_m",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "n",
+            "m"
+          ],
+          "type": "object"
+        },
+        {
+          "properties": {
+            "n": {
+              "format": "uint32",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "sum_ore": {
+              "$ref": "#/$defs/Ore"
+            },
+            "type": {
+              "const": "n_for_sum",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "n",
+            "sum_ore"
+          ],
+          "type": "object"
+        },
+        {
+          "properties": {
+            "prosent": {
+              "format": "uint32",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "type": {
+              "const": "prosent",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "prosent"
+          ],
+          "type": "object"
+        },
+        {
+          "properties": {
+            "n": {
+              "format": "uint32",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "rabatt_prosent": {
+              "format": "uint32",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "type": {
+              "const": "nte_vare",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "n",
+            "rabatt_prosent"
+          ],
+          "type": "object"
+        }
+      ],
+      "properties": {
+        "gyldig_fra": {
+          "format": "date",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "gyldig_til": {
+          "format": "date",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "kilde_merket": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "gyldig_fra",
+        "gyldig_til",
+        "kilde_merket"
+      ],
+      "type": "object"
+    },
+    "Ore": {
+      "format": "int64",
+      "type": "integer"
+    },
+    "PriceBasis": {
+      "enum": [
+        "hyllepris",
+        "medlemspris",
+        "tilbud"
+      ],
+      "type": "string"
+    },
+    "PriceRange": {
+      "properties": {
+        "maks_ore": {
+          "$ref": "#/$defs/Ore"
+        },
+        "min_ore": {
+          "$ref": "#/$defs/Ore"
+        }
+      },
+      "required": [
+        "min_ore",
+        "maks_ore"
+      ],
+      "type": "object"
+    },
+    "ProductId": {
+      "type": "string"
+    },
+    "ProductSummary": {
+      "properties": {
+        "beholder": {
+          "$ref": "#/$defs/Container"
+        },
+        "egenmerke": {
+          "type": "boolean"
+        },
+        "id": {
+          "$ref": "#/$defs/ProductId"
+        },
+        "merke": {
+          "type": "string"
+        },
+        "navn": {
+          "type": "string"
+        },
+        "smak": {
+          "type": "string"
+        },
+        "sukkerfri": {
+          "type": "boolean"
+        },
+        "verifisert": {
+          "type": "boolean"
+        },
+        "volum_ml": {
+          "$ref": "#/$defs/Ml"
+        }
+      },
+      "required": [
+        "id",
+        "navn",
+        "merke",
+        "smak",
+        "sukkerfri",
+        "volum_ml",
+        "beholder",
+        "egenmerke",
+        "verifisert"
+      ],
+      "type": "object"
+    },
+    "Query": {
+      "properties": {
+        "filtre": {
+          "$ref": "#/$defs/Filters"
+        },
+        "sorter": {
+          "$ref": "#/$defs/SortBy"
+        },
+        "tekst": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "tekst",
+        "filtre",
+        "sorter"
+      ],
+      "type": "object"
+    },
+    "SearchResult": {
+      "properties": {
+        "alder_timer": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "antall_i_pakke": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "brukt_pris": {
+          "$ref": "#/$defs/PriceBasis"
+        },
+        "effektiv_enhetspris_ore": {
+          "$ref": "#/$defs/Ore"
+        },
+        "hyllepris_ore": {
+          "$ref": "#/$defs/Ore"
+        },
+        "kilde": {
+          "$ref": "#/$defs/SourceId"
+        },
+        "kjede": {
+          "$ref": "#/$defs/Chain"
+        },
+        "literpris_ore": {
+          "$ref": "#/$defs/Ore"
+        },
+        "medlemspris_ore": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Ore"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "medlemsprogram": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MembershipProgram"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "minsteantall": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "pant_minsteantall_ore": {
+          "$ref": "#/$defs/Ore"
+        },
+        "pant_ore": {
+          "$ref": "#/$defs/Ore"
+        },
+        "prisspenn": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PriceRange"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "produkt": {
+          "$ref": "#/$defs/ProductSummary"
+        },
+        "sist_sett": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "tilbud": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OfferInfo"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "tilbudsmerke": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DealBadge"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "tilgjengelig": {
+          "type": "boolean"
+        },
+        "vurdering": {
+          "$ref": "#/$defs/VerdictInfo"
+        }
+      },
+      "required": [
+        "produkt",
+        "kjede",
+        "kilde",
+        "antall_i_pakke",
+        "hyllepris_ore",
+        "medlemspris_ore",
+        "medlemsprogram",
+        "effektiv_enhetspris_ore",
+        "literpris_ore",
+        "minsteantall",
+        "brukt_pris",
+        "pant_ore",
+        "pant_minsteantall_ore",
+        "tilbud",
+        "tilbudsmerke",
+        "vurdering",
+        "prisspenn",
+        "tilgjengelig",
+        "sist_sett",
+        "alder_timer"
+      ],
+      "type": "object"
+    },
+    "SortBy": {
+      "oneOf": [
+        {
+          "const": "literpris",
+          "type": "string"
+        },
+        {
+          "const": "pris",
+          "type": "string"
+        },
+        {
+          "const": "rabatt",
+          "type": "string"
+        },
+        {
+          "const": "navn",
+          "type": "string"
+        }
+      ]
+    },
+    "SourceId": {
+      "enum": [
+        "kassalapp",
+        "oda",
+        "rema",
+        "coop"
+      ],
+      "type": "string"
+    },
+    "SourceState": {
+      "enum": [
+        "ok",
+        "feilet",
+        "aldri_hentet"
+      ],
+      "type": "string"
+    },
+    "SourceStatus": {
+      "properties": {
+        "feil": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "hentet": {
+          "format": "date-time",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "id": {
+          "$ref": "#/$defs/SourceId"
+        },
+        "status": {
+          "$ref": "#/$defs/SourceState"
+        }
+      },
+      "required": [
+        "id",
+        "status",
+        "hentet"
+      ],
+      "type": "object"
+    },
+    "Verdict": {
+      "enum": [
+        "SUPERT",
+        "BRA",
+        "MIDDELS",
+        "LURERI",
+        "UKJENT"
+      ],
+      "type": "string"
+    },
+    "VerdictInfo": {
+      "properties": {
+        "atl_ore": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Ore"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "dekning_dager": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "l30_ore": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Ore"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "m90_ore": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Ore"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "verdi": {
+          "$ref": "#/$defs/Verdict"
+        }
+      },
+      "required": [
+        "verdi",
+        "l30_ore",
+        "m90_ore",
+        "atl_ore",
+        "dekning_dager"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "https://raw.githubusercontent.com/mathiashagen/databrus/main/schema/v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Dokumentet `databrus --json` skriver ut (skjemaversjon 1). Beløp er heltall øre, volum heltall ml og tidspunkt RFC 3339 i UTC. Nye felt og nye verdier kan komme uten at skjemaversjonen økes; fjernede eller endrede felt gir ny skjemaversjon.",
+  "properties": {
+    "generert": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "kilder": {
+      "items": {
+        "$ref": "#/$defs/SourceStatus"
+      },
+      "type": [
+        "array",
+        "null"
+      ]
+    },
+    "resultater": {
+      "items": {
+        "$ref": "#/$defs/SearchResult"
+      },
+      "type": "array"
+    },
+    "skjemaversjon": {
+      "format": "uint32",
+      "minimum": 0,
+      "type": "integer"
+    },
+    "sporring": {
+      "$ref": "#/$defs/Query"
+    }
+  },
+  "required": [
+    "skjemaversjon",
+    "generert",
+    "sporring",
+    "resultater"
+  ],
+  "title": "databrus søkeresultat",
+  "type": "object"
+}

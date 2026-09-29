@@ -4,6 +4,7 @@
 use std::io::{self, Write};
 
 use jiff::Timestamp;
+use schemars::JsonSchema;
 use serde::Serialize;
 
 use crate::error::AppError;
@@ -13,7 +14,7 @@ use crate::sources::SourceStatus;
 /// Bumped on breaking changes. New fields are not breaking.
 pub const SCHEMA_VERSION: u32 = 1;
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, JsonSchema)]
 pub struct Header {
     #[serde(rename = "skjemaversjon")]
     pub schema_version: u32,
@@ -45,7 +46,7 @@ impl Default for Header {
 }
 
 /// `{"skjemaversjon": 1, "generert": ..., <content>}`
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, JsonSchema)]
 pub struct Envelope<T> {
     #[serde(flatten)]
     pub header: Header,
