@@ -1,0 +1,117 @@
+# Innebygd produktkatalog (SPEC §6.2).
+#
+# Dette er et startsett. EAN-er (gtin) er bevisst tomme til de er hentet fra
+# en verifisert kilde i M1 – et feil EAN er verre enn ingen EAN.
+#
+# Brukere kan overstyre eller legge til produkter i <konfigmappe>/katalog.toml.
+# Oppføringer med samme `id` erstatter den innebygde.
+
+[[produkt]]
+id = "monster-energy-500-boks"
+navn = "Monster Energy"
+merke = "monster"
+smak = "original"
+smak_alias = ["green", "gronn"]
+sukkerfri = false
+volum_ml = 500
+beholder = "boks"
+
+[[produkt]]
+id = "monster-ultra-white-500-boks"
+navn = "Monster Ultra White"
+merke = "monster"
+linje = "Ultra"
+smak = "white"
+smak_alias = ["zero ultra", "ultra zero", "ultra white"]
+sukkerfri = true
+volum_ml = 500
+beholder = "boks"
+
+[[produkt]]
+id = "monster-ultra-paradise-500-boks"
+navn = "Monster Ultra Paradise"
+merke = "monster"
+linje = "Ultra"
+smak = "paradise"
+sukkerfri = true
+volum_ml = 500
+beholder = "boks"
+
+[[produkt]]
+id = "monster-mango-loco-500-boks"
+navn = "Monster Mango Loco"
+merke = "monster"
+linje = "Juiced"
+smak = "mango-loco"
+smak_alias = ["mango"]
+sukkerfri = false
+volum_ml = 500
+beholder = "boks"
+
+[[produkt]]
+id = "red-bull-energy-drink-250-boks"
+navn = "Red Bull Energy Drink"
+merke = "red-bull"
+smak = "original"
+sukkerfri = false
+volum_ml = 250
+beholder = "boks"
+
+[[produkt]]
+id = "red-bull-sugarfree-250-boks"
+navn = "Red Bull Sugarfree"
+merke = "red-bull"
+smak = "sugarfree"
+smak_alias = ["sukkerfri"]
+sukkerfri = true
+volum_ml = 250
+beholder = "boks"
+
+[[produkt]]
+id = "burn-original-500-boks"
+navn = "Burn Original"
+merke = "burn"
+smak = "original"
+sukkerfri = false
+volum_ml = 500
+beholder = "boks"
+
+[[produkt]]
+id = "nocco-caribbean-330-boks"
+navn = "Nocco Caribbean"
+merke = "nocco"
+linje = "BCAA"
+smak = "caribbean"
+sukkerfri = true
+volum_ml = 330
+beholder = "boks"
+
+[[produkt]]
+id = "nocco-miami-330-boks"
+navn = "Nocco Miami"
+merke = "nocco"
+linje = "BCAA"
+smak = "miami"
+smak_alias = ["miami strawberry", "jordbaer"]
+sukkerfri = true
+volum_ml = 330
+beholder = "boks"
+
+[[produkt]]
+id = "battery-original-330-boks"
+navn = "Battery Energy Drink"
+merke = "battery"
+smak = "original"
+sukkerfri = false
+volum_ml = 330
+beholder = "boks"
+
+[[produkt]]
+id = "battery-no-calories-330-boks"
+navn = "Battery No Calories"
+merke = "battery"
+smak = "no-calories"
+smak_alias = ["sukkerfri", "zero"]
+sukkerfri = true
+volum_ml = 330
+beholder = "boks"
