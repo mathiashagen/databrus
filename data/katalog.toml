@@ -773,6 +773,7 @@ id = "monster-full-throttle-zero-500-boks"
 navn = "Monster Full Throttle Zero"
 merke = "monster"
 smak = "full-throttle-zero"
+smak_alias = ["lh44 zero", "lh44"]
 sukkerfri = true
 volum_ml = 500
 beholder = "boks"

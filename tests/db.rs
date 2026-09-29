@@ -1,7 +1,7 @@
 //! The database contract: migrations and change-only price history (SPEC §7.2).
 
 use databrus::catalog::Catalog;
-use databrus::catalog::matching::{GtinIndex, match_listing};
+use databrus::catalog::matching::Matcher;
 use databrus::db::{Change, Database, PriceObservation};
 use databrus::model::{Chain, Offer, OfferInfo, Ore, RawListing, SourceId};
 use jiff::{Timestamp, ToSpan};
@@ -157,7 +157,7 @@ fn matched_listing_points_to_the_catalog_product() {
     let mut pack = listing(6990);
     pack.source_product_id = "pack-1".into();
     pack.gtin = Some("7040110569915".into());
-    let found = match_listing(&GtinIndex::build(&catalog), &pack).unwrap();
+    let found = Matcher::build(&catalog).find(&pack).unwrap();
     assert_eq!(found.pack_size, 4);
     db.save_listing(&pack, Some(&found), at(0)).unwrap();
 
@@ -194,7 +194,7 @@ fn pack_size_comes_from_the_name_not_the_ean() {
     )
     .unwrap();
     db.sync_catalog(&catalog).unwrap();
-    let index = GtinIndex::build(&catalog);
+    let matcher = Matcher::build(&catalog);
 
     // A tray under the single-can EAN.
     let mut tray = listing(73_531);
@@ -211,7 +211,7 @@ fn pack_size_comes_from_the_name_not_the_ean() {
     single.gtin = Some("5060517881412".into());
 
     for raw in [&tray, &single] {
-        let found = match_listing(&index, raw).unwrap();
+        let found = matcher.find(raw).unwrap();
         let id = db.save_listing(raw, Some(&found), at(0)).unwrap();
         db.record_price(id, &PriceObservation::from_listing(raw), at(0))
             .unwrap();

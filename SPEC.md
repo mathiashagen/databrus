@@ -323,7 +323,13 @@ Produkt {
 
 For each raw listing:
 1. **GTIN match** against the catalog (including multipack GTINs) gives a verified match.
-2. **Fuzzy fallback**: normalize the name (lowercase, fold æøå, strip "energidrikk", "boks", "pant" and similar), parse the volume (`0,5l`, `500 ml`, `50cl`) and pack size (`4x0,5l`, `24-pk`), then match brand and flavor against the catalog aliases. A single clear best match above the threshold becomes a match with `verifisert = false` (shown with a `?` marker in the table).
+2. **Name match**, only for listings **without an EAN**. A listing with an EAN the catalog does not know is left unmatched: it is almost always a product deliberately left out (sports or protein drinks), and a wrong match is worse than none. The rules are strict and word-based rather than a fuzzy score:
+   - The name is normalized (lowercase, æøå folded), sizes and pack sizes are dropped, and packaging words ("boks", "energidrikk", "flaske", …) are ignored.
+   - The **volume must be equal** and the **brand must be present** (in the name, or as the source's brand field). A listing that says "flaske" only matches bottles.
+   - One of the product's word sets must be fully present: its name without the brand, a hand-written alias (`smak_alias`), or – weaker – its flavor slug.
+   - **Every remaining word must be explained** by the product's name, aliases or flavor. Sugar-free words ("zero", "sukkerfri", "u/sukker") are only accepted on sugar-free products.
+   - The best match wins: name or alias before flavor, then more matched words. **A tie means no match.**
+   - A name match gets `verifisert = false` and is shown with a `?` in the table. On the live data (2026-09-29) all 11 listings without an EAN (Engrossnett trays) match correctly, bringing the total to 690 of 810.
 3. **No match**: the listing is stored, keyed by `(source, source product ID)`, and history is still recorded. `databrus produkter --ukjente` lists these so they can be added to the catalog. **Unmatched listings are not shown in searches**: with the curated catalog, almost all of them are products left out on purpose (sports and protein drinks). Listings only reach search results through a catalog match, verified (EAN) or not (fuzzy, shown with `?`).
 
 Unknown brands are included if the source categorizes them as energy drinks, or if the name contains "energy"/"energi". This keeps new store brands from disappearing.

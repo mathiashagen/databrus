@@ -19,7 +19,7 @@ use serde::Serialize;
 use tokio::task::JoinSet;
 
 use crate::catalog::Catalog;
-use crate::catalog::matching::{GtinIndex, match_listing};
+use crate::catalog::matching::Matcher;
 use crate::config::{Config, Fetching};
 use crate::db::{Database, FetchLog, PriceObservation};
 use crate::error::AppError;
@@ -259,12 +259,12 @@ pub async fn refresh(
         }
         finished.sort_by_key(|(id, ..)| *id);
 
-        let index = GtinIndex::build(catalog);
+        let matcher = Matcher::build(catalog);
         for (id, started, result) in finished {
             let done = model::now();
             match result {
                 Ok(listings) => {
-                    let (count, matched) = store_listings(db, catalog, &index, &listings, done)?;
+                    let (count, matched) = store_listings(db, catalog, &matcher, &listings, done)?;
                     db.log_fetch(id, started, done, Ok(count))?;
                     statuses.push(SourceStatus {
                         id,
@@ -310,14 +310,14 @@ pub async fn refresh(
 fn store_listings(
     db: &mut Database,
     catalog: &Catalog,
-    index: &GtinIndex,
+    matcher: &Matcher,
     listings: &[RawListing],
     now: Timestamp,
 ) -> Result<(usize, usize), AppError> {
     db.sync_catalog(catalog)?;
     let mut matched = 0;
     for listing in listings {
-        let found = match_listing(index, listing);
+        let found = matcher.find(listing);
         matched += usize::from(found.is_some());
         // Stores use the same EAN for a single can and a tray (Engrossnett), and
         // sometimes a pack EAN for one can. The listing's name therefore decides the
