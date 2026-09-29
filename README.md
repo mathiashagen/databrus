@@ -6,9 +6,10 @@ Finn de billigste energidrikkene i Norge – fra kommandolinjen.
 literpris (pant vises for seg), fremhever tilbud og lagrer prishistorikk lokalt, slik at du kan se
 om et tilbud faktisk er bra.
 
-> **Status:** under utvikling (milepæl M1). Søk virker med priser fra Kassalapp for Meny,
-> Spar, Joker, Bunnpris, Europris og Engrossnett. Kiwi, Rema, Coop og Oda mangler ferske
-> priser inntil de får egne kilder, og tilbudsvurdering og historikk kommer i M2.
+> **Status:** under utvikling. Søk virker med ferske priser for Meny, Spar, Joker, Bunnpris,
+> Europris og Engrossnett (via Kassalapp) og Oda (direkte, med kampanjer som «3 for 2»).
+> Kiwi, Rema og Coop har ingen offentlig priskilde og vises ikke. Tilbudsvurdering og
+> historikk kommer i M2.
 > Se [SPEC.md](SPEC.md) for full spesifikasjon.
 
 ## Kom i gang

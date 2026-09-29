@@ -1,0 +1,297 @@
+{
+  "type": "product",
+  "attributes": {
+    "items": 29,
+    "page": 2,
+    "has_more_items": false,
+    "request_types": [
+      {
+        "count": 114,
+        "type": "mixed",
+        "display_name": "Toppresultater",
+        "tracking_properties": {
+          "location": "Search",
+          "location_detail": "tab",
+          "location_id": null,
+          "location_type": null,
+          "list_name": "Mixed Search",
+          "list_id": null,
+          "list_item_position": null,
+          "recipe_list_name": null,
+          "recipe_list_id": null,
+          "recipe_list_item_position": null,
+          "model_name": null,
+          "model_variant": null,
+          "model_version": null,
+          "model_timestamp": null,
+          "prediction_version": null,
+          "prediction_timestamp": null,
+          "product_collection": null,
+          "purpose_name": null,
+          "source_uuid": "a0d34c89-dfa8-46be-b230-6c163c862123",
+          "builder_session_uuid": null,
+          "dinner_list_context": null,
+          "click_event": {
+            "action": "navigate_to",
+            "resource_type": "location",
+            "element_type": null,
+            "element_id": null,
+            "resource_value": "Search"
+          },
+          "banner_properties": null,
+          "sponsored_products": null,
+          "placement_id": null,
+          "placement_is_promoted": null
+        }
+      },
+      {
+        "count": 79,
+        "type": "product",
+        "display_name": "Varer",
+        "tracking_properties": {
+          "location": "Search",
+          "location_detail": "tab",
+          "location_id": null,
+          "location_type": null,
+          "list_name": "Mixed Search",
+          "list_id": null,
+          "list_item_position": null,
+          "recipe_list_name": null,
+          "recipe_list_id": null,
+          "recipe_list_item_position": null,
+          "model_name": null,
+          "model_variant": null,
+          "model_version": null,
+          "model_timestamp": null,
+          "prediction_version": null,
+          "prediction_timestamp": null,
+          "product_collection": null,
+          "purpose_name": null,
+          "source_uuid": "a0d34c89-dfa8-46be-b230-6c163c862123",
+          "builder_session_uuid": null,
+          "dinner_list_context": null,
+          "click_event": {
+            "action": "navigate_to",
+            "resource_type": "location",
+            "element_type": null,
+            "element_id": null,
+            "resource_value": "Product"
+          },
+          "banner_properties": null,
+          "sponsored_products": null,
+          "placement_id": null,
+          "placement_is_promoted": null
+        }
+      },
+      {
+        "count": 35,
+        "type": "recipe",
+        "display_name": "Oppskrifter",
+        "tracking_properties": {
+          "location": "Search",
+          "location_detail": "tab",
+          "location_id": null,
+          "location_type": null,
+          "list_name": "Mixed Search",
+          "list_id": null,
+          "list_item_position": null,
+          "recipe_list_name": null,
+          "recipe_list_id": null,
+          "recipe_list_item_position": null,
+          "model_name": null,
+          "model_variant": null,
+          "model_version": null,
+          "model_timestamp": null,
+          "prediction_version": null,
+          "prediction_timestamp": null,
+          "product_collection": null,
+          "purpose_name": null,
+          "source_uuid": "a0d34c89-dfa8-46be-b230-6c163c862123",
+          "builder_session_uuid": null,
+          "dinner_list_context": null,
+          "click_event": {
+            "action": "navigate_to",
+            "resource_type": "location",
+            "element_type": null,
+            "element_id": null,
+            "resource_value": "Recipe"
+          },
+          "banner_properties": null,
+          "sponsored_products": null,
+          "placement_id": null,
+          "placement_is_promoted": null
+        }
+      },
+      {
+        "count": 30,
+        "type": "complementary",
+        "display_name": "Ofte kjøpt med",
+        "tracking_properties": {
+          "location": "Search",
+          "location_detail": "tab",
+          "location_id": null,
+          "location_type": null,
+          "list_name": "Mixed Search",
+          "list_id": null,
+          "list_item_position": null,
+          "recipe_list_name": null,
+          "recipe_list_id": null,
+          "recipe_list_item_position": null,
+          "model_name": null,
+          "model_variant": null,
+          "model_version": null,
+          "model_timestamp": null,
+          "prediction_version": null,
+          "prediction_timestamp": null,
+          "product_collection": null,
+          "purpose_name": null,
+          "source_uuid": "a0d34c89-dfa8-46be-b230-6c163c862123",
+          "builder_session_uuid": null,
+          "dinner_list_context": null,
+          "click_event": {
+            "action": "navigate_to",
+            "resource_type": "location",
+            "element_type": null,
+            "element_id": null,
+            "resource_value": ""
+          },
+          "banner_properties": null,
+          "sponsored_products": null,
+          "placement_id": null,
+          "placement_is_promoted": null
+        }
+      }
+    ],
+    "query_string": "energidrikk",
+    "filters": "",
+    "meta": null,
+    "uuid": "a0d34c89-dfa8-46be-b230-6c163c862123"
+  },
+  "items": [
+    {
+      "id": 69043,
+      "type": "product",
+      "attributes": {
+        "id": 69043,
+        "full_name": "Battery Whirl Sugar",
+        "brand": "Battery",
+        "brand_id": 411,
+        "brand_slug": "battery",
+        "name": "Battery Whirl Sugar",
+        "name_extra": "0,5 l",
+        "front_url": "https://oda.com/no/products/69043-battery-battery-whirl-sugar/",
+        "absolute_url": "/no/products/69043-battery-battery-whirl-sugar/",
+        "gross_price": "25.90",
+        "gross_unit_price": "51.80",
+        "unit_price_quantity_abbreviation": "l",
+        "unit_price_quantity_name": "liter",
+        "currency": "NOK",
+        "discount": {
+          "is_discounted": true,
+          "discount_source": "CAMPAIGN",
+          "discount_id": 37755010,
+          "undiscounted_gross_price": "25.90",
+          "undiscounted_gross_unit_price": "51.80",
+          "description_short": "Salg!",
+          "discount_type": "fixed_price_bundle",
+          "maximum_quantity": null,
+          "remaining_quantity": null,
+          "active_until": null,
+          "has_related_discount_products": true,
+          "is_silent": false
+        },
+        "promotion": {
+          "title": "5 for 109 kr",
+          "description_short": "5 for 109 kr",
+          "accessibility_text": "5 for 109 kr",
+          "display_style": "mix_and_match"
+        },
+        "promotions": [
+          {
+            "title": "5 for 109 kr",
+            "description_short": "5 for 109 kr",
+            "accessibility_text": "5 for 109 kr",
+            "display_style": "mix_and_match"
+          }
+        ],
+        "availability": {
+          "is_available": true,
+          "description": "",
+          "description_short": "",
+          "code": "available"
+        }
+      }
+    },
+    {
+      "id": 70018,
+      "type": "product",
+      "attributes": {
+        "id": 70018,
+        "full_name": "Red Bull Winter edition Sukkerfri",
+        "brand": "Red Bull",
+        "brand_id": 162,
+        "brand_slug": "red-bull",
+        "name": "Red Bull Winter edition",
+        "name_extra": "Sukkerfri, 473 ml",
+        "front_url": "https://oda.com/no/products/70018-red-bull-red-bull-winter-edition-sukkerfri/",
+        "absolute_url": "/no/products/70018-red-bull-red-bull-winter-edition-sukkerfri/",
+        "gross_price": "35.90",
+        "gross_unit_price": "75.90",
+        "unit_price_quantity_abbreviation": "l",
+        "unit_price_quantity_name": "liter",
+        "currency": "NOK",
+        "discount": null,
+        "promotion": {
+          "title": "Ny!",
+          "description_short": null,
+          "accessibility_text": "Ny vare",
+          "display_style": "is_new"
+        },
+        "promotions": [
+          {
+            "title": "Ny!",
+            "description_short": null,
+            "accessibility_text": "Ny vare",
+            "display_style": "is_new"
+          }
+        ],
+        "availability": {
+          "is_available": true,
+          "description": "",
+          "description_short": "",
+          "code": "available"
+        }
+      }
+    },
+    {
+      "id": 67781,
+      "type": "product",
+      "attributes": {
+        "id": 67781,
+        "full_name": "Monster Lando Norris zero sugar",
+        "brand": "Monster",
+        "brand_id": 1211,
+        "brand_slug": "monster",
+        "name": "Monster Lando Norris zero sugar",
+        "name_extra": "500 ml",
+        "front_url": "https://oda.com/no/products/67781-monster-monster-lando-norris-zero-sugar/",
+        "absolute_url": "/no/products/67781-monster-monster-lando-norris-zero-sugar/",
+        "gross_price": "27.70",
+        "gross_unit_price": "55.40",
+        "unit_price_quantity_abbreviation": "l",
+        "unit_price_quantity_name": "liter",
+        "currency": "NOK",
+        "discount": null,
+        "promotion": null,
+        "promotions": [],
+        "availability": {
+          "is_available": false,
+          "description": "Utsolgt fra leverandør",
+          "description_short": "Utsolgt fra leverandør",
+          "code": "sold_out_supplier"
+        }
+      }
+    }
+  ],
+  "filters": []
+}

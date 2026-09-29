@@ -1,0 +1,488 @@
+{
+  "type": "product",
+  "attributes": {
+    "items": 50,
+    "page": 1,
+    "has_more_items": true,
+    "request_types": [
+      {
+        "count": 114,
+        "type": "mixed",
+        "display_name": "Toppresultater",
+        "tracking_properties": {
+          "location": "Search",
+          "location_detail": "tab",
+          "location_id": null,
+          "location_type": null,
+          "list_name": "Mixed Search",
+          "list_id": null,
+          "list_item_position": null,
+          "recipe_list_name": null,
+          "recipe_list_id": null,
+          "recipe_list_item_position": null,
+          "model_name": null,
+          "model_variant": null,
+          "model_version": null,
+          "model_timestamp": null,
+          "prediction_version": null,
+          "prediction_timestamp": null,
+          "product_collection": null,
+          "purpose_name": null,
+          "source_uuid": "91207f2e-7719-4c69-8b17-b64e8729fff5",
+          "builder_session_uuid": null,
+          "dinner_list_context": null,
+          "click_event": {
+            "action": "navigate_to",
+            "resource_type": "location",
+            "element_type": null,
+            "element_id": null,
+            "resource_value": "Search"
+          },
+          "banner_properties": null,
+          "sponsored_products": null,
+          "placement_id": null,
+          "placement_is_promoted": null
+        }
+      },
+      {
+        "count": 79,
+        "type": "product",
+        "display_name": "Varer",
+        "tracking_properties": {
+          "location": "Search",
+          "location_detail": "tab",
+          "location_id": null,
+          "location_type": null,
+          "list_name": "Mixed Search",
+          "list_id": null,
+          "list_item_position": null,
+          "recipe_list_name": null,
+          "recipe_list_id": null,
+          "recipe_list_item_position": null,
+          "model_name": null,
+          "model_variant": null,
+          "model_version": null,
+          "model_timestamp": null,
+          "prediction_version": null,
+          "prediction_timestamp": null,
+          "product_collection": null,
+          "purpose_name": null,
+          "source_uuid": "91207f2e-7719-4c69-8b17-b64e8729fff5",
+          "builder_session_uuid": null,
+          "dinner_list_context": null,
+          "click_event": {
+            "action": "navigate_to",
+            "resource_type": "location",
+            "element_type": null,
+            "element_id": null,
+            "resource_value": "Product"
+          },
+          "banner_properties": null,
+          "sponsored_products": null,
+          "placement_id": null,
+          "placement_is_promoted": null
+        }
+      },
+      {
+        "count": 35,
+        "type": "recipe",
+        "display_name": "Oppskrifter",
+        "tracking_properties": {
+          "location": "Search",
+          "location_detail": "tab",
+          "location_id": null,
+          "location_type": null,
+          "list_name": "Mixed Search",
+          "list_id": null,
+          "list_item_position": null,
+          "recipe_list_name": null,
+          "recipe_list_id": null,
+          "recipe_list_item_position": null,
+          "model_name": null,
+          "model_variant": null,
+          "model_version": null,
+          "model_timestamp": null,
+          "prediction_version": null,
+          "prediction_timestamp": null,
+          "product_collection": null,
+          "purpose_name": null,
+          "source_uuid": "91207f2e-7719-4c69-8b17-b64e8729fff5",
+          "builder_session_uuid": null,
+          "dinner_list_context": null,
+          "click_event": {
+            "action": "navigate_to",
+            "resource_type": "location",
+            "element_type": null,
+            "element_id": null,
+            "resource_value": "Recipe"
+          },
+          "banner_properties": null,
+          "sponsored_products": null,
+          "placement_id": null,
+          "placement_is_promoted": null
+        }
+      },
+      {
+        "count": 30,
+        "type": "complementary",
+        "display_name": "Ofte kjøpt med",
+        "tracking_properties": {
+          "location": "Search",
+          "location_detail": "tab",
+          "location_id": null,
+          "location_type": null,
+          "list_name": "Mixed Search",
+          "list_id": null,
+          "list_item_position": null,
+          "recipe_list_name": null,
+          "recipe_list_id": null,
+          "recipe_list_item_position": null,
+          "model_name": null,
+          "model_variant": null,
+          "model_version": null,
+          "model_timestamp": null,
+          "prediction_version": null,
+          "prediction_timestamp": null,
+          "product_collection": null,
+          "purpose_name": null,
+          "source_uuid": "91207f2e-7719-4c69-8b17-b64e8729fff5",
+          "builder_session_uuid": null,
+          "dinner_list_context": null,
+          "click_event": {
+            "action": "navigate_to",
+            "resource_type": "location",
+            "element_type": null,
+            "element_id": null,
+            "resource_value": ""
+          },
+          "banner_properties": null,
+          "sponsored_products": null,
+          "placement_id": null,
+          "placement_is_promoted": null
+        }
+      }
+    ],
+    "query_string": "energidrikk",
+    "filters": "",
+    "meta": null,
+    "uuid": "91207f2e-7719-4c69-8b17-b64e8729fff5"
+  },
+  "items": [
+    {
+      "id": 66987,
+      "type": "product",
+      "attributes": {
+        "id": 66987,
+        "full_name": "Monster Ultra White 4x0,5L",
+        "brand": "Monster",
+        "brand_id": 1211,
+        "brand_slug": "monster",
+        "name": "Ultra White",
+        "name_extra": "4x0,5L, 2 l",
+        "front_url": "https://oda.com/no/products/66987-monster-ultra-white-4x05l/",
+        "absolute_url": "/no/products/66987-monster-ultra-white-4x05l/",
+        "gross_price": "79.90",
+        "gross_unit_price": "39.95",
+        "unit_price_quantity_abbreviation": "l",
+        "unit_price_quantity_name": "liter",
+        "currency": "NOK",
+        "discount": {
+          "is_discounted": true,
+          "discount_source": "CAMPAIGN",
+          "discount_id": 37669633,
+          "undiscounted_gross_price": "79.90",
+          "undiscounted_gross_unit_price": "39.95",
+          "description_short": "Salg!",
+          "discount_type": "mix_and_match",
+          "maximum_quantity": null,
+          "remaining_quantity": null,
+          "active_until": null,
+          "has_related_discount_products": true,
+          "is_silent": false
+        },
+        "promotion": {
+          "title": "3 for 2",
+          "description_short": "Miks 3 for 2",
+          "accessibility_text": "Salg: Velg fritt 3 for 2",
+          "display_style": "mix_and_match"
+        },
+        "promotions": [
+          {
+            "title": "3 for 2",
+            "description_short": "Miks 3 for 2",
+            "accessibility_text": "Salg: Velg fritt 3 for 2",
+            "display_style": "mix_and_match"
+          }
+        ],
+        "availability": {
+          "is_available": true,
+          "description": "",
+          "description_short": "",
+          "code": "available"
+        }
+      }
+    },
+    {
+      "id": 27093,
+      "type": "product",
+      "attributes": {
+        "id": 27093,
+        "full_name": "Battery Peachberry",
+        "brand": null,
+        "brand_id": null,
+        "brand_slug": null,
+        "name": "Battery Peachberry",
+        "name_extra": "0,5 l",
+        "front_url": "https://oda.com/no/products/27093-battery-peachberry/",
+        "absolute_url": "/no/products/27093-battery-peachberry/",
+        "gross_price": "25.90",
+        "gross_unit_price": "51.80",
+        "unit_price_quantity_abbreviation": "l",
+        "unit_price_quantity_name": "liter",
+        "currency": "NOK",
+        "discount": {
+          "is_discounted": true,
+          "discount_source": "CAMPAIGN",
+          "discount_id": 37755010,
+          "undiscounted_gross_price": "25.90",
+          "undiscounted_gross_unit_price": "51.80",
+          "description_short": "Salg!",
+          "discount_type": "fixed_price_bundle",
+          "maximum_quantity": null,
+          "remaining_quantity": null,
+          "active_until": null,
+          "has_related_discount_products": true,
+          "is_silent": false
+        },
+        "promotion": {
+          "title": "5 for 109 kr",
+          "description_short": "5 for 109 kr",
+          "accessibility_text": "5 for 109 kr",
+          "display_style": "mix_and_match"
+        },
+        "promotions": [
+          {
+            "title": "5 for 109 kr",
+            "description_short": "5 for 109 kr",
+            "accessibility_text": "5 for 109 kr",
+            "display_style": "mix_and_match"
+          }
+        ],
+        "availability": {
+          "is_available": true,
+          "description": "",
+          "description_short": "",
+          "code": "available"
+        }
+      }
+    },
+    {
+      "id": 31152,
+      "type": "product",
+      "attributes": {
+        "id": 31152,
+        "full_name": "Battery Remix",
+        "brand": null,
+        "brand_id": null,
+        "brand_slug": null,
+        "name": "Battery Remix",
+        "name_extra": "0,5 l",
+        "front_url": "https://oda.com/no/products/31152-battery-remix/",
+        "absolute_url": "/no/products/31152-battery-remix/",
+        "gross_price": "25.90",
+        "gross_unit_price": "51.80",
+        "unit_price_quantity_abbreviation": "l",
+        "unit_price_quantity_name": "liter",
+        "currency": "NOK",
+        "discount": {
+          "is_discounted": true,
+          "discount_source": "CAMPAIGN",
+          "discount_id": 37755010,
+          "undiscounted_gross_price": "25.90",
+          "undiscounted_gross_unit_price": "51.80",
+          "description_short": "Salg!",
+          "discount_type": "fixed_price_bundle",
+          "maximum_quantity": null,
+          "remaining_quantity": null,
+          "active_until": null,
+          "has_related_discount_products": true,
+          "is_silent": false
+        },
+        "promotion": {
+          "title": "5 for 109 kr",
+          "description_short": "5 for 109 kr",
+          "accessibility_text": "5 for 109 kr",
+          "display_style": "mix_and_match"
+        },
+        "promotions": [
+          {
+            "title": "5 for 109 kr",
+            "description_short": "5 for 109 kr",
+            "accessibility_text": "5 for 109 kr",
+            "display_style": "mix_and_match"
+          }
+        ],
+        "availability": {
+          "is_available": true,
+          "description": "Kan leveres 1. okt",
+          "description_short": "Kan leveres 1. okt",
+          "code": "available_later"
+        }
+      }
+    },
+    {
+      "id": 67504,
+      "type": "product",
+      "attributes": {
+        "id": 67504,
+        "full_name": "Red Bull Regular 24x250 ml",
+        "brand": "Red Bull",
+        "brand_id": 162,
+        "brand_slug": "red-bull",
+        "name": "Red Bull Regular",
+        "name_extra": "Maks 2 per kunde, 24x250 ml, 6 l",
+        "front_url": "https://oda.com/no/products/67504-red-bull-red-bull-regular-24x250-ml/",
+        "absolute_url": "/no/products/67504-red-bull-red-bull-regular-24x250-ml/",
+        "gross_price": "299.00",
+        "gross_unit_price": "49.83",
+        "unit_price_quantity_abbreviation": "l",
+        "unit_price_quantity_name": "liter",
+        "currency": "NOK",
+        "discount": {
+          "is_discounted": true,
+          "discount_source": "CAMPAIGN",
+          "discount_id": 37690637,
+          "undiscounted_gross_price": "349.00",
+          "undiscounted_gross_unit_price": "58.17",
+          "description_short": "Salg!",
+          "discount_type": "price_discount",
+          "maximum_quantity": 2,
+          "remaining_quantity": null,
+          "active_until": null,
+          "has_related_discount_products": false,
+          "is_silent": false
+        },
+        "promotion": {
+          "title": "Salg!",
+          "description_short": "Salg! Salg!",
+          "accessibility_text": "Salg! Salg!",
+          "display_style": "regular_discount"
+        },
+        "promotions": [
+          {
+            "title": "Salg!",
+            "description_short": "Salg! Salg!",
+            "accessibility_text": "Salg! Salg!",
+            "display_style": "regular_discount"
+          }
+        ],
+        "availability": {
+          "is_available": true,
+          "description": "",
+          "description_short": "",
+          "code": "available"
+        }
+      }
+    },
+    {
+      "id": 69824,
+      "type": "product",
+      "attributes": {
+        "id": 69824,
+        "full_name": "Froosh Energy Drink Lemon & lime",
+        "brand": "Froosh",
+        "brand_id": 1245,
+        "brand_slug": "froosh",
+        "name": "Energy Drink",
+        "name_extra": "Lemon & lime, 330 ml",
+        "front_url": "https://oda.com/no/products/69824-froosh-energy-drink-lemon-lime/",
+        "absolute_url": "/no/products/69824-froosh-energy-drink-lemon-lime/",
+        "gross_price": "25.00",
+        "gross_unit_price": "75.76",
+        "unit_price_quantity_abbreviation": "l",
+        "unit_price_quantity_name": "liter",
+        "currency": "NOK",
+        "discount": null,
+        "promotion": {
+          "title": "Ny!",
+          "description_short": null,
+          "accessibility_text": "Ny vare",
+          "display_style": "is_new"
+        },
+        "promotions": [
+          {
+            "title": "Ny!",
+            "description_short": null,
+            "accessibility_text": "Ny vare",
+            "display_style": "is_new"
+          }
+        ],
+        "availability": {
+          "is_available": true,
+          "description": "",
+          "description_short": "",
+          "code": "available"
+        }
+      }
+    },
+    {
+      "id": 7957,
+      "type": "product",
+      "attributes": {
+        "id": 7957,
+        "full_name": "Powerade Mountain Blast 12x500 ml",
+        "brand": "POWERADE",
+        "brand_id": 2613,
+        "brand_slug": "powerade",
+        "name": "Powerade Mountain Blast",
+        "name_extra": "12x500 ml, 6 l",
+        "front_url": "https://oda.com/no/products/7957-powerade-powerade-mountain-blast-12x500-ml/",
+        "absolute_url": "/no/products/7957-powerade-powerade-mountain-blast-12x500-ml/",
+        "gross_price": "299.00",
+        "gross_unit_price": "49.83",
+        "unit_price_quantity_abbreviation": "l",
+        "unit_price_quantity_name": "liter",
+        "currency": "NOK",
+        "discount": null,
+        "promotion": null,
+        "promotions": [],
+        "availability": {
+          "is_available": true,
+          "description": "",
+          "description_short": "",
+          "code": "available"
+        }
+      }
+    },
+    {
+      "id": 23300,
+      "type": "product",
+      "attributes": {
+        "id": 23300,
+        "full_name": "Monster Energy",
+        "brand": "Monster",
+        "brand_id": 1211,
+        "brand_slug": "monster",
+        "name": "Monster Energy",
+        "name_extra": "0,5 l",
+        "front_url": "https://oda.com/no/products/23300-monster-monster-energy/",
+        "absolute_url": "/no/products/23300-monster-monster-energy/",
+        "gross_price": "29.20",
+        "gross_unit_price": "58.40",
+        "unit_price_quantity_abbreviation": "l",
+        "unit_price_quantity_name": "liter",
+        "currency": "NOK",
+        "discount": null,
+        "promotion": null,
+        "promotions": [],
+        "availability": {
+          "is_available": true,
+          "description": "",
+          "description_short": "",
+          "code": "available"
+        }
+      }
+    }
+  ],
+  "filters": []
+}

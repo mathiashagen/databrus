@@ -20,14 +20,15 @@ const CONNECT_TIMEOUT: Duration = Duration::from_secs(10);
 const TIMEOUT: Duration = Duration::from_secs(30);
 const MAX_BACKOFF: Duration = Duration::from_secs(30);
 
-/// An honest User-Agent with the version and, when set in Cargo.toml, the repo URL.
+/// An honest User-Agent: it says it is a bot, names the program and gives the repo URL as
+/// the contact. Oda requires all three for automated clients (SPEC §4.6).
 pub fn user_agent() -> String {
     let repo = env!("CARGO_PKG_REPOSITORY");
     let version = env!("CARGO_PKG_VERSION");
     if repo.is_empty() {
-        format!("databrus/{version}")
+        format!("databrus-bot/{version}")
     } else {
-        format!("databrus/{version} (+{repo})")
+        format!("databrus-bot/{version} (+{repo})")
     }
 }
 
@@ -190,8 +191,10 @@ mod tests {
     }
 
     #[test]
-    fn user_agent_has_version() {
-        assert!(user_agent().starts_with("databrus/"));
+    fn user_agent_follows_odas_policy() {
+        let ua = user_agent();
+        assert!(ua.starts_with("databrus-bot/"), "{ua}");
+        assert!(ua.contains("github.com/mathiashagen/databrus"), "{ua}");
     }
 
     #[tokio::test]

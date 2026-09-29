@@ -65,11 +65,12 @@ api_nokkel = ""
 [kilder.oda]
 aktiv = true
 
+# Rema og Coop har ingen offentlig priskilde (SPEC §4.6), så de er av som standard.
 [kilder.rema]
-aktiv = true
+aktiv = false
 
 [kilder.coop]
-aktiv = true
+aktiv = false
 "#;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, ValueEnum, Serialize, Deserialize)]
@@ -140,13 +141,27 @@ impl Default for Fetching {
     }
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(default)]
 pub struct Sources {
     pub kassalapp: KassalappConfig,
     pub oda: SourceConfig,
     pub rema: SourceConfig,
     pub coop: SourceConfig,
+}
+
+impl Default for Sources {
+    fn default() -> Self {
+        // Rema and Coop have no public price source (SPEC §4.6); their adapters are
+        // placeholders and stay off unless someone turns them on.
+        let off = SourceConfig { enabled: false };
+        Self {
+            kassalapp: KassalappConfig::default(),
+            oda: SourceConfig::default(),
+            rema: off.clone(),
+            coop: off,
+        }
+    }
 }
 
 impl Sources {

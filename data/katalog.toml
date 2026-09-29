@@ -299,6 +299,7 @@ id = "battery-zero-lemon-lime-yuzu-500-boks"
 navn = "Battery Zero Lemon Lime Yuzu"
 merke = "battery"
 smak = "zero-lemon-lime-yuzu"
+smak_alias = ["zero lemon yuzu"]
 sukkerfri = true
 volum_ml = 500
 beholder = "boks"
@@ -818,6 +819,7 @@ id = "monster-juiced-rio-punch-500-boks"
 navn = "Monster Juiced Rio Punch"
 merke = "monster"
 smak = "juiced-rio-punch"
+smak_alias = ["rio punch"]
 sukkerfri = false
 volum_ml = 500
 beholder = "boks"
@@ -829,6 +831,7 @@ id = "monster-lando-norris-zs-500-boks"
 navn = "Monster Lando Norris Zs"
 merke = "monster"
 smak = "lando-norris-zs"
+smak_alias = ["lando norris"]
 sukkerfri = true
 volum_ml = 500
 beholder = "boks"
@@ -984,6 +987,7 @@ id = "monster-ultra-strawberry-500-boks"
 navn = "Monster Ultra Strawberry"
 merke = "monster"
 smak = "ultra-strawberry"
+smak_alias = ["ultra strawberry dreams"]
 sukkerfri = true
 volum_ml = 500
 beholder = "boks"
@@ -1018,6 +1022,7 @@ id = "monster-valentino-rossi-zs-500-boks"
 navn = "Monster Valentino Rossi Zs"
 merke = "monster"
 smak = "valentino-rossi-zs"
+smak_alias = ["vr46", "valentino rossi"]
 sukkerfri = true
 volum_ml = 500
 beholder = "boks"
@@ -1029,6 +1034,7 @@ id = "monster-viking-berry-500-boks"
 navn = "Monster Viking Berry"
 merke = "monster"
 smak = "viking-berry"
+smak_alias = ["juiced viking berry"]
 sukkerfri = false
 volum_ml = 500
 beholder = "boks"
@@ -1040,6 +1046,7 @@ id = "monster-zero-sugar-500-boks"
 navn = "Monster Zero Sugar"
 merke = "monster"
 smak = "original"
+smak_alias = ["green zero"]
 sukkerfri = true
 volum_ml = 500
 beholder = "boks"
@@ -1407,6 +1414,7 @@ id = "red-bull-lilac-edition-250-boks"
 navn = "Red Bull Lilac Edition"
 merke = "red-bull"
 smak = "lilac-edition"
+smak_alias = ["lilac edition myske grapefruktsmak"]
 sukkerfri = false
 volum_ml = 250
 beholder = "boks"
@@ -1418,6 +1426,7 @@ id = "red-bull-peach-250-boks"
 navn = "Red Bull Peach"
 merke = "red-bull"
 smak = "peach"
+smak_alias = ["fersken"]
 sukkerfri = false
 volum_ml = 250
 beholder = "boks"
@@ -1484,6 +1493,7 @@ id = "red-bull-sukkerfri-250-boks"
 navn = "Red Bull Sukkerfri"
 merke = "red-bull"
 smak = "original"
+smak_alias = ["sugarfree", "sugar free"]
 sukkerfri = true
 volum_ml = 250
 beholder = "boks"
@@ -1495,6 +1505,7 @@ id = "red-bull-sukkerfri-355-boks"
 navn = "Red Bull Sukkerfri"
 merke = "red-bull"
 smak = "original"
+smak_alias = ["sugarfree", "sugar free"]
 sukkerfri = true
 volum_ml = 355
 beholder = "boks"
@@ -1506,6 +1517,7 @@ id = "red-bull-sukkerfri-473-boks"
 navn = "Red Bull Sukkerfri"
 merke = "red-bull"
 smak = "original"
+smak_alias = ["sugarfree", "sugar free"]
 sukkerfri = true
 volum_ml = 473
 beholder = "boks"
@@ -1539,6 +1551,7 @@ id = "red-bull-sukkerfri-peach-edition-250-boks"
 navn = "Red Bull Sukkerfri Peach Edition"
 merke = "red-bull"
 smak = "peach-edition"
+smak_alias = ["fersken"]
 sukkerfri = true
 volum_ml = 250
 beholder = "boks"
@@ -1671,6 +1684,7 @@ id = "red-bull-yellow-edition-250-boks"
 navn = "Red Bull Yellow Edition"
 merke = "red-bull"
 smak = "yellow-edition"
+smak_alias = ["yellow edition tropical"]
 sukkerfri = false
 volum_ml = 250
 beholder = "boks"
@@ -1966,3 +1980,361 @@ antall = 4
 gtin = "7030660366065"
 produkt = "torst-250-boks"
 antall = 24
+
+# Kildekoblinger (SPEC §4.6): Oda oppgir ikke EAN, så Odas produkt-id kobles til EAN.
+# Hentet fra Kassalapps Oda-oppføringer 2026-09-29. En kobling til en EAN som ikke er i
+# katalogen (f.eks. en sportsdrikk) holder oppføringen umatchet i stedet for å navnematche den.
+
+[[kildekobling]]
+# Red Bull Energidrikk 473 ml
+kilde = "oda"
+id = "6718"
+gtin = "9002490241407"
+
+[[kildekobling]]
+# Powerade Mountain Blast 12x500 ml, 6 l
+kilde = "oda"
+id = "7957"
+gtin = "54492653"
+
+[[kildekobling]]
+# Battery 0,5 l
+kilde = "oda"
+id = "7975"
+gtin = "7044610806228"
+
+[[kildekobling]]
+# Powerade Lemon 0,5 l
+kilde = "oda"
+id = "22147"
+gtin = "50112814"
+
+[[kildekobling]]
+# Monster Energy 0,5 l
+kilde = "oda"
+id = "23300"
+gtin = "5060166693732"
+
+[[kildekobling]]
+# Proteinshake Chocolate 500 ml
+kilde = "oda"
+id = "27031"
+gtin = "7070646286727"
+
+[[kildekobling]]
+# Proteinshake Strawberry 500 ml
+kilde = "oda"
+id = "27032"
+gtin = "7070646286697"
+
+[[kildekobling]]
+# Gatorade Cool Blue 0,5 l
+kilde = "oda"
+id = "27091"
+gtin = "8001160001786"
+
+[[kildekobling]]
+# Battery Peachberry 0,5 l
+kilde = "oda"
+id = "27093"
+gtin = "6415600543712"
+
+[[kildekobling]]
+# Red Bull Energidrikk Sukkerfri 473 ml
+kilde = "oda"
+id = "28098"
+gtin = "9002490241438"
+
+[[kildekobling]]
+# Monster Ultra White 0,5 l
+kilde = "oda"
+id = "28421"
+gtin = "5060337502238"
+
+[[kildekobling]]
+# Burn Original 0,5 l
+kilde = "oda"
+id = "28422"
+gtin = "5060466519008"
+
+[[kildekobling]]
+# Battery Fresh 0,5 l
+kilde = "oda"
+id = "29091"
+gtin = "7044610799490"
+
+[[kildekobling]]
+# Monster Mango Loco 0,5 l
+kilde = "oda"
+id = "29436"
+gtin = "5060517889937"
+
+[[kildekobling]]
+# Red Bull Energidrikk 4x250 ml, 1 l
+kilde = "oda"
+id = "30110"
+gtin = "9002490241148"
+
+[[kildekobling]]
+# Red Bull Energidrikk Yellow Edition Tropisk, 250 ml
+kilde = "oda"
+id = "30112"
+gtin = "90435027"
+
+[[kildekobling]]
+# Nocco Limón Del Sol 0,33 l
+kilde = "oda"
+id = "31738"
+gtin = "7340131601916"
+
+[[kildekobling]]
+# Red Bull Energidrikk Peach Edition Fersken, 250 ml
+kilde = "oda"
+id = "31784"
+gtin = "90435843"
+
+[[kildekobling]]
+# Battery No Calorie 0,5 l
+kilde = "oda"
+id = "31915"
+gtin = "6415600556835"
+
+[[kildekobling]]
+# Red Bull Energidrikk Red Edition Vannmelon, 250 ml
+kilde = "oda"
+id = "32449"
+gtin = "90446573"
+
+[[kildekobling]]
+# Battery Juiced Exotic 0,5 l
+kilde = "oda"
+id = "32693"
+gtin = "6415600560443"
+
+[[kildekobling]]
+# Monster Pipeline Punch 0,5 l
+kilde = "oda"
+id = "32723"
+gtin = "5060639126095"
+
+[[kildekobling]]
+# Burn Peach Zero 0,5 l
+kilde = "oda"
+id = "32725"
+gtin = "5060608744206"
+
+[[kildekobling]]
+# Monster Ultra Fiesta Mango 0,5 l
+kilde = "oda"
+id = "32846"
+gtin = "5060751215073"
+
+[[kildekobling]]
+# Battery NoCal Lemon&Lime 0,5 l
+kilde = "oda"
+id = "36364"
+gtin = "6415600565547"
+
+[[kildekobling]]
+# Nocco Blood Orange Del Sol 0,33 l
+kilde = "oda"
+id = "36954"
+gtin = "7340131602609"
+
+[[kildekobling]]
+# Monster Ultra Watermelon 0,5 l
+kilde = "oda"
+id = "40760"
+gtin = "5060896621869"
+
+[[kildekobling]]
+# Monster Khaotic 0,5 l
+kilde = "oda"
+id = "40761"
+gtin = "5060896622644"
+
+[[kildekobling]]
+# Battery Juiced Breeze 0,5 l
+kilde = "oda"
+id = "40799"
+gtin = "6415600557993"
+
+[[kildekobling]]
+# Battery Pulse 0,5 l
+kilde = "oda"
+id = "40800"
+gtin = "6415600568401"
+
+[[kildekobling]]
+# Red Bull Energidrikk Blue Edition Blåbær, 250 ml
+kilde = "oda"
+id = "40804"
+gtin = "90448652"
+
+[[kildekobling]]
+# Bang Rainbow Unicorn 0,5 l
+kilde = "oda"
+id = "42071"
+gtin = "8720211192425"
+
+[[kildekobling]]
+# Battery Rise 0,5 l
+kilde = "oda"
+id = "48284"
+gtin = "6415600570503"
+
+[[kildekobling]]
+# Nocco Golden Grape Del Sol 0,33 l
+kilde = "oda"
+id = "49269"
+gtin = "7340131603071"
+
+[[kildekobling]]
+# Bang Candy Apple Crisp 0,5 l
+kilde = "oda"
+id = "50984"
+gtin = "8720211192487"
+
+[[kildekobling]]
+# Battery NoCal Strawberry Mint 0,5 l
+kilde = "oda"
+id = "53029"
+gtin = "6415600572507"
+
+[[kildekobling]]
+# Battery Blueberry Limited Edition, 0,5 l
+kilde = "oda"
+id = "58046"
+gtin = "6415600574051"
+
+[[kildekobling]]
+# Red Bull Energidrikk Sukkerfri 355 ml
+kilde = "oda"
+id = "58584"
+gtin = "9002490257231"
+
+[[kildekobling]]
+# Red Bull Energidrikk Green Edition Dragefrukt, 250 ml
+kilde = "oda"
+id = "59033"
+gtin = "90454318"
+
+[[kildekobling]]
+# Nocco Ramonade 0,33 l
+kilde = "oda"
+id = "59060"
+gtin = "7340131603385"
+
+[[kildekobling]]
+# Red Bull Energidrikk Sukkerfri 4x250 ml, 1 l
+kilde = "oda"
+id = "59508"
+gtin = "9002490200381"
+
+[[kildekobling]]
+# Burn Fruitpunch 0,5 l
+kilde = "oda"
+id = "59526"
+gtin = "5060895745122"
+
+[[kildekobling]]
+# Monster Lewis Hamilton Zero Sugar 0,5 l
+kilde = "oda"
+id = "59527"
+gtin = "5060896625638"
+
+[[kildekobling]]
+# Monster Ultra Rosa 0,5 l
+kilde = "oda"
+id = "60334"
+gtin = "5060947541214"
+
+[[kildekobling]]
+# Battery Juiced Sour Apple 0,5 l
+kilde = "oda"
+id = "61795"
+gtin = "6415600576062"
+
+[[kildekobling]]
+# Monster Ultra Gold 0,5 l
+kilde = "oda"
+id = "61800"
+gtin = "5060896624808"
+
+[[kildekobling]]
+# Monster Monarch 0,5 l
+kilde = "oda"
+id = "61801"
+gtin = "5060751216070"
+
+[[kildekobling]]
+# Powerade Zero Mountain Blast 12x500 ml, 6 l
+kilde = "oda"
+id = "61804"
+gtin = "5000112658422"
+
+[[kildekobling]]
+# Powerade Passionfruit Maks 2 per kunde, 12x500 ml, 6 l
+kilde = "oda"
+id = "61805"
+gtin = "90418136"
+
+[[kildekobling]]
+# Monster Aussie Lemonade 0,5 l
+kilde = "oda"
+id = "61810"
+gtin = "5060947542921"
+
+[[kildekobling]]
+# Red Bull Sea Blue 250 ml
+kilde = "oda"
+id = "61879"
+gtin = "90454523"
+
+[[kildekobling]]
+# BOKS Energy Zero sugar, 0,5 l
+kilde = "oda"
+id = "62559"
+gtin = "7070293082840"
+
+[[kildekobling]]
+# Prime Tropical Punch 500 ml
+kilde = "oda"
+id = "63595"
+gtin = "7649989242129"
+
+[[kildekobling]]
+# Prime Blue Raspberry 500 ml
+kilde = "oda"
+id = "63596"
+gtin = "7649989242105"
+
+[[kildekobling]]
+# Prime Lemon Lime 500 ml
+kilde = "oda"
+id = "63597"
+gtin = "7649989242099"
+
+[[kildekobling]]
+# Prime Ice Pop 500 ml
+kilde = "oda"
+id = "63598"
+gtin = "7649989242112"
+
+[[kildekobling]]
+# Battery Black 0,5 l
+kilde = "oda"
+id = "63761"
+gtin = "6415600579292"
+
+[[kildekobling]]
+# Monster Ultra Black 0,5 l
+kilde = "oda"
+id = "63845"
+gtin = "5060947542440"
+
+[[kildekobling]]
+# Red Bull Winter Edition Pære, 250 ml
+kilde = "oda"
+id = "63895"
+gtin = "90454820"

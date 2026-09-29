@@ -159,11 +159,12 @@ Sources run concurrently with tokio. The politeness limits in §7.4 apply per ho
 | Source | Role | Chains | Notes |
 |---|---|---|---|
 | **Kassalapp API** (`kassal.app/api/v1`) | Primary base prices | See §4.5 | Needs a free API key (§10.2). Fetches the whole energy drink category (`category_id=111`) page by page (about 11 requests). The category already has one row per store, so EAN lookups aren't needed for fetching. Rate limit 60 req/min (verified, §4.5). |
-| **Oda** | Direct adapter | Oda | Public JSON search API: price, per-liter price, availability, campaigns and pant. No EAN; see §4.6. |
+| **Oda** | Direct adapter (implemented) | Oda | Public JSON search API, one search for "energidrikk" (~79 products, 2 requests). Gives price, availability and campaigns: `mix_and_match` "3 for 2" → `n_for_m`, `fixed_price_bundle` "5 for 109 kr" → `n_for_sum`, `price_discount` → `fastpris` with the undiscounted price as shelf price. No EAN: matched through source links and names (§4.6, §6.3). On live data (2026-09-29) 49 of 79 match; the rest are mostly sodas, sports drinks and a few new products. |
 | ~~Rema 1000 offers~~ | – | Rema 1000 | **Not available**: prices and offers exist only in the REMA app (§4.6). |
 | ~~Coop offers~~ | – | Coop Extra/Obs/Mega/Prix | **Not available**: Coop's online store is closed, and weekly offers are flyer images (§4.6). |
 
-Each direct adapter can be turned off in config (`[kilder.rema] aktiv = false`). An adapter that
+Each direct adapter can be turned off in config (`[kilder.oda] aktiv = false`). The Rema and
+Coop placeholders are off by default, since they have no source (§4.6). An adapter that
 fails its self-check (unexpected schema) disables itself for that run and warns. It never crashes
 the tool.
 
@@ -345,6 +346,7 @@ Produkt {
 
 - Bundled into the binary (`include_str!("../data/katalog.toml")`). Generated from Kassalapp's energy drink category and curated by hand (2026-09-29): 172 products, 24 multipacks and 187 EANs across Red Bull, Monster, Burn, Nocco, Battery, Tørst, Explo, Cult and smaller brands. Sports drinks, protein drinks, powders and pallets that Kassalapp files under energy drinks are left out. Sugar-free comes from the sugar content (< 0,5 g per 100 ml), not from the name. With this catalog, 679 of 810 Kassalapp listings match by EAN; the rest are the left-out products and Engrossnett trays without EANs.
 - A user override file at `<konfigmappe>/katalog.toml` is merged over the bundled one (matched by `id`). This lets users fix or add entries without a new release.
+- **Source links** (`[[kildekobling]]` with `kilde`, `id`, `gtin`) give an EAN to listings from sources that report none, such as Oda (§4.6). A link to an EAN outside the catalog keeps the listing unmatched rather than name-matched.
 - Multipack GTINs map to `(produkt_id, antall)`. **The pack size of a listing comes from the listing's own name**, not from the GTIN: stores reuse GTINs across pack sizes (Engrossnett sells 24-trays under the single-can GTIN, and a 4-pack GTIN sometimes appears on a single can). The catalog's `antall` is only a cross-check, and a mismatch is logged at `-v`.
 
 ### 6.3 Matching pipeline
@@ -352,7 +354,7 @@ Produkt {
 For each raw listing:
 1. **GTIN match** against the catalog (including multipack GTINs) gives a verified match.
 2. **Name match**, only for listings **without an EAN**. A listing with an EAN the catalog does not know is left unmatched: it is almost always a product deliberately left out (sports or protein drinks), and a wrong match is worse than none. The rules are strict and word-based rather than a fuzzy score:
-   - The name is normalized (lowercase, æøå folded), sizes and pack sizes are dropped, and packaging words ("boks", "energidrikk", "flaske", …) are ignored.
+   - The name is normalized (lowercase, æøå folded), sizes and pack sizes are dropped, and filler words ("boks", "energidrikk", "energy", "drink", "og", "flaske", …) are ignored. The size may also come from the source's size field, including free text such as "Blåbær, 250 ml".
    - The **volume must be equal** and the **brand must be present** (in the name, or as the source's brand field). A listing that says "flaske" only matches bottles.
    - One of the product's word sets must be fully present: its name without the brand, a hand-written alias (`smak_alias`), or – weaker – its flavor slug.
    - **Every remaining word must be explained** by the product's name, aliases or flavor. Sugar-free words ("zero", "sukkerfri", "u/sukker") are only accepted on sugar-free products.
@@ -412,7 +414,7 @@ Chain, source, container and membership values are stored as their public slugs 
 
 ### 7.4 Politeness
 
-- An honest `User-Agent: databrus/<versjon> (+<repo-url>)`.
+- An honest `User-Agent: databrus-bot/<versjon> (+<repo-url>)`. It says it is a bot, names the program and gives a contact, as Oda's policy requires (§4.6).
 - At most **2 concurrent requests per host**, plus each source's own documented rate limit (token bucket).
 - Respect `Retry-After`. Use exponential backoff with jitter on 429 and 5xx, up to 3 retries.
 - **TTL floor of 15 minutes** per source that even `--oppdater` can't bypass. A skipped fetch prints an informational message on stderr.
@@ -594,9 +596,9 @@ api_nokkel = ""                    # KASSALAPP_API_KEY overrides this
 [kilder.oda]
 aktiv = true
 [kilder.rema]
-aktiv = true
+aktiv = false                      # no public source (§4.6)
 [kilder.coop]
-aktiv = true
+aktiv = false                      # no public source (§4.6)
 ```
 
 - `konfig init` writes a commented default file.

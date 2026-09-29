@@ -1,6 +1,8 @@
 //! Matching raw listings against the catalog (SPEC §6.3).
 //!
-//! 1. **EAN**: a listing whose EAN is in the catalog is a verified match.
+//! 1. **EAN**: a listing whose EAN is in the catalog is a verified match. A listing from a
+//!    source without EANs gets one through a source link (`[[kildekobling]]`) when the
+//!    catalog knows the source's product id.
 //! 2. **Name**: a listing *without* an EAN is matched by name, strictly, and marked
 //!    unverified (`?` in the table). A listing with an EAN the catalog does not know is
 //!    left unmatched: it is almost always a product that was deliberately left out
@@ -10,7 +12,7 @@ use std::collections::{BTreeSet, HashMap};
 
 use super::Catalog;
 use super::parse::{normalize, parse_size, parse_volume};
-use crate::model::{Container, Ml, Product, ProductId, RawListing};
+use crate::model::{Container, Ml, Product, ProductId, RawListing, SourceId};
 
 /// Normalizes a GTIN/EAN to 14 digits, so EAN-13 and GTIN-14 with a leading zero compare
 /// equal. `None` if the string is not a plausible GTIN.
@@ -63,7 +65,11 @@ impl GtinIndex {
 
 /// Words in store names that say nothing about which product it is. The store names
 /// are Norwegian.
-const NOISE_WORDS: [&str; 20] = [
+const NOISE_WORDS: [&str; 23] = [
+    // "energy"/"drink" are how stores spell "energidrikk"; "og" is "and" in "eple og pære".
+    "energy",
+    "drink",
+    "og",
     "boks",
     "bx",
     "can",
@@ -200,8 +206,12 @@ struct ListingWords {
 
 impl ListingWords {
     fn new(listing: &RawListing) -> Option<Self> {
+        // The size may be in the name, in free text in the size field ("Blåbær, 250 ml"),
+        // or be a bare number in the size field ("473").
+        let size = listing.raw_size.as_deref();
         let volume = parse_volume(&listing.raw_name)
-            .or_else(|| listing.raw_size.as_deref().and_then(|s| parse_size(s).ok()))?;
+            .or_else(|| size.and_then(parse_volume))
+            .or_else(|| size.and_then(|s| parse_size(s).ok()))?;
         let name_words = words(&listing.raw_name);
         let bottle = name_words
             .iter()
@@ -259,23 +269,40 @@ impl NameIndex {
 pub struct Matcher {
     gtins: GtinIndex,
     names: NameIndex,
+    /// (source, source product id) → normalized EAN, from the catalog's source links.
+    links: HashMap<(SourceId, String), String>,
 }
 
 impl Matcher {
     pub fn build(catalog: &Catalog) -> Self {
+        let links = catalog
+            .source_links
+            .iter()
+            .filter_map(|l| Some(((l.source, l.id.clone()), normalize_gtin(&l.gtin)?)))
+            .collect();
         Self {
             gtins: GtinIndex::build(catalog),
             names: NameIndex::build(catalog),
+            links,
         }
+    }
+
+    /// The listing's EAN: its own, or one from a source link.
+    fn gtin<'a>(&'a self, listing: &'a RawListing) -> Option<&'a str> {
+        listing
+            .gtin
+            .as_deref()
+            .filter(|g| normalize_gtin(g).is_some())
+            .or_else(|| {
+                self.links
+                    .get(&(listing.source, listing.source_product_id.clone()))
+                    .map(String::as_str)
+            })
     }
 
     /// EAN first; name only for listings without a valid EAN (see the module docs).
     pub fn find(&self, listing: &RawListing) -> Option<Match> {
-        match listing
-            .gtin
-            .as_deref()
-            .filter(|g| normalize_gtin(g).is_some())
-        {
+        match self.gtin(listing) {
             Some(gtin) => {
                 let (product, pack_size) = self.gtins.find(gtin)?;
                 Some(Match {
@@ -533,6 +560,63 @@ mod tests {
         // The longer name wins when all its words are present.
         assert_eq!(find("Brus Mango Classic 0,5l").as_deref(), Some("b"));
         assert_eq!(find("Brus Tropisk 0,5l").as_deref(), Some("c"));
+    }
+
+    #[test]
+    fn a_source_link_gives_a_verified_match() {
+        let catalog = Catalog::from_toml(
+            r#"
+            [[produkt]]
+            id = "monster-energy-500-boks"
+            navn = "Monster Energy"
+            merke = "monster"
+            smak = "original"
+            sukkerfri = false
+            volum_ml = 500
+            beholder = "boks"
+            gtin = ["5060166693732"]
+
+            [[kildekobling]]
+            kilde = "oda"
+            id = "23300"
+            gtin = "5060166693732"
+
+            [[kildekobling]]
+            kilde = "oda"
+            id = "7957"
+            gtin = "54492653"
+            "#,
+        )
+        .unwrap();
+        let matcher = Matcher::build(&catalog);
+        let oda = |id: &str, name: &str| {
+            let mut l = listing(name, None);
+            l.source = SourceId::Oda;
+            l.source_product_id = id.into();
+            matcher.find(&l)
+        };
+        // The name alone would not match ("Grønn" is not an alias here), the link does.
+        let found = oda("23300", "Monster Grønn 0,5 l").unwrap();
+        assert_eq!(found.product.0, "monster-energy-500-boks");
+        assert!(found.verified);
+        // A link to an EAN outside the catalog keeps the listing unmatched – it is not
+        // matched by name either.
+        assert_eq!(oda("7957", "Monster Energy 0,5 l"), None);
+        // Another source with the same id is not linked.
+        let mut kassalapp = listing("Monster Grønn 0,5 l", None);
+        kassalapp.source_product_id = "23300".into();
+        assert_eq!(matcher.find(&kassalapp), None);
+    }
+
+    #[test]
+    fn the_size_can_be_free_text_in_the_size_field() {
+        let mut l = listing("Monster Ultra Rosa", None);
+        l.raw_size = Some("Rosa, 0,5 l".into());
+        let matcher = Matcher::build(&Catalog::builtin().unwrap());
+        assert_eq!(
+            matcher.find(&l).map(|m| m.product.0).as_deref(),
+            Some("monster-ultra-rosa-500-boks")
+        );
     }
 
     #[test]

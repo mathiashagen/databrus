@@ -9,7 +9,7 @@ use std::fs;
 use std::io;
 use std::path::Path;
 
-pub use file::Multipack;
+pub use file::{Multipack, SourceLink};
 
 use crate::error::AppError;
 use crate::model::{Product, ProductId};
@@ -18,6 +18,7 @@ use crate::model::{Product, ProductId};
 pub struct Catalog {
     pub products: Vec<Product>,
     pub multipacks: Vec<Multipack>,
+    pub source_links: Vec<SourceLink>,
 }
 
 impl Catalog {
@@ -49,10 +50,12 @@ impl Catalog {
         Ok(Self {
             products: file.products,
             multipacks: file.multipacks,
+            source_links: file.source_links,
         })
     }
 
-    /// Lays `other` over this one: the same product `id` or multipack `gtin` is replaced.
+    /// Lays `other` over this one: the same product `id`, multipack `gtin` or source link
+    /// (source, id) is replaced.
     pub fn merge(&mut self, other: Catalog) {
         for product in other.products {
             match self.products.iter_mut().find(|p| p.id == product.id) {
@@ -64,6 +67,16 @@ impl Catalog {
             match self.multipacks.iter_mut().find(|p| p.gtin == pack.gtin) {
                 Some(existing) => *existing = pack,
                 None => self.multipacks.push(pack),
+            }
+        }
+        for link in other.source_links {
+            match self
+                .source_links
+                .iter_mut()
+                .find(|l| l.source == link.source && l.id == link.id)
+            {
+                Some(existing) => *existing = link,
+                None => self.source_links.push(link),
             }
         }
     }
@@ -102,6 +115,24 @@ impl Catalog {
                 return Err(format!("flerpakning {} må ha antall ≥ 2", pack.gtin));
             }
             check_gtin(&pack.gtin, &pack.product)?;
+        }
+
+        // A link may point to an EAN outside the catalog (a product that was left out):
+        // the listing then stays unmatched instead of being matched by name.
+        let mut links = HashSet::new();
+        for link in &self.source_links {
+            if matching::normalize_gtin(&link.gtin).is_none() {
+                return Err(format!(
+                    "kildekobling {} {}: ugyldig EAN «{}»",
+                    link.source, link.id, link.gtin
+                ));
+            }
+            if !links.insert((link.source, &link.id)) {
+                return Err(format!(
+                    "kildekobling {} {} finnes flere ganger",
+                    link.source, link.id
+                ));
+            }
         }
         Ok(())
     }

@@ -16,6 +16,8 @@ fn databrus(dir: &TempDir) -> Command {
         .env("DATABRUS_KONFIG", dir.path().join("konfig.toml"))
         .env("DATABRUS_DATA_DIR", dir.path().join("data"))
         .env_remove("KASSALAPP_API_KEY")
+        // Oda needs no key, so point it at an invalid URL: it fails at once, offline.
+        .env("DATABRUS_ODA_URL", "ikke-en-url")
         .env_remove("DATABRUS_LOGG")
         .env("NO_COLOR", "1");
     command
@@ -58,7 +60,10 @@ fn search_without_data_warns_per_source_and_exits_with_3() {
         .assert()
         .code(3)
         .stderr(predicate::str::contains("Kassalapp: mangler API-nøkkel"))
-        .stderr(predicate::str::contains("Oda: ikke implementert"));
+        .stderr(predicate::str::contains("Oda: ugyldig URL"))
+        // Rema and Coop are off by default and stay quiet.
+        .stderr(predicate::str::contains("Rema").not())
+        .stderr(predicate::str::contains("Coop").not());
 }
 
 #[test]

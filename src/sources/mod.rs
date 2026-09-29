@@ -77,7 +77,7 @@ pub trait Source: Send + Sync {
 pub fn all() -> Vec<Box<dyn Source>> {
     vec![
         Box::new(kassalapp::Kassalapp::from_env()),
-        Box::new(oda::Oda),
+        Box::new(oda::Oda::from_env()),
         Box::new(rema::Rema),
         Box::new(coop::Coop),
     ]
