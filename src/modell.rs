@@ -125,10 +125,14 @@ pub enum Kjede {
     CoopPrix,
     Bunnpris,
     Oda,
+    Europris,
+    Engrossnett,
+    Havaristen,
+    Fastcandy,
 }
 
 impl Kjede {
-    pub const ALLE: [Kjede; 11] = [
+    pub const ALLE: [Kjede; 15] = [
         Kjede::Rema,
         Kjede::Kiwi,
         Kjede::Meny,
@@ -140,6 +144,10 @@ impl Kjede {
         Kjede::CoopPrix,
         Kjede::Bunnpris,
         Kjede::Oda,
+        Kjede::Europris,
+        Kjede::Engrossnett,
+        Kjede::Havaristen,
+        Kjede::Fastcandy,
     ];
 
     pub const COOP: [Kjede; 4] = [
@@ -162,6 +170,10 @@ impl Kjede {
             Kjede::CoopPrix => "coop-prix",
             Kjede::Bunnpris => "bunnpris",
             Kjede::Oda => "oda",
+            Kjede::Europris => "europris",
+            Kjede::Engrossnett => "engrossnett",
+            Kjede::Havaristen => "havaristen",
+            Kjede::Fastcandy => "fastcandy",
         }
     }
 
@@ -178,6 +190,10 @@ impl Kjede {
             Kjede::CoopPrix => "Coop Prix",
             Kjede::Bunnpris => "Bunnpris",
             Kjede::Oda => "Oda",
+            Kjede::Europris => "Europris",
+            Kjede::Engrossnett => "Engrossnett",
+            Kjede::Havaristen => "Havaristen",
+            Kjede::Fastcandy => "Fastcandy",
         }
     }
 
@@ -186,7 +202,12 @@ impl Kjede {
             Kjede::Rema => Some("Reitan"),
             Kjede::Kiwi | Kjede::Meny | Kjede::Spar | Kjede::Joker => Some("NorgesGruppen"),
             Kjede::CoopExtra | Kjede::CoopObs | Kjede::CoopMega | Kjede::CoopPrix => Some("Coop"),
-            Kjede::Bunnpris | Kjede::Oda => None,
+            Kjede::Bunnpris
+            | Kjede::Oda
+            | Kjede::Europris
+            | Kjede::Engrossnett
+            | Kjede::Havaristen
+            | Kjede::Fastcandy => None,
         }
     }
 

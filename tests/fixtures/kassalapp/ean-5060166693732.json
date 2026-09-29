@@ -1,0 +1,690 @@
+{
+  "data": {
+    "ean": "5060166693732",
+    "products": [
+      {
+        "id": 2036,
+        "name": "Monster Energy 0,5l boks",
+        "vendor": "Coca-cola europacific partners norge as",
+        "brand": "Monster",
+        "description": null,
+        "ingredients": null,
+        "url": "https://joker.no/nettbutikk/varer/drikkevarer/energidrikk/monster-energy-5060166693732",
+        "image": "https://bilder.ngdata.no/5060166693732/kmh/large.jpg",
+        "category": [
+          {
+            "id": 26,
+            "depth": -1,
+            "name": "Drikke"
+          },
+          {
+            "id": 111,
+            "depth": 0,
+            "name": "Energidrikk"
+          }
+        ],
+        "store": {
+          "name": "Joker",
+          "code": "JOKER_NO",
+          "url": "https://joker.no/nettbutikk/varer",
+          "logo": "https://kassal.app/logos/Joker.svg"
+        },
+        "current_price": {
+          "price": 32.9,
+          "unit_price": 65.8,
+          "date": "2026-09-29T07:00:28.000000Z"
+        },
+        "weight": 500,
+        "weight_unit": "ml",
+        "price_history": [
+          {
+            "price": 32.9,
+            "date": "2026-09-29T07:00:28.000000Z"
+          },
+          {
+            "price": 32.9,
+            "date": "2026-09-28T07:00:32.000000Z"
+          },
+          {
+            "price": 32.9,
+            "date": "2026-09-26T07:00:27.000000Z"
+          },
+          {
+            "price": 32.9,
+            "date": "2026-09-24T07:00:22.000000Z"
+          },
+          {
+            "price": 32.9,
+            "date": "2026-09-23T07:00:33.000000Z"
+          }
+        ],
+        "kassalapp": {
+          "url": "https://kassal.app/vare/2036-monster-energy-05l-boks-5060166693732",
+          "opengraph": "https://kassal.app/opengraph/products/2036.jpg"
+        },
+        "created_at": "2022-01-09T18:29:25.000000Z",
+        "updated_at": "2026-09-29T07:00:28.000000Z"
+      },
+      {
+        "id": 4374,
+        "name": "Monster Energy 0,5l boks",
+        "vendor": "Coca-cola europacific partners norge as",
+        "brand": "Monster",
+        "description": null,
+        "ingredients": null,
+        "url": "https://spar.no/nettbutikk/varer/drikke/energidrikk/monster-energy-5060166693732",
+        "image": "https://bilder.ngdata.no/5060166693732/kmh/large.jpg",
+        "category": [
+          {
+            "id": 26,
+            "depth": -1,
+            "name": "Drikke"
+          },
+          {
+            "id": 111,
+            "depth": 0,
+            "name": "Energidrikk"
+          }
+        ],
+        "store": {
+          "name": "SPAR",
+          "code": "SPAR_NO",
+          "url": "https://spar.no/nettbutikk/varer",
+          "logo": "https://kassal.app/logos/Spar.svg"
+        },
+        "current_price": {
+          "price": 16.9,
+          "unit_price": 33.8,
+          "date": "2026-09-29T07:02:24.000000Z"
+        },
+        "weight": 500,
+        "weight_unit": "ml",
+        "price_history": [
+          {
+            "price": 16.9,
+            "date": "2026-09-29T07:02:24.000000Z"
+          },
+          {
+            "price": 16.9,
+            "date": "2026-09-29T07:00:55.000000Z"
+          },
+          {
+            "price": 16.9,
+            "date": "2026-09-28T07:02:28.000000Z"
+          },
+          {
+            "price": 16.9,
+            "date": "2026-09-28T07:00:59.000000Z"
+          },
+          {
+            "price": 16.9,
+            "date": "2026-09-26T07:02:24.000000Z"
+          }
+        ],
+        "kassalapp": {
+          "url": "https://kassal.app/vare/4374-monster-energy-05l-boks-5060166693732",
+          "opengraph": "https://kassal.app/opengraph/products/4374.jpg"
+        },
+        "created_at": "2022-01-09T18:30:06.000000Z",
+        "updated_at": "2026-09-29T07:02:24.000000Z"
+      },
+      {
+        "id": 6974,
+        "name": "Monster Energy 0,5l boks",
+        "vendor": "Coca-cola europacific partners norge as",
+        "brand": "Monster",
+        "description": null,
+        "ingredients": null,
+        "url": "https://meny.no/Varer/drikke/energidrikk/monster-energy-5060166693732",
+        "image": "https://bilder.ngdata.no/5060166693732/meny/large.jpg",
+        "category": [
+          {
+            "id": 26,
+            "depth": -1,
+            "name": "Drikke"
+          },
+          {
+            "id": 111,
+            "depth": 0,
+            "name": "Energidrikk"
+          }
+        ],
+        "store": {
+          "name": "Meny",
+          "code": "MENY_NO",
+          "url": "https://meny.no/Varer",
+          "logo": "https://kassal.app/logos/Meny.svg"
+        },
+        "current_price": {
+          "price": 32.9,
+          "unit_price": 65.8,
+          "date": "2026-09-29T07:02:04.000000Z"
+        },
+        "weight": 500,
+        "weight_unit": "ml",
+        "price_history": [
+          {
+            "price": 32.9,
+            "date": "2026-09-29T07:02:04.000000Z"
+          },
+          {
+            "price": 32.9,
+            "date": "2026-09-29T07:00:14.000000Z"
+          },
+          {
+            "price": 32.9,
+            "date": "2026-09-28T07:02:14.000000Z"
+          },
+          {
+            "price": 32.9,
+            "date": "2026-09-28T07:00:10.000000Z"
+          },
+          {
+            "price": 32.9,
+            "date": "2026-09-26T07:02:05.000000Z"
+          }
+        ],
+        "kassalapp": {
+          "url": "https://kassal.app/vare/6974-monster-energy-05l-boks-5060166693732",
+          "opengraph": "https://kassal.app/opengraph/products/6974.jpg"
+        },
+        "created_at": "2022-01-09T18:30:52.000000Z",
+        "updated_at": "2026-09-29T07:02:04.000000Z"
+      },
+      {
+        "id": 9749,
+        "name": "Monster Energy 0,5l",
+        "vendor": "COCA-COLA EUROPEAN PARTNERS NORGE A",
+        "brand": "andre merkevarer",
+        "description": null,
+        "ingredients": null,
+        "url": "https://matlevering.coop.no/drikkevarer/energidrikk/monster-energy-0.5l-bx",
+        "image": "https://cdcimg.coop.no/rte/RTE2/5060166693732.png",
+        "category": [
+          {
+            "id": 26,
+            "depth": -1,
+            "name": "Drikke"
+          },
+          {
+            "id": 111,
+            "depth": 0,
+            "name": "Energidrikk"
+          }
+        ],
+        "store": {
+          "name": "Coop",
+          "code": "COOP_NO",
+          "url": "https://matlevering.coop.no",
+          "logo": "https://kassal.app/logos/Coop.svg"
+        },
+        "current_price": {
+          "price": 24.5,
+          "unit_price": null,
+          "date": "2023-01-30T08:31:10.000000Z"
+        },
+        "weight": null,
+        "weight_unit": null,
+        "price_history": [
+          {
+            "price": 24.5,
+            "date": "2023-01-30T08:31:10.000000Z"
+          },
+          {
+            "price": 24.5,
+            "date": "2023-01-15T09:58:16.000000Z"
+          },
+          {
+            "price": 24.5,
+            "date": "2023-01-12T13:08:03.000000Z"
+          },
+          {
+            "price": 24.5,
+            "date": "2023-01-10T10:48:43.000000Z"
+          },
+          {
+            "price": 24.5,
+            "date": "2023-01-08T17:40:27.000000Z"
+          }
+        ],
+        "kassalapp": {
+          "url": "https://kassal.app/vare/9749-monster-energy-05l-5060166693732",
+          "opengraph": "https://kassal.app/opengraph/products/9749.jpg"
+        },
+        "created_at": "2022-01-09T18:37:14.000000Z",
+        "updated_at": "2024-05-05T21:01:53.000000Z"
+      },
+      {
+        "id": 28637,
+        "name": "Monster Energy 0,5 l",
+        "vendor": "COCA-COLA EUROPACIFIC PARTNERS NORGE AS, Robsrudskogen 5, 1471 Lørenskog, Norwegen",
+        "brand": "Monster",
+        "description": null,
+        "ingredients": null,
+        "url": "https://oda.com/no/products/23300-monster-monster-energy/",
+        "image": "https://images.oda.com/local_products/277555b4-ad5c-4b86-baa2-4481febe1ffa.jpg?fit=bounds&format=auto&optimize=medium&width=424&s=0x33b2f339db7849a29acf7e13fd9b0c0c3679e10e",
+        "category": [
+          {
+            "id": 26,
+            "depth": -1,
+            "name": "Drikke"
+          },
+          {
+            "id": 111,
+            "depth": 0,
+            "name": "Energidrikk"
+          }
+        ],
+        "store": {
+          "name": "Oda",
+          "code": "ODA_NO",
+          "url": "https://oda.com/no/",
+          "logo": "https://kassal.app/logos/Oda.svg"
+        },
+        "current_price": {
+          "price": 29.1,
+          "unit_price": null,
+          "date": "2026-09-03T13:44:32.000000Z"
+        },
+        "weight": 0,
+        "weight_unit": "l",
+        "price_history": [
+          {
+            "price": 29.1,
+            "date": "2026-09-03T13:44:32.000000Z"
+          },
+          {
+            "price": 28.9,
+            "date": "2025-09-24T07:10:18.000000Z"
+          },
+          {
+            "price": 26.9,
+            "date": "2025-06-22T07:10:22.000000Z"
+          },
+          {
+            "price": 26.9,
+            "date": "2025-06-03T07:10:41.000000Z"
+          },
+          {
+            "price": 25.9,
+            "date": "2025-05-06T07:10:24.000000Z"
+          }
+        ],
+        "kassalapp": {
+          "url": "https://kassal.app/vare/28637-monster-energy-05-l-5060166693732",
+          "opengraph": "https://kassal.app/opengraph/products/28637.jpg"
+        },
+        "created_at": "2022-01-09T18:57:47.000000Z",
+        "updated_at": "2026-09-03T13:44:32.000000Z"
+      },
+      {
+        "id": 40415,
+        "name": "Monster Energy 24x500ml",
+        "vendor": null,
+        "brand": "COCA-COLA",
+        "description": null,
+        "ingredients": null,
+        "url": "https://engrosnett.no/drikkevarer/energidrikk/monster-energy-24x500ml",
+        "image": "https://engrosnett.no/image/drikkevarer/mineralvann/4338117-4338117.jpg?lb=true&v=638181050568830000",
+        "category": [
+          {
+            "id": 26,
+            "depth": -1,
+            "name": "Drikke"
+          },
+          {
+            "id": 111,
+            "depth": 0,
+            "name": "Energidrikk"
+          }
+        ],
+        "store": {
+          "name": "Engrosnett",
+          "code": "ENGROSSNETT_NO",
+          "url": "https://engrosnett.no/",
+          "logo": "https://kassal.app/logos/Engrosnett.svg"
+        },
+        "current_price": {
+          "price": 735.31,
+          "unit_price": null,
+          "date": "2026-09-03T13:44:33.000000Z"
+        },
+        "weight": null,
+        "weight_unit": null,
+        "price_history": [
+          {
+            "price": 735.31,
+            "date": "2026-09-03T13:44:33.000000Z"
+          },
+          {
+            "price": 735.31,
+            "date": "2026-08-28T07:11:54.000000Z"
+          },
+          {
+            "price": 735.31,
+            "date": "2026-08-27T07:12:04.000000Z"
+          },
+          {
+            "price": 735.31,
+            "date": "2026-08-26T07:15:16.000000Z"
+          },
+          {
+            "price": 735.31,
+            "date": "2026-08-25T07:11:15.000000Z"
+          }
+        ],
+        "kassalapp": {
+          "url": "https://kassal.app/vare/40415-monster-energy-24x500ml-5060166693732",
+          "opengraph": "https://kassal.app/opengraph/products/40415.jpg"
+        },
+        "created_at": "2022-01-13T17:20:46.000000Z",
+        "updated_at": "2026-09-03T13:44:33.000000Z"
+      },
+      {
+        "id": 52520,
+        "name": "Monster 500 ml energidrikk Green, Energy",
+        "vendor": "COCA-COLA EUROPACIFIC PARTNERS NORGE AS",
+        "brand": "Monster",
+        "description": null,
+        "ingredients": null,
+        "url": "https://www.europris.no/p-monster-500-ml-energidrikk-green-energy-179614",
+        "image": "https://images2.europris.no/produkter/vw800/17/179614/179614_main.webp",
+        "category": [
+          {
+            "id": 26,
+            "depth": -1,
+            "name": "Drikke"
+          },
+          {
+            "id": 111,
+            "depth": 0,
+            "name": "Energidrikk"
+          }
+        ],
+        "store": {
+          "name": "Europris",
+          "code": "EUROPRIS_NO",
+          "url": "https://www.europris.no/",
+          "logo": "https://kassal.app/logos/Europris.svg"
+        },
+        "current_price": {
+          "price": 29.9,
+          "unit_price": null,
+          "date": "2025-11-05T16:36:39.000000Z"
+        },
+        "weight": null,
+        "weight_unit": null,
+        "price_history": [
+          {
+            "price": 29.9,
+            "date": "2025-11-05T16:36:39.000000Z"
+          },
+          {
+            "price": 29.9,
+            "date": "2025-05-03T05:11:51.000000Z"
+          },
+          {
+            "price": 29.9,
+            "date": "2025-04-18T05:11:29.000000Z"
+          },
+          {
+            "price": 29.9,
+            "date": "2025-04-11T05:11:32.000000Z"
+          },
+          {
+            "price": 29.9,
+            "date": "2025-03-29T07:11:50.000000Z"
+          }
+        ],
+        "kassalapp": {
+          "url": "https://kassal.app/vare/52520-monster-500-ml-energidrikk-green-energy-5060166693732",
+          "opengraph": "https://kassal.app/opengraph/products/52520.jpg"
+        },
+        "created_at": "2022-10-26T17:34:54.000000Z",
+        "updated_at": "2025-11-05T16:36:39.000000Z"
+      },
+      {
+        "id": 54308,
+        "name": "MONSTER ENERGY 0.5 l bx",
+        "vendor": null,
+        "brand": null,
+        "description": null,
+        "ingredients": null,
+        "url": "https://nettbutikk.bunnpris.no/itemdetail.aspx?itemno=5060166693732&itemgrpno=&grpnm=&deptno=",
+        "image": "https://nettbutikk.bunnpris.no/itemImages/5060166693732_0_f.png",
+        "category": [
+          {
+            "id": 26,
+            "depth": -1,
+            "name": "Drikke"
+          },
+          {
+            "id": 111,
+            "depth": 0,
+            "name": "Energidrikk"
+          }
+        ],
+        "store": {
+          "name": "Bunnpris",
+          "code": "BUNNPRIS",
+          "url": "https://bunnpris.no/",
+          "logo": "https://kassal.app/logos/Bunnpris.svg"
+        },
+        "current_price": {
+          "price": 31.9,
+          "unit_price": null,
+          "date": "2026-09-29T07:14:11.000000Z"
+        },
+        "weight": null,
+        "weight_unit": null,
+        "price_history": [
+          {
+            "price": 31.9,
+            "date": "2026-09-29T07:14:11.000000Z"
+          },
+          {
+            "price": 31.9,
+            "date": "2026-09-28T07:14:28.000000Z"
+          },
+          {
+            "price": 31.9,
+            "date": "2026-09-27T07:14:02.000000Z"
+          },
+          {
+            "price": 31.9,
+            "date": "2026-09-26T07:14:49.000000Z"
+          },
+          {
+            "price": 31.9,
+            "date": "2026-09-25T07:15:05.000000Z"
+          }
+        ],
+        "kassalapp": {
+          "url": "https://kassal.app/vare/54308-monster-energy-05-l-bx-5060166693732",
+          "opengraph": "https://kassal.app/opengraph/products/54308.jpg"
+        },
+        "created_at": "2022-10-31T21:15:28.000000Z",
+        "updated_at": "2026-09-29T07:14:11.000000Z"
+      },
+      {
+        "id": 59278,
+        "name": "Monster Energy 0,5l boks",
+        "vendor": "Coca-cola europacific partners norge as",
+        "brand": "Monster",
+        "description": null,
+        "ingredients": null,
+        "url": "https://kiwi.no/aktuelt/dagligvarer/#5060166693732",
+        "image": "https://bilder.ngdata.no/5060166693732/kiwi/large.jpg",
+        "category": [
+          {
+            "id": 26,
+            "depth": -1,
+            "name": "Drikke"
+          },
+          {
+            "id": 111,
+            "depth": 0,
+            "name": "Energidrikk"
+          }
+        ],
+        "store": {
+          "name": "KIWI",
+          "code": "KIWI",
+          "url": "https://kiwi.no/",
+          "logo": "https://kassal.app/logos/Kiwi.svg"
+        },
+        "current_price": {
+          "price": 23.9,
+          "unit_price": null,
+          "date": "2023-04-14T07:00:41.000000Z"
+        },
+        "weight": null,
+        "weight_unit": null,
+        "price_history": [
+          {
+            "price": 23.9,
+            "date": "2023-04-14T07:00:41.000000Z"
+          },
+          {
+            "price": 23.6,
+            "date": "2023-04-13T07:00:42.000000Z"
+          },
+          {
+            "price": 23.6,
+            "date": "2023-04-13T04:59:45.000000Z"
+          },
+          {
+            "price": 23.6,
+            "date": "2023-04-13T00:20:41.000000Z"
+          },
+          {
+            "price": 23.6,
+            "date": "2023-04-12T07:00:50.000000Z"
+          }
+        ],
+        "kassalapp": {
+          "url": "https://kassal.app/vare/59278-monster-energy-05l-boks-5060166693732",
+          "opengraph": "https://kassal.app/opengraph/products/59278.jpg"
+        },
+        "created_at": "2022-12-11T19:53:01.000000Z",
+        "updated_at": "2024-05-05T21:58:26.000000Z"
+      },
+      {
+        "id": 97874,
+        "name": "Monster Energy 500ml bx",
+        "vendor": "COCA-COLA EUROPACIFIC PARTNERS NORGE AS",
+        "brand": "Monster",
+        "description": null,
+        "ingredients": null,
+        "url": "",
+        "image": "https://api.vetduat.no/api/images/large/5060166693732",
+        "category": [
+          {
+            "id": 26,
+            "depth": -1,
+            "name": "Drikke"
+          },
+          {
+            "id": 111,
+            "depth": 0,
+            "name": "Energidrikk"
+          }
+        ],
+        "store": null,
+        "current_price": null,
+        "weight": 0.5,
+        "weight_unit": "l",
+        "price_history": [],
+        "kassalapp": {
+          "url": "https://kassal.app/vare/97874-monster-energy-500ml-bx-5060166693732",
+          "opengraph": "https://kassal.app/opengraph/products/97874.jpg"
+        },
+        "created_at": "2023-06-11T00:55:28.000000Z",
+        "updated_at": "2024-05-05T22:41:45.000000Z"
+      },
+      {
+        "id": 184137,
+        "name": "MONSTER ENERGY 0,5L",
+        "vendor": null,
+        "brand": null,
+        "description": null,
+        "ingredients": null,
+        "url": "",
+        "image": null,
+        "category": [
+          {
+            "id": 26,
+            "depth": -1,
+            "name": "Drikke"
+          },
+          {
+            "id": 111,
+            "depth": 0,
+            "name": "Energidrikk"
+          }
+        ],
+        "store": {
+          "name": "REMA 1000",
+          "code": "REMA_1000",
+          "url": "https://rema.no",
+          "logo": "https://kassal.app/logos/Rema-1000.svg"
+        },
+        "current_price": {
+          "price": 23.9,
+          "unit_price": null,
+          "date": "2023-06-28T13:07:46.000000Z"
+        },
+        "weight": null,
+        "weight_unit": null,
+        "price_history": [
+          {
+            "price": 23.9,
+            "date": "2023-06-28T13:07:46.000000Z"
+          }
+        ],
+        "kassalapp": {
+          "url": "https://kassal.app/vare/184137-monster-energy-05l-5060166693732",
+          "opengraph": "https://kassal.app/opengraph/products/184137.jpg"
+        },
+        "created_at": "2023-06-28T13:07:46.000000Z",
+        "updated_at": "2024-05-06T00:04:05.000000Z"
+      },
+      {
+        "id": 192556,
+        "name": "Monster Energy 500ml bx",
+        "vendor": "COCA-COLA EUROPACIFIC PARTNERS NORGE AS",
+        "brand": "Monster",
+        "description": null,
+        "ingredients": null,
+        "url": "",
+        "image": "https://api.vetduat.no/api/images/large/5060166693732",
+        "category": [
+          {
+            "id": 26,
+            "depth": -1,
+            "name": "Drikke"
+          },
+          {
+            "id": 111,
+            "depth": 0,
+            "name": "Energidrikk"
+          }
+        ],
+        "store": null,
+        "current_price": null,
+        "weight": 0.5,
+        "weight_unit": "l",
+        "price_history": [],
+        "kassalapp": {
+          "url": "https://kassal.app/vare/192556-monster-energy-500ml-bx-5060166693732",
+          "opengraph": "https://kassal.app/opengraph/products/192556.jpg"
+        },
+        "created_at": "2023-08-11T20:27:46.000000Z",
+        "updated_at": "2026-06-07T01:27:24.000000Z"
+      }
+    ],
+    "allergens": [],
+    "nutrition": [],
+    "labels": []
+  }
+}

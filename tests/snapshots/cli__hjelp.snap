@@ -74,13 +74,17 @@ Filtre:
           - meny
           - spar
           - joker
-          - coop:       alle Coop-kjedene
+          - coop:        alle Coop-kjedene
           - coop-extra
           - coop-obs
           - coop-mega
           - coop-prix
           - bunnpris
           - oda
+          - europris
+          - engrossnett
+          - havaristen
+          - fastcandy
 
       --sukkerfri
           Bare sukkerfrie

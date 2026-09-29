@@ -13,7 +13,7 @@ Status: draft v1 spec · 2026-09-29
 
 ### Goals
 - Answer "where is Monster Ultra White cheapest right now, per liter?" in one command.
-- Cover the major Norwegian chains: Rema 1000, Kiwi, Meny, Spar, Joker, Coop (Extra, Obs, Mega, Prix), Bunnpris and Oda.
+- Cover the major Norwegian chains: Rema 1000, Kiwi, Meny, Spar, Joker, Coop (Extra, Obs, Mega, Prix), Bunnpris and Oda, plus Europris, Engrossnett and the online candy shops Havaristen and Fastcandy.
 - Cover the major brands (Red Bull, Monster, Burn, Nocco, Battery and others) and store brands (Xtra, First Price, Coop-branded and so on).
 - Rank fairly across single cans, multipacks and multi-buy offers.
 - Build up local price history and use it to judge whether a deal is actually good.
@@ -150,7 +150,7 @@ Sources run concurrently with tokio. The politeness limits in §7.4 apply per ho
 
 | Source | Role | Chains | Notes |
 |---|---|---|---|
-| **Kassalapp API** (`kassal.app/api/v1`) | Primary base prices | Most chains | Needs a free API key (§10.2). Search by brand terms, and look up by EAN for catalog products. Respect its documented rate limit (free tier: verify at implementation time, around 60 req/min). |
+| **Kassalapp API** (`kassal.app/api/v1`) | Primary base prices | See §4.5 | Needs a free API key (§10.2). Fetches the whole energy drink category (`category_id=111`) page by page, plus EAN lookups for catalog products. Rate limit 60 req/min (verified, §4.5). |
 | **Oda** | Direct adapter | Oda | Public web JSON endpoints (search and product detail). Gives availability (sold out) and campaign info. |
 | **Rema 1000 offers** | Offer overlay | Rema 1000 | Weekly offers, including Æ-app offers, which Kassalapp may lag on. The endpoint is undocumented, so it is a **research task** at implementation time. |
 | **Coop offers** | Offer overlay | Coop Extra/Obs/Mega/Prix | Weekly offer feeds per Coop chain, including member prices. The endpoint is undocumented, so it is a **research task**. |
@@ -184,8 +184,51 @@ A canonical chain list with slugs, display names and parent groups:
 | `coop-prix` | Coop Prix | Coop |
 | `bunnpris` | Bunnpris | – |
 | `oda` | Oda | – |
+| `europris` | Europris | – |
+| `engrossnett` | Engrossnett | – |
+| `havaristen` | Havaristen | – |
+| `fastcandy` | Fastcandy | – |
+
+Engrossnett is an online wholesaler that mostly sells large trays (e.g. 24-packs). Its rows rely
+on pack parsing (§6.3) to get a fair per-can price. Havaristen and Fastcandy are small online candy
+shops.
 
 The mapping from each source's store/chain codes to these slugs lives in code, with a test for each source.
+
+### 4.5 Kassalapp findings (verified 2026-09-29)
+
+Measured against the full energy drink category (1 011 listings, 242 unique EANs):
+
+| Kassalapp code | Chain | Listings | Fresh (≤ 14 days) | Typical age |
+|---|---|---|---|---|
+| `MENY_NO` | `meny` | 215 | 61 | fresh rows updated daily |
+| `SPAR_NO` | `spar` | 155 | 50 | fresh rows updated daily |
+| `JOKER_NO` | `joker` | 149 | 43 | fresh rows updated daily |
+| `BUNNPRIS` | `bunnpris` | 59 | 37 | fresh |
+| `EUROPRIS_NO` | `europris` | 60 | 15 | mixed |
+| `ENGROSSNETT_NO` | `engrossnett` | 31 | 6 | ~1 month |
+| `ODA_NO` | `oda` | 59 | 1 | ~1 year |
+| `KIWI` | `kiwi` | 48 | 0 | ~2.4 years |
+| `REMA_1000` | `rema` | 28 | 0 | ~2.4 years |
+| `COOP_NO` | *(not mapped)* | 79 | 0 | ~2.4 years |
+| `HAVARISTEN`, `FASTCANDY` | `havaristen`, `fastcandy` | 6 | 0 | > 1 year |
+
+Consequences:
+- **Kiwi, Rema, Coop and Oda have no usable Kassalapp data.** With the 14-day cutoff (§8) they
+  show nothing until a direct source exists. Finding direct sources for them is a research task
+  right after M1 (§15). Oda already has a planned adapter (§4.2).
+- **`COOP_NO` is one code for all Coop chains**, so it can't be mapped to Extra/Obs/Mega/Prix. It
+  is ignored until the Coop adapter exists.
+- **No offer or member-price data.** Kassalapp gives only the current shelf price. From Kassalapp,
+  deals can only be detected as `PRISFALL` from history (§7.8), never as `KAMPANJE`.
+- **Volume is often missing** (`weight_unit` is null on about two thirds of rows), so volume and
+  pack size are parsed from the product name (§6.3).
+- **Brand names are inconsistent** (`Red bull`, `Red Bull`, `RED BULL`); matching normalizes them.
+- **Each store price has its own timestamp** (`current_price.date` in EAN lookups, `updated_at` in
+  searches). That timestamp is the observation time, not the fetch time, so a stale row never looks
+  fresh just because it was fetched today.
+- `/products` pages with `size` ≤ 100 and has only `next` links, no total count. The whole category
+  is about 11 requests.
 
 ---
 
@@ -594,6 +637,7 @@ tests/fixtures/<kilde>/...
 ## 15. Milestones
 
 1. **M1 – Core search**: config, Kassalapp adapter, catalog + GTIN matching, SQLite with change-only history, pricing math, search with filters, table + JSON output, TTL fetching, degrade/warn.
+   - **Right after M1 – source research**: find out whether Kiwi, Rema, Coop and Oda expose current prices directly (§4.5). The outcome may reorder M2 and M3.
 2. **M2 – History**: verdict engine, deal detection, `tilbud`, sparklines, `historikk` chart, `eksporter`.
 3. **M3 – Direct adapters**: Oda, then Rema offers and Coop offers (after the endpoint research), merge rules, member prices.
 4. **M4 – Automation and release**: `planlegg` for all OSes, `overvak` + notifications, completions, cargo-dist releases, published JSON schema.
@@ -604,7 +648,7 @@ tests/fixtures/<kilde>/...
 
 - **Undocumented endpoints** (Rema, Coop, and Oda to a lesser degree) can change without warning. Mitigations: fixtures, schema-drift detection, per-source kill switch, and Kassalapp as the baseline.
 - **Terms of use**: the tool is for personal use with conservative request rates. Review each source's terms before publishing to crates.io, and drop any adapter whose terms forbid automated access.
-- **Kassalapp freshness and chain coverage** decide the quality of the baseline. Record `hentet` per source, so staleness is always visible.
+- **Kassalapp freshness and chain coverage** decide the quality of the baseline. Record `hentet` per source, so staleness is always visible. **Confirmed problem (§4.5):** Kassalapp has no fresh Kiwi, Rema, Coop or Oda prices. Direct sources for those chains are the biggest open question for the tool's usefulness.
 - **Pant rates** must be confirmed against Infinitum at implementation time. They are configurable data.
 - **Cold start**: verdicts show `UKJENT` for the first ~14 days. A possible v1.x improvement is to seed history from Kassalapp's per-product price history (not in v1 scope).
 - **Chain-level simplification**: a price shown for Coop Extra may not match every Coop Extra store. The spread (`prisspenn`) is surfaced in JSON. Store-level pricing is a possible future extension.

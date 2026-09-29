@@ -157,7 +157,7 @@ pub enum KjedeValg {
     AlleCoop,
 }
 
-const KJEDEVALG: [KjedeValg; 12] = [
+const KJEDEVALG: [KjedeValg; 16] = [
     KjedeValg::En(Kjede::Rema),
     KjedeValg::En(Kjede::Kiwi),
     KjedeValg::En(Kjede::Meny),
@@ -170,6 +170,10 @@ const KJEDEVALG: [KjedeValg; 12] = [
     KjedeValg::En(Kjede::CoopPrix),
     KjedeValg::En(Kjede::Bunnpris),
     KjedeValg::En(Kjede::Oda),
+    KjedeValg::En(Kjede::Europris),
+    KjedeValg::En(Kjede::Engrossnett),
+    KjedeValg::En(Kjede::Havaristen),
+    KjedeValg::En(Kjede::Fastcandy),
 ];
 
 impl ValueEnum for KjedeValg {

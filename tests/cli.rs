@@ -80,7 +80,7 @@ fn butikker_json() {
     let json = stdout_json(databrus(&mappe).args(["butikker", "--json"]));
     assert_eq!(json["skjemaversjon"], 1);
     let butikker = json["butikker"].as_array().unwrap();
-    assert_eq!(butikker.len(), 11);
+    assert_eq!(butikker.len(), 15);
     assert_eq!(butikker[0]["kjede"], "rema");
     assert!(butikker[0]["sist_hentet"].is_null());
 }
@@ -100,7 +100,7 @@ fn butikker_json_linjer() {
         .lines()
         .map(|l| serde_json::from_str(l).unwrap())
         .collect();
-    assert_eq!(linjer.len(), 12);
+    assert_eq!(linjer.len(), 16);
     assert_eq!(linjer[0]["type"], "hode");
     assert_eq!(linjer[0]["skjemaversjon"], 1);
     assert_eq!(linjer[1]["type"], "resultat");
