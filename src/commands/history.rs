@@ -7,8 +7,6 @@ use jiff::{Timestamp, ToSpan};
 use serde::Serialize;
 
 use crate::Context;
-use crate::catalog::Catalog;
-use crate::catalog::parse::normalize;
 use crate::cli::{HistoryArgs, SearchArgs};
 use crate::error::{AppError, ExitStatus};
 use crate::history::{History, deals, oslo_date, start_of_day};
@@ -68,7 +66,8 @@ pub fn run(args: &HistoryArgs, ctx: &Context) -> Result<ExitStatus, AppError> {
 
     let now = model::now();
     let history = ranking::history(&db.price_history()?, &catalog, &ctx.config, now);
-    let product = resolve(&catalog, &args.product, &history, ctx)?;
+    let product =
+        super::resolve_product(&catalog, &args.product, |id| history.has_history(id), ctx)?;
 
     // Current prices and verdicts for every chain, computed the same way as in search:
     // stale, sold-out and suspicious prices are not current, but no row limit.
@@ -206,62 +205,4 @@ fn write_table(
     }
     writeln!(out, "{t}")?;
     Ok(())
-}
-
-/// Finds the one product the user means: by id, or by text, preferring an exact name and
-/// then products with history. More than one match is an error that lists them.
-fn resolve<'a>(
-    catalog: &'a Catalog,
-    query: &[String],
-    history: &History,
-    ctx: &Context,
-) -> Result<&'a Product, AppError> {
-    let text = query.join(" ");
-    if let Some(product) = catalog.products.iter().find(|p| p.id.0 == text.trim()) {
-        return Ok(product);
-    }
-    let filter = SearchFilter::from_args(
-        &SearchArgs {
-            query: query.to_vec(),
-            ..SearchArgs::default()
-        },
-        &ctx.config,
-    );
-    let mut candidates: Vec<&Product> = catalog
-        .products
-        .iter()
-        .filter(|p| filter.product_matches(p))
-        .collect();
-    narrow(&mut candidates, |p| normalize(&p.name) == normalize(&text));
-    narrow(&mut candidates, |p| history.has_history(&p.id));
-
-    match candidates.as_slice() {
-        [] => Err(AppError::Usage(format!(
-            "ingen produkter passer «{text}» – se `databrus produkter`"
-        ))),
-        [one] => Ok(one),
-        many => {
-            let mut many = many.to_vec();
-            many.sort_by(|a, b| a.name.cmp(&b.name).then(a.volume.cmp(&b.volume)));
-            let mut list: Vec<String> = many
-                .iter()
-                .take(10)
-                .map(|p| format!("  {} {}  ({})", p.name, format::liters(p.volume), p.id.0))
-                .collect();
-            if many.len() > 10 {
-                list.push(format!("  … og {} til", many.len() - 10));
-            }
-            Err(AppError::Usage(format!(
-                "flere produkter passer «{text}» – skriv mer presist eller bruk id-en:\n{}",
-                list.join("\n")
-            )))
-        }
-    }
-}
-
-/// Keeps only the candidates that pass `keep`, unless that would leave none.
-fn narrow(candidates: &mut Vec<&Product>, keep: impl Fn(&Product) -> bool) {
-    if candidates.len() > 1 && candidates.iter().any(|p| keep(p)) {
-        candidates.retain(|p| keep(p));
-    }
 }

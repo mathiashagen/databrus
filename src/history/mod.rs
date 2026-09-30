@@ -178,6 +178,7 @@ mod tests {
         HistoricPrice {
             price: StoredPrice {
                 listing_id,
+                interval_id: listing_id * 100 + from,
                 source: SourceId::Kassalapp,
                 chain: Chain::Meny,
                 product: ProductId("monster-ultra-white-05".into()),

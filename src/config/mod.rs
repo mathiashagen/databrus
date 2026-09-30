@@ -57,6 +57,10 @@ atl_toleranse_prosent = 2
 lureri_prisokning_prosent = 5
 prisfall_prosent = 10
 
+[varsler]
+# Vis prisvarsler (overvak) som skrivebordsvarsler, ikke bare på stderr.
+skrivebord = true
+
 [kilder.kassalapp]
 aktiv = true
 # Gratis nøkkel fra https://kassal.app/api. Miljøvariabelen KASSALAPP_API_KEY går foran.
@@ -104,6 +108,8 @@ pub struct Config {
     pub deposit: DepositConfig,
     #[serde(rename = "vurdering")]
     pub verdict: Thresholds,
+    #[serde(rename = "varsler")]
+    pub alerts: AlertsConfig,
     #[serde(rename = "kilder")]
     pub sources: Sources,
 }
@@ -118,8 +124,24 @@ impl Default for Config {
             fetching: Fetching::default(),
             deposit: DepositConfig::default(),
             verdict: Thresholds::default(),
+            alerts: AlertsConfig::default(),
             sources: Sources::default(),
         }
+    }
+}
+
+/// `[varsler]`: how triggered price alerts are shown (SPEC §7.7).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(default)]
+pub struct AlertsConfig {
+    /// Also as a desktop notification, not only on stderr.
+    #[serde(rename = "skrivebord")]
+    pub desktop: bool,
+}
+
+impl Default for AlertsConfig {
+    fn default() -> Self {
+        Self { desktop: true }
     }
 }
 

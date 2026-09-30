@@ -225,3 +225,94 @@ async fn update_and_search_with_campaigns() {
     assert_eq!(row[14], "13,32");
     assert_eq!(row[15], "26,64");
 }
+
+/// A price alert added before the first fetch fires when `oppdater` brings a price under
+/// the threshold, and `overvak liste` shows it as under. Desktop notifications are off, so
+/// the test never pops anything up.
+#[tokio::test(flavor = "multi_thread")]
+async fn alert_fires_after_update() {
+    let server = MockServer::start().await;
+    two_pages(&server).await;
+    let dir = TempDir::new().unwrap();
+    std::fs::write(
+        dir.path().join("konfig.toml"),
+        "[varsler]\nskrivebord = false\n",
+    )
+    .unwrap();
+    let url = format!("{}/api/v1", server.uri());
+
+    let databrus = move |dir: &TempDir, args: &[&str]| {
+        let mut command = Command::new(env!("CARGO_BIN_EXE_databrus"));
+        command
+            .args(args)
+            .env("DATABRUS_KONFIG", dir.path().join("konfig.toml"))
+            .env("DATABRUS_DATA_DIR", dir.path().join("data"))
+            .env("DATABRUS_ODA_URL", &url)
+            .env_remove("KASSALAPP_API_KEY")
+            .env("NO_COLOR", "1");
+        command
+    };
+
+    let (added, too_high, update, list) = tokio::task::spawn_blocking(move || {
+        // 13,32 per can at Oda with "3 for 2": under 14, not under 13.
+        let added = databrus(
+            &dir,
+            &[
+                "overvak",
+                "legg-til",
+                "monster-ultra-white-500-boks",
+                "--under",
+                "14",
+            ],
+        )
+        .assert();
+        let too_high = databrus(
+            &dir,
+            &[
+                "overvak",
+                "legg-til",
+                "monster-ultra-white-500-boks",
+                "--under",
+                "13",
+            ],
+        )
+        .assert();
+        let update = databrus(&dir, &["oppdater", "--kilde", "oda", "--stille"]).assert();
+        let list = databrus(&dir, &["overvak", "liste", "--json"]).assert();
+        (added, too_high, update, list)
+    })
+    .await
+    .unwrap();
+
+    added
+        .success()
+        .stdout(predicate::str::contains(
+            "la til varsel 1: Monster Ultra White 0,5 l under 14,00 kr",
+        ))
+        .stdout(predicate::str::contains("ingen fersk pris nå"));
+    too_high.success();
+
+    // Exactly one alert fires, even with --stille.
+    let output = update.success().get_output().stderr.clone();
+    let stderr = String::from_utf8(output).unwrap();
+    assert_eq!(
+        stderr.lines().filter(|l| l.starts_with("varsel:")).count(),
+        1,
+        "{stderr}"
+    );
+    assert!(
+        stderr.contains(
+            "Prisvarsel: Monster Ultra White 0,5 l: 13,32 kr hos Oda – under grensen på 14,00 kr"
+        ),
+        "{stderr}"
+    );
+
+    let output = list.success().get_output().stdout.clone();
+    let json: serde_json::Value = serde_json::from_slice(&output).unwrap();
+    let alerts = json["varsler"].as_array().unwrap();
+    assert_eq!(alerts.len(), 2);
+    assert_eq!(alerts[0]["under_grensen"], true);
+    assert_eq!(alerts[0]["beste_pris_ore"], 1332);
+    assert_eq!(alerts[0]["beste_kjede"], "oda");
+    assert_eq!(alerts[1]["under_grensen"], false);
+}

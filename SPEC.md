@@ -457,10 +457,11 @@ the underlying numbers (`l30`, `m90`, `atl`, `dekning_dager`).
 
 ### 7.7 Price alerts (`overvak`)
 
-- `overvak legg-til "monster ultra white" --under 18 [--kjede kiwi] [--literpris]`. The threshold is on the effective unit price, or on the per-liter price with `--literpris`. The product is resolved with the same matching as search. If the match is ambiguous, the command errors and lists the candidates.
-- Checked after every `oppdater` (manual or scheduled), and also after an automatic TTL fetch during a search.
-- When an alert triggers: a desktop notification (`notify-rust`; Windows toast, macOS, Linux notify), plus a line on stderr. The same alert re-fires only when the price interval changes (so there's no notification spam every day for an unchanged price).
-- `overvak liste` shows alerts with their current best price and status.
+- `overvak legg-til "monster ultra white" --under 18 [--kjede kiwi] [--literpris]`. The threshold is on the effective unit price, or on the per-liter price with `--literpris`, and is strict (`--under 18` means below 18,00). The product is resolved like in `historikk` (§7.9): by id or text, an exact name first, then products with prices. If the match is still ambiguous, the command errors and lists the candidates with their ids. It prints the current best price.
+- Checked after every fetch that got new data: `oppdater` (manual or scheduled), and the automatic TTL fetch during a search or `tilbud`.
+- The price an alert compares is the best current price for its product (at its chain, if it has one), as search would show it: fresh, available and not suspicious, whatever `standard_butikker` says.
+- When an alert triggers: a line on stderr (`varsel: …`, also with `--stille`, since the scheduled job has no other way to report it), plus a desktop notification (`notify-rust`: Windows toast, macOS, Linux D-Bus) unless `[varsler] skrivebord = false`. A notification that fails to show is logged, not an error. The same alert re-fires only when the price interval changes (so there's no notification spam every day for an unchanged price).
+- `overvak liste` shows alerts with their current best price and status (`UNDER`). With `--json` the payload key is `varsler`: each alert (`id`, `produkt`, `kjede`, `grense_ore`, `grensetype`, `opprettet`) plus `produktnavn`, `beste_pris_ore`, `beste_kjede` and `under_grensen`. `overvak fjern <ID>` removes one; an unknown id is a usage error.
 
 ### 7.8 Deal detection ("tilbud")
 
@@ -600,6 +601,9 @@ atl_toleranse_prosent = 2
 lureri_prisokning_prosent = 5
 prisfall_prosent = 10
 
+[varsler]
+skrivebord = true      # also show alerts as desktop notifications
+
 [kilder.kassalapp]
 aktiv = true
 api_nokkel = ""                    # KASSALAPP_API_KEY overrides this
@@ -708,6 +712,7 @@ tests/fixtures/<source>/...
    - Done (2026-09-30). History is judged per listing rather than per `(product, chain)` (§7.6).
 3. **M3 – Direct adapters**: Oda (§4.6), merge rules. Rema and Coop offer adapters are dropped for lack of a public source; revisit if Tjek or the chains offer access.
 4. **M4 – Automation and release**: `planlegg` for all OSes, `overvak` + notifications, completions, cargo-dist releases, published JSON schema.
+   - Done: `planlegg` on Windows, `overvak` with notifications, the published JSON schema. Left: `planlegg` on Linux and macOS, cargo-dist releases.
 
 ---
 

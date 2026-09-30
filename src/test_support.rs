@@ -41,6 +41,7 @@ pub(crate) fn now() -> Timestamp {
 pub(crate) fn price(product: &str, chain: Chain, shelf_price: i64, hours_ago: i64) -> StoredPrice {
     StoredPrice {
         listing_id: 0,
+        interval_id: 0,
         source: SourceId::Kassalapp,
         chain,
         product: ProductId(product.into()),

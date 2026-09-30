@@ -49,6 +49,7 @@ pub async fn run(args: &UpdateArgs, ctx: &Context) -> Result<ExitStatus, AppErro
         }
         OutputFormat::Table => {}
     }
+    super::check_alerts(&mut db, &catalog, ctx, &statuses)?;
 
     if fetched.is_empty() && failed > 0 {
         return Err(AppError::AllSourcesFailed);

@@ -577,6 +577,10 @@ pub struct SearchResult {
     /// The stored listing behind the row, for `historikk`. Not part of the JSON.
     #[serde(skip)]
     pub listing_id: i64,
+    /// The price interval behind the row, so an alert fires once per price. Not part of
+    /// the JSON.
+    #[serde(skip)]
+    pub interval_id: i64,
 }
 
 #[cfg(test)]

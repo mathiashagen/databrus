@@ -256,6 +256,7 @@ fn build_result(
         age_hours,
         trend,
         listing_id: price.listing_id,
+        interval_id: price.interval_id,
     }
 }
 
@@ -366,6 +367,7 @@ mod tests {
     fn price(id: i64, product: &str, chain: Chain, shelf_price: i64) -> StoredPrice {
         StoredPrice {
             listing_id: id,
+            interval_id: id,
             source: SourceId::Kassalapp,
             chain,
             product: ProductId(product.into()),

@@ -18,6 +18,7 @@ pub async fn run(args: &DealsArgs, ctx: &Context) -> Result<ExitStatus, AppError
     let catalog = ctx.catalog()?;
     let mut db = ctx.open_database()?;
     let statuses = sources::refresh(&mut db, &ctx.config, &catalog, ctx.fetch_mode(), &[]).await?;
+    super::check_alerts(&mut db, &catalog, ctx, &statuses)?;
     super::require_price_data(&db)?;
 
     let now = model::now();

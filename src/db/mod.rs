@@ -3,6 +3,7 @@
 //! Timestamps are stored as unix seconds (UTC). The database is opened in WAL mode, so a
 //! scheduled fetch and an interactive search can run at the same time.
 
+pub mod alerts;
 pub mod migrations;
 pub mod read;
 pub mod write;

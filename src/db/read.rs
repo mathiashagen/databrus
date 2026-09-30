@@ -26,6 +26,8 @@ pub struct FetchLog {
 #[derive(Debug, Clone, PartialEq)]
 pub struct StoredPrice {
     pub listing_id: i64,
+    /// The price interval this price comes from.
+    pub interval_id: i64,
     pub source: SourceId,
     pub chain: Chain,
     pub product: ProductId,
@@ -65,6 +67,7 @@ struct PriceRow {
     suspicious: bool,
     last_seen: Timestamp,
     valid_from: Timestamp,
+    interval_id: i64,
 }
 
 impl PriceRow {
@@ -90,6 +93,7 @@ impl PriceRow {
         Some(HistoricPrice {
             price: StoredPrice {
                 listing_id: id,
+                interval_id: self.interval_id,
                 source,
                 chain,
                 product: ProductId(self.product),
@@ -162,7 +166,8 @@ impl Database {
         let sql = format!(
             "SELECT l.id, l.source, l.chain, l.product_id, l.pack_size, l.verified,
                     p.shelf_price_ore, p.member_price_ore, p.membership_program,
-                    p.offer_json, p.available, p.suspicious, p.last_seen, p.valid_from
+                    p.offer_json, p.available, p.suspicious, p.last_seen, p.valid_from,
+                    p.id
              FROM listing l {rest}"
         );
         let mut query = self.conn.prepare(&sql).map_err(|e| error(&self.path, e))?;
@@ -183,6 +188,7 @@ impl Database {
                     suspicious: row.get(11)?,
                     last_seen: timestamp(row, 12)?,
                     valid_from: timestamp(row, 13)?,
+                    interval_id: row.get(14)?,
                 })
             })
             .map_err(|e| error(&self.path, e))?;
@@ -300,7 +306,7 @@ impl Database {
     }
 }
 
-fn timestamp(row: &Row<'_>, column: usize) -> rusqlite::Result<Timestamp> {
+pub(super) fn timestamp(row: &Row<'_>, column: usize) -> rusqlite::Result<Timestamp> {
     let seconds: i64 = row.get(column)?;
     Timestamp::from_second(seconds)
         .map_err(|e| rusqlite::Error::FromSqlConversionFailure(column, Type::Integer, Box::new(e)))
