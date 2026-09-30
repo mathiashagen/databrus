@@ -701,7 +701,7 @@ tests/fixtures/<source>/...
 ## 14. Distribution
 
 - `cargo install databrus`.
-- GitHub Actions with `cargo-dist`: release binaries for Windows (x86_64 MSVC), macOS (arm64 + x86_64) and Linux (x86_64 musl), plus a PowerShell and a shell installer.
+- GitHub Actions with `dist` (formerly cargo-dist; config in `dist-workspace.toml`, workflow in `.github/workflows/release.yml`): pushing a `v*` tag builds release binaries for Windows (x86_64 MSVC), macOS (arm64 + x86_64) and Linux (x86_64 musl, static), plus a PowerShell and a shell installer that install into `~/.cargo/bin`, and publishes them as a GitHub release with checksums. The binary is self-contained: the catalog and the migrations are compiled in.
 - CI on every PR: `fmt`, `clippy -D warnings`, and tests on Windows/Linux/macOS.
 
 ---
@@ -714,7 +714,7 @@ tests/fixtures/<source>/...
    - Done (2026-09-30). History is judged per listing rather than per `(product, chain)` (§7.6).
 3. **M3 – Direct adapters**: Oda (§4.6), merge rules. Rema and Coop offer adapters are dropped for lack of a public source; revisit if Tjek or the chains offer access.
 4. **M4 – Automation and release**: `planlegg` for all OSes, `overvak` + notifications, completions, cargo-dist releases, published JSON schema.
-   - Done: `planlegg` on Windows, Linux and macOS, `overvak` with notifications, the published JSON schema. Left: cargo-dist releases.
+   - Done: `planlegg` on Windows, Linux and macOS, `overvak` with notifications, the published JSON schema, `dist` releases.
 
 ---
 
