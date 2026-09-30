@@ -119,6 +119,12 @@ impl SourceId {
         }
     }
 
+    /// Whether the source is the chain's own (Oda) rather than the Kassalapp aggregator.
+    /// A direct source wins ties and its offers win conflicts (SPEC §4.3).
+    pub const fn is_direct(self) -> bool {
+        !matches!(self, SourceId::Kassalapp)
+    }
+
     /// Norwegian name shown to the user.
     pub const fn display_name(self) -> &'static str {
         match self {
@@ -520,7 +526,7 @@ pub struct VerdictInfo {
     pub coverage_days: u32,
 }
 
-#[derive(Debug, Clone, Copy, Serialize, JsonSchema)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, JsonSchema)]
 pub struct PriceRange {
     pub min_ore: Ore,
     #[serde(rename = "maks_ore")]

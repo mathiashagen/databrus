@@ -1,5 +1,6 @@
 //! Filtering and ranking (SPEC §3.2, §6.4).
 
+pub mod merge;
 pub mod ranking;
 
 use clap::ValueEnum;

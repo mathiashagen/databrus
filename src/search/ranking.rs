@@ -5,14 +5,14 @@ use std::collections::HashMap;
 use jiff::Timestamp;
 use jiff::civil::Date;
 
-use super::{SearchFilter, SortBy};
+use super::{SearchFilter, SortBy, merge};
 use crate::catalog::Catalog;
 use crate::config::Config;
 use crate::db::{HistoricPrice, StoredPrice};
 use crate::history::{self, History, References, deals};
 use crate::model::{
-    MembershipProgram, Offer, Ore, PriceBasis, Product, ProductSummary, SearchResult, Verdict,
-    VerdictInfo,
+    MembershipProgram, Offer, Ore, PriceBasis, PriceRange, Product, ProductSummary, SearchResult,
+    Verdict, VerdictInfo,
 };
 use crate::pricing::{self, PriceCalc, effective_unit_price};
 
@@ -75,7 +75,8 @@ pub fn rank(
     let mut hidden = Hidden::default();
     let mut rows = Vec::new();
 
-    for price in prices {
+    for merged in merge::merge(prices, today) {
+        let price = &merged.price;
         let Some(product) = catalog.find(&price.product) else {
             continue;
         };
@@ -127,6 +128,7 @@ pub fn rank(
             product,
             &refs,
             trend,
+            merged.range,
             calc,
             basis,
             liter_price,
@@ -202,6 +204,7 @@ fn build_result(
     product: &Product,
     refs: &References,
     trend: Vec<Option<Ore>>,
+    price_range: Option<PriceRange>,
     calc: PriceCalc,
     price_basis: PriceBasis,
     liter_price: Ore,
@@ -250,7 +253,7 @@ fn build_result(
             atl_ore: refs.atl,
             coverage_days: refs.coverage_days,
         },
-        price_range: None,
+        price_range,
         available: price.available != Some(false),
         last_seen: price.last_seen,
         age_hours,
@@ -843,6 +846,30 @@ mod tests {
         assert_eq!(
             row.offer.as_ref().and_then(|o| o.valid_from),
             Some(date(2026, 10, 2))
+        );
+    }
+    #[test]
+    fn listings_of_the_same_thing_become_one_row_with_a_spread() {
+        // Two Kassalapp entries for the same can at Meny, seen at the same time.
+        let prices = [
+            price(1, WHITE, Chain::Meny, 2490),
+            price(2, WHITE, Chain::Meny, 2290),
+            price(3, WHITE, Chain::Meny, 2490),
+        ];
+        let all = SearchArgs {
+            all: true,
+            ..SearchArgs::default()
+        };
+        let hits = search(&prices, all, &Config::default());
+        assert_eq!(hits.rows.len(), 1);
+        let row = &hits.rows[0];
+        assert_eq!(row.shelf_price, Ore(2490));
+        assert_eq!(
+            row.price_range,
+            Some(PriceRange {
+                min_ore: Ore(2290),
+                max_ore: Ore(2490)
+            })
         );
     }
 }
