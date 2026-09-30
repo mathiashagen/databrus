@@ -13,10 +13,25 @@ om et tilbud faktisk er bra.
 > daglig henting med `databrus planlegg installer` (Windows, Linux og macOS).
 > Se [SPEC.md](SPEC.md) for full spesifikasjon.
 
+## Installer
+
+Ferdige programfiler for Windows, macOS (Apple Silicon og Intel) og Linux (x86_64) ligger
+under [Releases](https://github.com/mathiashagen/databrus/releases) fra og med første
+utgivelse. Installasjonsskriptene legger `databrus` i `~/.cargo/bin`:
+
+```console
+# macOS og Linux
+$ curl --proto '=https' --tlsv1.2 -LsSf https://github.com/mathiashagen/databrus/releases/latest/download/databrus-installer.sh | sh
+
+# Windows (PowerShell)
+> powershell -ExecutionPolicy Bypass -c "irm https://github.com/mathiashagen/databrus/releases/latest/download/databrus-installer.ps1 | iex"
+```
+
+Eller bygg selv med `cargo install --path .` fra en klone av repoet.
+
 ## Kom i gang
 
 ```console
-$ cargo install --path .
 $ databrus konfig init          # skriv standardkonfigurasjon
 $ databrus butikker             # kjente kjeder og kilder
 $ databrus produkter --merke monster
@@ -44,6 +59,18 @@ $ databrus konfig sett kilder.kassalapp.api_nokkel ...
 $ cargo test
 $ cargo clippy --all-targets -- -D warnings
 ```
+
+### Ny versjon
+
+Utgivelser bygges av [dist](https://github.com/axodotdev/cargo-dist)
+(`.github/workflows/release.yml`). Øk `version` i `Cargo.toml`, commit, og push en tagg:
+
+```console
+$ git tag v0.2.0
+$ git push origin v0.2.0
+```
+
+Etter endringer i `dist-workspace.toml`: kjør `dist generate` og commit resultatet.
 
 Snapshot-tester bruker [insta](https://insta.rs); se over endringer med `cargo insta review`.
 
