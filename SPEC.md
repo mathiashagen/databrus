@@ -423,10 +423,10 @@ Chain, source, container and membership values are stored as their public slugs 
 ### 7.5 Scheduled collection (`planlegg`)
 
 - `planlegg installer [--tid 07:00]` installs a daily `databrus oppdater --stille` job:
-  - **Windows**: Task Scheduler via `schtasks.exe` (task name `databrus-oppdater`, runs as the current user, runs when missed).
+  - **Windows** (implemented): Task Scheduler via `schtasks.exe /create /xml` (task name `databrus-oppdater`). Runs as the current user while they are logged on, so no password is stored. Runs as soon as possible after a missed start, and also on battery. The first start is the next occurrence of `--tid`, so installing never triggers an immediate run. A `--konfig` path is passed on to the task as an absolute path.
   - **Linux**: systemd user timer if available, otherwise a crontab entry.
   - **macOS**: a launchd agent plist.
-- `planlegg status` shows whether it is installed, when it last ran, and the result (from the `henting` table).
+- `planlegg status` shows whether it is installed, its time and command, and the last fetch per source with its result (from `fetch_log`).
 - `planlegg fjern` removes it.
 - `--stille` means no output except errors. Alerts (§7.7) are evaluated after every `oppdater`.
 
