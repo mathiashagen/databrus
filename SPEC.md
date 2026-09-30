@@ -170,11 +170,18 @@ the tool.
 
 ### 4.3 Merge rules
 
-For each `(chain, product)`:
+For each `(chain, product, pack size)` (a single can and a 4-pack are different things,
+§5.2), before ranking. Observations less than **24 hours** apart count as made at the same
+time, which matches the daily fetch.
 
-1. **Base price**: the freshest observation among all sources. When sources tie, a direct adapter beats Kassalapp.
-2. **Offers**: an active offer from a direct adapter is layered on top of the base price. If two sources report different offers, prefer the direct adapter and log the conflict at `-v`.
-3. **Chain level**: when a source reports multiple stores of the same chain with different prices, use the **mode** (most common price). If there is no mode, use the median. Record the min and max in the listing (`prisspenn`) so JSON consumers can see the spread.
+1. **Base price**: the freshest observation among all sources. When sources tie (less than 24 hours apart), a direct adapter beats Kassalapp.
+2. **Offers**: an active offer from a direct adapter is layered on top of the base price, if the direct adapter saw it at most 3 days before the base price (an offer without an end date seen long ago may be over). If two sources report different offers, prefer the direct adapter and log the conflict at `-v`.
+3. **Chain level**: when a source reports several listings for the same chain, only those seen at the same time as its newest one count; an old entry next to a fresh one is a change over time, not a different store. Among them, use the **mode** (most common shelf price). If there is no single mode, use the median, the lower middle one for an even count, so it is a price that exists. When they disagree, record the min and max in the row (`prisspenn`) so JSON consumers can see the spread.
+
+Suspicious prices (§5.5) only count when there is nothing else. The winning listing's
+history is the row's history (§7.6). In the data from 2026-09-30, this removed Kassalapp's
+year-old Oda rows next to Oda's own, and 4 stale duplicate Kassalapp entries (e.g. Red Bull
+Blue Edition at Meny: 23,90 from June next to 14,90 from today).
 
 ### 4.4 Chains
 
@@ -713,6 +720,7 @@ tests/fixtures/<source>/...
 2. **M2 – History**: verdict engine, deal detection, `tilbud`, sparklines, `historikk` chart, `eksporter`.
    - Done (2026-09-30). History is judged per listing rather than per `(product, chain)` (§7.6).
 3. **M3 – Direct adapters**: Oda (§4.6), merge rules. Rema and Coop offer adapters are dropped for lack of a public source; revisit if Tjek or the chains offer access.
+   - Done (2026-09-30).
 4. **M4 – Automation and release**: `planlegg` for all OSes, `overvak` + notifications, completions, cargo-dist releases, published JSON schema.
    - Done: `planlegg` on Windows, Linux and macOS, `overvak` with notifications, the published JSON schema, `dist` releases.
 
