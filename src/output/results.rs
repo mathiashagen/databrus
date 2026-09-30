@@ -1,18 +1,21 @@
 //! The search result as a table (SPEC §3.4, §11). All text in the table is Norwegian.
 //!
-//! Vurdering and Trend come with the history in M2; until then they are not shown.
+//! The Trend column is left out when no row has enough history for it.
 
 use comfy_table::{Attribute, Cell, CellAlignment, Color, Table};
 use jiff::Timestamp;
 
 use super::{format, table};
-use crate::model::{DealBadge, PriceBasis, SearchResult};
+use crate::history::deals;
+use crate::model::{DealBadge, PriceBasis, SearchResult, Verdict};
 use crate::pricing::effective_unit_price;
 use crate::search::ranking::{MAX_AGE_HOURS, SearchHits};
 use crate::sources::{SourceState, SourceStatus};
 
 /// Below this width the Pant column is dropped.
 const NARROW: u16 = 80;
+/// Below this width the Trend column is dropped.
+const WITHOUT_TREND: u16 = 100;
 /// Rows older than this show their age after the chain and are dimmed.
 const OLD_HOURS: u32 = 24;
 
@@ -25,6 +28,12 @@ pub fn table(hits: &SearchHits, color: bool, width: Option<u16>) -> Table {
         headers.push("Pant");
     }
     headers.push("Tilbud");
+    headers.push("Vurdering");
+    let trend =
+        width.is_none_or(|w| w >= WITHOUT_TREND) && hits.rows.iter().any(|r| !r.trend.is_empty());
+    if trend {
+        headers.push("Trend");
+    }
 
     let mut t = table::new(&headers);
     if let Some(width) = width {
@@ -43,6 +52,7 @@ pub fn table(hits: &SearchHits, color: bool, width: Option<u16>) -> Table {
 
     for (i, row) in hits.rows.iter().enumerate() {
         let (deal, campaign) = deal_text(row);
+        let verdict = verdict_text(row);
         let mut cells = vec![
             product_name(row),
             format::liters(row.product.volume),
@@ -54,9 +64,14 @@ pub fn table(hits: &SearchHits, color: bool, width: Option<u16>) -> Table {
             cells.push(format!("+{}", format::kr(row.deposit)));
         }
         cells.push(deal);
+        cells.push(verdict.to_owned());
+        let verdict_column = cells.len() - 1;
+        if trend {
+            cells.push(format::sparkline(&row.trend));
+        }
 
         let dimmed = row.age_hours >= OLD_HOURS || !row.available;
-        let last = cells.len() - 1;
+        let deal_column = verdict_column - 1;
         let cells: Vec<Cell> = cells
             .into_iter()
             .enumerate()
@@ -69,8 +84,13 @@ pub fn table(hits: &SearchHits, color: bool, width: Option<u16>) -> Table {
                     if dimmed {
                         cell = cell.add_attribute(Attribute::Dim);
                     }
-                    if j == last && campaign {
+                    if j == deal_column && campaign {
                         cell = cell.fg(Color::Yellow);
+                    }
+                    if j == verdict_column
+                        && let Some(color) = verdict_color(row.verdict.value)
+                    {
+                        cell = cell.fg(color);
                     }
                 }
                 cell
@@ -142,15 +162,45 @@ fn chain_name(row: &SearchResult) -> String {
     }
 }
 
+/// The text in the Vurdering column. A row that is not a deal shows `–` unless its
+/// price is below the 90-day median, and `UKJENT` only matters for deals (SPEC §7.6).
+fn verdict_text(row: &SearchResult) -> &'static str {
+    let is_deal = row.deal_badge.is_some();
+    let below_median = row.verdict.m90_ore.is_some_and(|m90| row.liter_price < m90);
+    match row.verdict.value {
+        Verdict::Unknown if !is_deal => "–",
+        _ if !is_deal && !below_median => "–",
+        verdict => verdict.label(),
+    }
+}
+
+fn verdict_color(verdict: Verdict) -> Option<Color> {
+    match verdict {
+        Verdict::Great => Some(Color::Green),
+        Verdict::Good => Some(Color::Cyan),
+        Verdict::Fake => Some(Color::Red),
+        Verdict::Fair | Verdict::Unknown => None,
+    }
+}
+
 /// The text in the Tilbud column, and whether it is a campaign (shown in yellow).
 fn deal_text(row: &SearchResult) -> (String, bool) {
     let mut parts = Vec::new();
     let campaign = row.deal_badge == Some(DealBadge::Campaign);
     match row.deal_badge {
-        Some(DealBadge::Campaign) if row.min_quantity > row.pack_size => {
-            parts.push(format!("KAMPANJE {}stk", row.min_quantity));
+        Some(DealBadge::Campaign) => {
+            let mut text = String::from("KAMPANJE");
+            if row.min_quantity > row.pack_size {
+                text.push_str(&format!(" {}stk", row.min_quantity));
+            }
+            // Only with `tilbud --kommende`: the offer has not started yet.
+            if let Some(start) = row.offer.as_ref().and_then(|o| o.valid_from)
+                && start > deals::today_oslo()
+            {
+                text.push_str(&format!(" fra {}.{}.", start.day(), start.month()));
+            }
+            parts.push(text);
         }
-        Some(DealBadge::Campaign) => parts.push("KAMPANJE".into()),
         Some(DealBadge::PriceDrop) => parts.push("PRISFALL".into()),
         None => {}
     }
@@ -176,12 +226,51 @@ mod tests {
     use jiff::ToSpan;
 
     use super::*;
-    use crate::model::SourceId;
+    use crate::model::{Ore, SourceId};
     use crate::test_support::{example_hits as example, now};
 
     #[test]
     fn table_without_colors() {
         insta::assert_snapshot!(table(&example(), false, Some(120)).to_string());
+    }
+
+    #[test]
+    fn verdict_is_shown_for_deals_and_prices_below_the_median() {
+        let mut row = example().rows[0].clone();
+        row.deal_badge = None;
+        row.verdict.value = Verdict::Great;
+        row.verdict.m90_ore = Some(row.liter_price);
+        assert_eq!(verdict_text(&row), "–");
+        row.verdict.m90_ore = Some(Ore(row.liter_price.0 + 1));
+        assert_eq!(verdict_text(&row), "SUPERT");
+
+        row.verdict.value = Verdict::Unknown;
+        assert_eq!(verdict_text(&row), "–");
+        row.deal_badge = Some(DealBadge::Campaign);
+        assert_eq!(verdict_text(&row), "UKJENT");
+        row.verdict.value = Verdict::Fake;
+        assert_eq!(verdict_text(&row), "LURERI");
+    }
+
+    #[test]
+    fn upcoming_campaign_shows_its_start() {
+        let mut row = example().rows[0].clone();
+        if let Some(offer) = row.offer.as_mut() {
+            offer.valid_from = Some(jiff::civil::date(2099, 10, 2));
+        }
+        assert_eq!(deal_text(&row).0, "KAMPANJE 3stk fra 2.10.");
+    }
+
+    #[test]
+    fn trend_column_only_with_history_and_room() {
+        let mut hits = example();
+        assert!(!table(&hits, false, Some(120)).to_string().contains("Trend"));
+
+        hits.rows[0].trend = vec![Some(Ore(4000)), Some(Ore(3000))];
+        let wide = table(&hits, false, Some(120)).to_string();
+        assert!(wide.contains("Trend"));
+        assert!(wide.contains("█▁"));
+        assert!(!table(&hits, false, Some(99)).to_string().contains("Trend"));
     }
 
     #[test]

@@ -423,17 +423,22 @@ Chain, source, container and membership values are stored as their public slugs 
 ### 7.5 Scheduled collection (`planlegg`)
 
 - `planlegg installer [--tid 07:00]` installs a daily `databrus oppdater --stille` job:
-  - **Windows**: Task Scheduler via `schtasks.exe` (task name `databrus-oppdater`, runs as the current user, runs when missed).
-  - **Linux**: systemd user timer if available, otherwise a crontab entry.
-  - **macOS**: a launchd agent plist.
-- `planlegg status` shows whether it is installed, when it last ran, and the result (from the `henting` table).
+  - **Windows** (implemented): Task Scheduler via `schtasks.exe /create /xml` (task name `databrus-oppdater`). Runs as the current user while they are logged on, so no password is stored. Runs as soon as possible after a missed start, and also on battery. The first start is the next occurrence of `--tid`, so installing never triggers an immediate run. A `--konfig` path is passed on to the task as an absolute path.
+  - **Linux**: a systemd user timer (`~/.config/systemd/user/databrus-oppdater.{service,timer}`, `OnCalendar` at `--tid`, `Persistent=true` so a missed run is caught up) when `systemctl --user` works, otherwise a crontab line marked `# databrus-oppdater`, with the output appended to `planlagt.log` in the data directory. Installing one removes the other. The rest of the crontab is kept as it is, and a crontab that can't be read (other than "no crontab") is an error rather than overwritten. A user timer only runs while the user is logged in unless lingering is enabled (`loginctl enable-linger`); `installer` says so. cron does not catch up missed runs.
+  - **macOS**: a launch agent `~/Library/LaunchAgents/io.github.mathiashagen.databrus-oppdater.plist` (`StartCalendarInterval`, output to `planlagt.log`), loaded with `launchctl bootstrap gui/<uid>` so desktop notifications can show. launchd runs a start missed during sleep on wake.
+  - Other systems get a clear error suggesting a cron line of their own.
+  - `installer` warns when the Kassalapp key or `DATABRUS_DATA_DIR` is only set in the shell's environment, since the scheduled job may not see it.
+- `planlegg status` shows whether it is installed, its time and command, and the last fetch per source with its result (from `fetch_log`).
 - `planlegg fjern` removes it.
 - `--stille` means no output except errors. Alerts (§7.7) are evaluated after every `oppdater`.
 
 ### 7.6 Deal verdict ("vurdering")
 
-Computed per `(product, chain)` from the history of the ranked price (the effective price,
-per-liter):
+Computed per **listing** from the history of the ranked price (the effective price,
+per-liter). A row is judged against the history of the listing it shows. History is not
+combined across the listings of a `(product, chain)` (say a single can and a 4-pack): a
+listing's history starts when a source first reports it, so a 4-pack first seen today would
+look like a drop from the single can's price even if it has been on the shelf all along.
 
 Reference values:
 - **L30**: the lowest price in the 30 days *before the current price began* (the EU Omnibus principle)
@@ -454,10 +459,11 @@ the underlying numbers (`l30`, `m90`, `atl`, `dekning_dager`).
 
 ### 7.7 Price alerts (`overvak`)
 
-- `overvak legg-til "monster ultra white" --under 18 [--kjede kiwi] [--literpris]`. The threshold is on the effective unit price, or on the per-liter price with `--literpris`. The product is resolved with the same matching as search. If the match is ambiguous, the command errors and lists the candidates.
-- Checked after every `oppdater` (manual or scheduled), and also after an automatic TTL fetch during a search.
-- When an alert triggers: a desktop notification (`notify-rust`; Windows toast, macOS, Linux notify), plus a line on stderr. The same alert re-fires only when the price interval changes (so there's no notification spam every day for an unchanged price).
-- `overvak liste` shows alerts with their current best price and status.
+- `overvak legg-til "monster ultra white" --under 18 [--kjede kiwi] [--literpris]`. The threshold is on the effective unit price, or on the per-liter price with `--literpris`, and is strict (`--under 18` means below 18,00). The product is resolved like in `historikk` (§7.9): by id or text, an exact name first, then products with prices. If the match is still ambiguous, the command errors and lists the candidates with their ids. It prints the current best price.
+- Checked after every fetch that got new data: `oppdater` (manual or scheduled), and the automatic TTL fetch during a search or `tilbud`.
+- The price an alert compares is the best current price for its product (at its chain, if it has one), as search would show it: fresh, available and not suspicious, whatever `standard_butikker` says.
+- When an alert triggers: a line on stderr (`varsel: …`, also with `--stille`, since the scheduled job has no other way to report it), plus a desktop notification (`notify-rust`: Windows toast, macOS, Linux D-Bus) unless `[varsler] skrivebord = false`. A notification that fails to show is logged, not an error. The same alert re-fires only when the price interval changes (so there's no notification spam every day for an unchanged price).
+- `overvak liste` shows alerts with their current best price and status (`UNDER`). With `--json` the payload key is `varsler`: each alert (`id`, `produkt`, `kjede`, `grense_ore`, `grensetype`, `opprettet`) plus `produktnavn`, `beste_pris_ore`, `beste_kjede` and `under_grensen`. `overvak fjern <ID>` removes one; an unknown id is a usage error.
 
 ### 7.8 Deal detection ("tilbud")
 
@@ -468,13 +474,17 @@ A listing is a deal if **either** of these holds:
 Member-only offers the user can't use show the `MEDLEM` marker but don't count as a deal for
 ranking unless the user has that membership.
 
-`tilbud` sorts by verdict (`SUPERT`, then `BRA`, then `MIDDELS`, then `LURERI`), then by per-liter price.
+`tilbud` sorts by verdict (`SUPERT`, then `BRA`, then `MIDDELS`, then `UKJENT`, then `LURERI`), then by
+per-liter price. `--sorter` changes the order within each verdict. Deals are picked before the
+cheapest listing per `(product, chain)`, so a single can on offer shows up even when the
+4-pack is cheaper per liter. With `--kommende`, an offer that has not started is priced as on its
+first day and marked `KAMPANJE fra 2.10.`.
 
 ### 7.9 History views
 
-- **Sparkline** (`Trend` column): per-liter price for that `(product, chain)` over the last 90 days, bucketed into 6–8 slots, drawn with `▁▂▃▄▅▆▇█`. Blank when coverage is below 14 days. Hidden when the terminal is narrower than the full table.
-- **`historikk <PRODUKT>`**: a Unicode (braille) line chart of per-liter price over time, one series per chain (colored, with a legend), plus a summary table per chain: now, L30, M90, ATL, verdict, days of coverage. `--dager` (default 90), `--kjede` to filter. Uses `textplots` or a small in-house braille renderer.
-- **`eksporter`**: CSV (UTF-8 with BOM for Excel compatibility, `;` as the delimiter and decimal commas when `--excel` is set; otherwise RFC 4180 with dots). One row per price interval: product, chain, source, gyldig_fra, sist_sett, prices, offer, pant.
+- **Sparkline** (`Trend` column): per-liter price for the row's listing over the last 90 days, in 6 slots (the time-weighted average in each), drawn with `▁▂▃▄▅▆▇█`. The scale spans at least 5 % of the price, so small changes don't look like big swings and a flat price is `▅▅▅▅▅▅`. Blank when coverage is below 14 days. The column is dropped below 100 columns, and when no row has enough history. Not part of the JSON.
+- **`historikk <PRODUKT>`**: a Unicode (braille) line chart of per-liter price over time, one series per chain (colored, with a legend), plus a summary table per chain: now, L30, M90, ATL, verdict, days of coverage. `--dager` (default 90), `--kjede` to filter. Uses a small in-house braille renderer; prices are drawn as steps and gaps stay empty. Each chain shows the listing search would show today, or, when it has no current price, the listing seen most recently. The product is given by id or text. An exact name wins, then products with prices; if several still match, the command fails and lists them with their ids.
+- **`eksporter`**: CSV on stdout. Plain RFC 4180 by default (commas, decimal dots, CRLF, times in Norwegian time with the UTC offset). With `--excel`: a UTF-8 BOM, `;` as the delimiter, decimal commas and times as `2026-09-30 07:00:00`. One row per stored price interval of matched listings, oldest first per listing: `produkt_id`, `produkt`, `volum_ml`, `kjede`, `kilde`, `antall_i_pakke`, `gyldig_fra`, `sist_sett`, `hyllepris_kr`, `medlemspris_kr`, `medlemsprogram`, `tilbud` (in words, e.g. `3 for 2`), `tilbud_gyldig_fra`, `tilbud_gyldig_til`, `effektiv_enhetspris_kr`, `literpris_kr` (computed as in search), `pant_kr`, `tilgjengelig`, `mistenkelig`. The product and chain filters apply. `--fra`/`--til` keep intervals seen on those days (inclusive, Europe/Oslo). `--json` is a usage error.
 
 ---
 
@@ -557,8 +567,12 @@ Each following line is `{"type":"resultat", ...same object as above...}`.
 ### 9.3 Other commands
 
 `tilbud`, `historikk`, `butikker`, `produkter` and `overvak liste` all support `--json` with the
-same envelope (`skjemaversjon`, `generert`) and a command-specific payload key. For `historikk`
-that key is `serier` (per chain: a list of intervals plus the reference values).
+same envelope (`skjemaversjon`, `generert`) and a command-specific payload key. `tilbud` is the
+exception: its rows are search results, so it prints the search document unchanged
+(`sporring`, `resultater`) and the published schema covers it. For `historikk`
+the content is `produkt`, `dager` and `serier`: per chain `kjede`, the current `literpris_ore`
+(`null` without a current price), `vurdering` (as in search) and `intervaller`
+(`fra`, `til`, `literpris_ore`).
 
 ---
 
@@ -588,6 +602,9 @@ bra_under_median_prosent = 10
 atl_toleranse_prosent = 2
 lureri_prisokning_prosent = 5
 prisfall_prosent = 10
+
+[varsler]
+skrivebord = true      # also show alerts as desktop notifications
 
 [kilder.kassalapp]
 aktiv = true
@@ -694,8 +711,10 @@ tests/fixtures/<source>/...
 1. **M1 – Core search**: config, Kassalapp adapter, catalog + GTIN matching, SQLite with change-only history, pricing math, search with filters, table + JSON output, TTL fetching, degrade/warn.
    - **Right after M1 – source research** (done, §4.6): only Oda has a usable public source.
 2. **M2 – History**: verdict engine, deal detection, `tilbud`, sparklines, `historikk` chart, `eksporter`.
+   - Done (2026-09-30). History is judged per listing rather than per `(product, chain)` (§7.6).
 3. **M3 – Direct adapters**: Oda (§4.6), merge rules. Rema and Coop offer adapters are dropped for lack of a public source; revisit if Tjek or the chains offer access.
 4. **M4 – Automation and release**: `planlegg` for all OSes, `overvak` + notifications, completions, cargo-dist releases, published JSON schema.
+   - Done: `planlegg` on Windows, Linux and macOS, `overvak` with notifications, the published JSON schema. Left: cargo-dist releases.
 
 ---
 

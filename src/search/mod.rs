@@ -102,6 +102,10 @@ pub struct SearchFilter {
     pub all: bool,
     /// Rows shown without `--alle`.
     pub limit: usize,
+    /// Only deals, grouped by verdict (`tilbud`, SPEC §7.8).
+    pub deals_only: bool,
+    /// Also offers that start later, priced as on their first day (`tilbud --kommende`).
+    pub upcoming: bool,
 }
 
 impl SearchFilter {
@@ -142,6 +146,8 @@ impl SearchFilter {
             single_unit: args.single_unit,
             all: args.all,
             limit: config.default_limit,
+            deals_only: false,
+            upcoming: false,
         }
     }
 

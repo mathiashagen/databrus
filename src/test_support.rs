@@ -41,6 +41,7 @@ pub(crate) fn now() -> Timestamp {
 pub(crate) fn price(product: &str, chain: Chain, shelf_price: i64, hours_ago: i64) -> StoredPrice {
     StoredPrice {
         listing_id: 0,
+        interval_id: 0,
         source: SourceId::Kassalapp,
         chain,
         product: ProductId(product.into()),
@@ -86,6 +87,7 @@ pub(crate) fn example_hits() -> SearchHits {
     let filter = SearchFilter::from_args(&SearchArgs::default(), &Config::default());
     rank(
         &[campaign, member, pack, unverified, stale],
+        &crate::history::History::default(),
         &catalog,
         &filter,
         &Config::default(),

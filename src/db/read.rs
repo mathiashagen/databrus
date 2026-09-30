@@ -1,4 +1,4 @@
-//! Reading. The queries for history and export come in M2.
+//! Reading.
 
 use std::collections::HashMap;
 
@@ -26,6 +26,8 @@ pub struct FetchLog {
 #[derive(Debug, Clone, PartialEq)]
 pub struct StoredPrice {
     pub listing_id: i64,
+    /// The price interval this price comes from.
+    pub interval_id: i64,
     pub source: SourceId,
     pub chain: Chain,
     pub product: ProductId,
@@ -39,6 +41,74 @@ pub struct StoredPrice {
     pub suspicious: bool,
     /// When the source last saw the price.
     pub last_seen: Timestamp,
+}
+
+/// One price interval of a listing: the price was seen from `valid_from` until
+/// `price.last_seen`.
+#[derive(Debug, Clone, PartialEq)]
+pub struct HistoricPrice {
+    pub price: StoredPrice,
+    pub valid_from: Timestamp,
+}
+
+/// A row as it comes from the database, before the slugs are parsed.
+struct PriceRow {
+    id: i64,
+    source: String,
+    chain: String,
+    product: String,
+    pack_size: u32,
+    verified: bool,
+    shelf_price: i64,
+    member_price: Option<i64>,
+    program: Option<String>,
+    offer: Option<String>,
+    available: Option<bool>,
+    suspicious: bool,
+    last_seen: Timestamp,
+    valid_from: Timestamp,
+    interval_id: i64,
+}
+
+impl PriceRow {
+    fn into_price(self) -> Option<HistoricPrice> {
+        let source = SourceId::from_slug(&self.source)?;
+        let chain = Chain::from_slug(&self.chain)?;
+        let member_price = match (
+            self.member_price,
+            self.program.as_deref().map(MembershipProgram::from_slug),
+        ) {
+            (Some(price), Some(Some(program))) => Some(MemberPrice {
+                price: Ore(price),
+                program,
+            }),
+            _ => None,
+        };
+        let id = self.id;
+        let offer = self.offer.and_then(|json| {
+            serde_json::from_str(&json)
+                .inspect_err(|e| tracing::debug!("oppføring {id}: ugyldig tilbud ({e})"))
+                .ok()
+        });
+        Some(HistoricPrice {
+            price: StoredPrice {
+                listing_id: id,
+                interval_id: self.interval_id,
+                source,
+                chain,
+                product: ProductId(self.product),
+                pack_size: self.pack_size.max(1),
+                verified: self.verified,
+                shelf_price: Ore(self.shelf_price),
+                member_price,
+                offer,
+                available: self.available,
+                suspicious: self.suspicious,
+                last_seen: self.last_seen,
+            },
+            valid_from: self.valid_from,
+        })
+    }
 }
 
 /// A listing that did not match any catalog product (`produkter --ukjente`). Serialized
@@ -71,90 +141,63 @@ impl Database {
     /// unknown source, chain or membership program (e.g. from a newer version) are
     /// skipped, and an offer that cannot be parsed is ignored with a log line.
     pub fn latest_prices(&self) -> Result<Vec<StoredPrice>, AppError> {
-        let mut query = self
-            .conn
-            .prepare(
-                "SELECT l.id, l.source, l.chain, l.product_id, l.pack_size, l.verified,
-                        p.shelf_price_ore, p.member_price_ore, p.membership_program,
-                        p.offer_json, p.available, p.suspicious, p.last_seen
-                 FROM listing l
-                 JOIN price_interval p ON p.id = (
-                     SELECT id FROM price_interval WHERE listing_id = l.id
-                     ORDER BY valid_from DESC, id DESC LIMIT 1)
-                 WHERE l.product_id IS NOT NULL",
-            )
-            .map_err(|e| error(&self.path, e))?;
+        let prices = self.read_prices(
+            "JOIN price_interval p ON p.id = (
+                 SELECT id FROM price_interval WHERE listing_id = l.id
+                 ORDER BY valid_from DESC, id DESC LIMIT 1)
+             WHERE l.product_id IS NOT NULL",
+        )?;
+        Ok(prices.into_iter().map(|h| h.price).collect())
+    }
+
+    /// Every price interval of every listing that matched a catalog product, ordered by
+    /// listing and then time. Skips the same rows as [`Self::latest_prices`].
+    pub fn price_history(&self) -> Result<Vec<HistoricPrice>, AppError> {
+        self.read_prices(
+            "JOIN price_interval p ON p.listing_id = l.id
+             WHERE l.product_id IS NOT NULL
+             ORDER BY l.id, p.valid_from, p.id",
+        )
+    }
+
+    /// Price intervals joined with their listing. `rest` joins `price_interval p` to
+    /// `listing l` and filters.
+    fn read_prices(&self, rest: &str) -> Result<Vec<HistoricPrice>, AppError> {
+        let sql = format!(
+            "SELECT l.id, l.source, l.chain, l.product_id, l.pack_size, l.verified,
+                    p.shelf_price_ore, p.member_price_ore, p.membership_program,
+                    p.offer_json, p.available, p.suspicious, p.last_seen, p.valid_from,
+                    p.id
+             FROM listing l {rest}"
+        );
+        let mut query = self.conn.prepare(&sql).map_err(|e| error(&self.path, e))?;
         let rows = query
             .query_map([], |row| {
-                Ok((
-                    row.get::<_, i64>(0)?,
-                    row.get::<_, String>(1)?,
-                    row.get::<_, String>(2)?,
-                    row.get::<_, String>(3)?,
-                    row.get::<_, u32>(4)?,
-                    row.get::<_, bool>(5)?,
-                    row.get::<_, i64>(6)?,
-                    row.get::<_, Option<i64>>(7)?,
-                    row.get::<_, Option<String>>(8)?,
-                    row.get::<_, Option<String>>(9)?,
-                    row.get::<_, Option<bool>>(10)?,
-                    row.get::<_, bool>(11)?,
-                    timestamp(row, 12)?,
-                ))
+                Ok(PriceRow {
+                    id: row.get(0)?,
+                    source: row.get(1)?,
+                    chain: row.get(2)?,
+                    product: row.get(3)?,
+                    pack_size: row.get(4)?,
+                    verified: row.get(5)?,
+                    shelf_price: row.get(6)?,
+                    member_price: row.get(7)?,
+                    program: row.get(8)?,
+                    offer: row.get(9)?,
+                    available: row.get(10)?,
+                    suspicious: row.get(11)?,
+                    last_seen: timestamp(row, 12)?,
+                    valid_from: timestamp(row, 13)?,
+                    interval_id: row.get(14)?,
+                })
             })
             .map_err(|e| error(&self.path, e))?;
 
         let mut prices = Vec::new();
         for row in rows {
-            let (
-                id,
-                source,
-                chain,
-                product,
-                pack_size,
-                verified,
-                shelf_price,
-                member_price,
-                program,
-                offer,
-                available,
-                suspicious,
-                last_seen,
-            ) = row.map_err(|e| error(&self.path, e))?;
-            let (Some(source), Some(chain)) =
-                (SourceId::from_slug(&source), Chain::from_slug(&chain))
-            else {
-                continue;
-            };
-            let member_price = match (
-                member_price,
-                program.as_deref().map(MembershipProgram::from_slug),
-            ) {
-                (Some(price), Some(Some(program))) => Some(MemberPrice {
-                    price: Ore(price),
-                    program,
-                }),
-                _ => None,
-            };
-            let offer = offer.and_then(|json| {
-                serde_json::from_str(&json)
-                    .inspect_err(|e| tracing::debug!("oppføring {id}: ugyldig tilbud ({e})"))
-                    .ok()
-            });
-            prices.push(StoredPrice {
-                listing_id: id,
-                source,
-                chain,
-                product: ProductId(product),
-                pack_size: pack_size.max(1),
-                verified,
-                shelf_price: Ore(shelf_price),
-                member_price,
-                offer,
-                available,
-                suspicious,
-                last_seen,
-            });
+            if let Some(price) = row.map_err(|e| error(&self.path, e))?.into_price() {
+                prices.push(price);
+            }
         }
         Ok(prices)
     }
@@ -263,7 +306,7 @@ impl Database {
     }
 }
 
-fn timestamp(row: &Row<'_>, column: usize) -> rusqlite::Result<Timestamp> {
+pub(super) fn timestamp(row: &Row<'_>, column: usize) -> rusqlite::Result<Timestamp> {
     let seconds: i64 = row.get(column)?;
     Timestamp::from_second(seconds)
         .map_err(|e| rusqlite::Error::FromSqlConversionFailure(column, Type::Integer, Box::new(e)))

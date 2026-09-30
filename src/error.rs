@@ -47,6 +47,9 @@ pub enum AppError {
     #[error("database {}: {message}", path.display())]
     Database { path: PathBuf, message: String },
 
+    #[error("planlegging: {0}")]
+    Schedule(String),
+
     #[error("nettverk: {0}")]
     Network(String),
 

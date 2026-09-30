@@ -220,11 +220,16 @@ fn completions_for_powershell() {
 }
 
 #[test]
-fn not_implemented_exits_with_1() {
+fn alerts_list_and_remove_without_alerts() {
     let dir = TempDir::new().unwrap();
     databrus(&dir)
         .args(["overvak", "liste"])
         .assert()
+        .success()
+        .stderr(predicate::str::contains("ingen prisvarsler"));
+    databrus(&dir)
+        .args(["overvak", "fjern", "7"])
+        .assert()
         .code(1)
-        .stderr(predicate::str::contains("ikke implementert"));
+        .stderr(predicate::str::contains("fant ikke varsel 7"));
 }

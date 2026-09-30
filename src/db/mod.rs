@@ -3,6 +3,7 @@
 //! Timestamps are stored as unix seconds (UTC). The database is opened in WAL mode, so a
 //! scheduled fetch and an interactive search can run at the same time.
 
+pub mod alerts;
 pub mod migrations;
 pub mod read;
 pub mod write;
@@ -14,7 +15,7 @@ use std::time::Duration;
 
 use rusqlite::Connection;
 
-pub use read::{FetchLog, StoredPrice, UnmatchedListing};
+pub use read::{FetchLog, HistoricPrice, StoredPrice, UnmatchedListing};
 pub use write::{Change, PriceObservation};
 
 use crate::error::AppError;

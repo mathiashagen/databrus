@@ -243,3 +243,57 @@ fn fetch_log() {
     );
     assert_eq!(db.last_fetch(SourceId::Coop).unwrap(), None);
 }
+
+/// The history of matched listings, oldest first, with each interval's start.
+#[test]
+fn price_history_lists_every_interval_in_order() {
+    let dir = TempDir::new().unwrap();
+    let mut db = open(&dir);
+    let catalog = Catalog::from_toml(
+        r#"
+        [[produkt]]
+        id = "monster-ultra-white-500-boks"
+        navn = "Monster Ultra White"
+        merke = "monster"
+        smak = "white"
+        sukkerfri = true
+        volum_ml = 500
+        beholder = "boks"
+        "#,
+    )
+    .unwrap();
+    db.sync_catalog(&catalog).unwrap();
+
+    let raw = listing(2490);
+    let found = Matcher::build(&catalog).find(&raw).unwrap();
+    let id = db.save_listing(&raw, Some(&found), at(0)).unwrap();
+    for (price, hours) in [(2490, 0), (2490, 24), (1990, 48), (2490, 72)] {
+        db.record_price(
+            id,
+            &PriceObservation::from_listing(&listing(price)),
+            at(hours),
+        )
+        .unwrap();
+    }
+    // An unmatched listing has no history in the search.
+    let mut other = listing(990);
+    other.source_product_id = "other".into();
+    other.raw_name = "Ukjent drikk".into();
+    let other_id = db.save_listing(&other, None, at(0)).unwrap();
+    db.record_price(other_id, &PriceObservation::from_listing(&other), at(0))
+        .unwrap();
+
+    let history = db.price_history().unwrap();
+    let rows: Vec<_> = history
+        .iter()
+        .map(|h| (h.price.shelf_price.0, h.valid_from, h.price.last_seen))
+        .collect();
+    assert_eq!(
+        rows,
+        [
+            (2490, at(0), at(24)),
+            (1990, at(48), at(48)),
+            (2490, at(72), at(72)),
+        ]
+    );
+}

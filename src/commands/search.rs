@@ -12,7 +12,7 @@ use crate::model;
 use crate::output::json::{self, Envelope, Header};
 use crate::output::{self, OutputFormat, results, table};
 use crate::search::ranking::{self, SearchHits};
-use crate::search::{SearchContent, SearchFilter, SortBy};
+use crate::search::{SearchContent, SearchFilter};
 use crate::sources::{self, SourceState, SourceStatus};
 
 /// A row older than this counts as stale for `--streng` (SPEC §8).
@@ -20,20 +20,17 @@ const STALE_HOURS: u32 = 24;
 
 pub async fn run(args: &SearchArgs, ctx: &Context) -> Result<ExitStatus, AppError> {
     let filter = SearchFilter::from_args(args, &ctx.config);
-    if filter.sort == SortBy::Discount {
-        anstream::eprintln!(
-            "{} --sorter rabatt krever prishistorikk (kommer i M2) – sorterer etter literpris",
-            "info:".cyan().bold()
-        );
-    }
     let catalog = ctx.catalog()?;
     let mut db = ctx.open_database()?;
     let statuses = sources::refresh(&mut db, &ctx.config, &catalog, ctx.fetch_mode(), &[]).await?;
+    super::check_alerts(&mut db, &catalog, ctx, &statuses)?;
     super::require_price_data(&db)?;
 
     let now = model::now();
+    let history = ranking::history(&db.price_history()?, &catalog, &ctx.config, now);
     let hits = ranking::rank(
         &db.latest_prices()?,
+        &history,
         &catalog,
         &filter,
         &ctx.config,
@@ -62,7 +59,7 @@ pub async fn run(args: &SearchArgs, ctx: &Context) -> Result<ExitStatus, AppErro
     Ok(exit_status(ctx.global.strict, &hits, &statuses))
 }
 
-fn write_table(
+pub(super) fn write_table(
     hits: &SearchHits,
     statuses: &[SourceStatus],
     now: jiff::Timestamp,
@@ -92,7 +89,11 @@ fn no_hits(hits: &SearchHits) {
 }
 
 /// `--streng` exits with 2 when a source failed or a shown row is stale.
-fn exit_status(strict: bool, hits: &SearchHits, statuses: &[SourceStatus]) -> ExitStatus {
+pub(super) fn exit_status(
+    strict: bool,
+    hits: &SearchHits,
+    statuses: &[SourceStatus],
+) -> ExitStatus {
     let failed = statuses.iter().any(|s| s.status == SourceState::Failed);
     let stale = hits.rows.iter().any(|r| r.age_hours > STALE_HOURS);
     if strict && (failed || stale) {
