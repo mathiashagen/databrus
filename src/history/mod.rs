@@ -9,7 +9,7 @@ use std::collections::HashMap;
 
 use jiff::civil::Date;
 use jiff::tz::TimeZone;
-use jiff::{SignedDuration, Timestamp};
+use jiff::{SignedDuration, Timestamp, Zoned};
 
 pub use stats::{Interval, References};
 pub use verdict::{Thresholds, assess};
@@ -143,9 +143,14 @@ fn oslo() -> TimeZone {
     TimeZone::get("Europe/Oslo").unwrap_or(TimeZone::UTC)
 }
 
+/// `time` in Norway.
+pub fn oslo_time(time: Timestamp) -> Zoned {
+    time.to_zoned(oslo())
+}
+
 /// The date in Norway at `time`. Day boundaries always follow Europe/Oslo (SPEC §7.2).
 pub fn oslo_date(time: Timestamp) -> Date {
-    time.to_zoned(oslo()).date()
+    oslo_time(time).date()
 }
 
 /// Midnight in Norway at the start of `date`.

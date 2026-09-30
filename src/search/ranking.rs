@@ -163,7 +163,7 @@ pub fn rank(
 }
 
 /// The effective price per container, and which price was used (SPEC §5.2–5.3).
-fn compute_price(
+pub(crate) fn compute_price(
     price: &StoredPrice,
     single_unit: bool,
     memberships: &[MembershipProgram],

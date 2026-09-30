@@ -80,7 +80,7 @@ async fn update_and_search_with_campaigns() {
         command
     };
 
-    let (update, search, table, deals, history, narrowed, ambiguous) =
+    let (update, search, table, deals, history, narrowed, ambiguous, export) =
         tokio::task::spawn_blocking(move || {
             let update = databrus(&dir, &["oppdater", "--kilde", "oda"]).assert();
             let search = databrus(
@@ -97,7 +97,11 @@ async fn update_and_search_with_campaigns() {
             .assert();
             let narrowed = databrus(&dir, &["historikk", "monster", "ultra"]).assert();
             let ambiguous = databrus(&dir, &["historikk", "monster"]).assert();
-            (update, search, table, deals, history, narrowed, ambiguous)
+            let export =
+                databrus(&dir, &["eksporter", "--excel", "monster", "ultra", "white"]).assert();
+            (
+                update, search, table, deals, history, narrowed, ambiguous, export,
+            )
         })
         .await
         .unwrap();
@@ -205,4 +209,19 @@ async fn update_and_search_with_campaigns() {
         .code(1)
         .stderr(predicate::str::contains("flere produkter passer"))
         .stderr(predicate::str::contains("(monster-ultra-white-500-boks)"));
+
+    // `eksporter --excel`: BOM, semicolons, decimal commas, one row per interval.
+    let output = export.success().get_output().stdout.clone();
+    let text = String::from_utf8(output).unwrap();
+    let text = text.strip_prefix('\u{feff}').expect("a byte order mark");
+    let lines: Vec<&str> = text.lines().collect();
+    assert!(lines[0].starts_with("produkt_id;produkt;volum_ml;kjede;kilde;"));
+    assert_eq!(lines.len(), 2, "{text}");
+    let row: Vec<&str> = lines[1].split(';').collect();
+    assert_eq!(row[0], "monster-ultra-white-500-boks");
+    assert_eq!(row[3], "oda");
+    assert_eq!(row[5], "4");
+    assert_eq!(row[11], "3 for 2");
+    assert_eq!(row[14], "13,32");
+    assert_eq!(row[15], "26,64");
 }

@@ -481,7 +481,7 @@ first day and marked `KAMPANJE fra 2.10.`.
 
 - **Sparkline** (`Trend` column): per-liter price for the row's listing over the last 90 days, in 6 slots (the time-weighted average in each), drawn with `▁▂▃▄▅▆▇█`. The scale spans at least 5 % of the price, so small changes don't look like big swings and a flat price is `▅▅▅▅▅▅`. Blank when coverage is below 14 days. The column is dropped below 100 columns, and when no row has enough history. Not part of the JSON.
 - **`historikk <PRODUKT>`**: a Unicode (braille) line chart of per-liter price over time, one series per chain (colored, with a legend), plus a summary table per chain: now, L30, M90, ATL, verdict, days of coverage. `--dager` (default 90), `--kjede` to filter. Uses a small in-house braille renderer; prices are drawn as steps and gaps stay empty. Each chain shows the listing search would show today, or, when it has no current price, the listing seen most recently. The product is given by id or text. An exact name wins, then products with prices; if several still match, the command fails and lists them with their ids.
-- **`eksporter`**: CSV (UTF-8 with BOM for Excel compatibility, `;` as the delimiter and decimal commas when `--excel` is set; otherwise RFC 4180 with dots). One row per price interval: product, chain, source, gyldig_fra, sist_sett, prices, offer, pant.
+- **`eksporter`**: CSV on stdout. Plain RFC 4180 by default (commas, decimal dots, CRLF, times in Norwegian time with the UTC offset). With `--excel`: a UTF-8 BOM, `;` as the delimiter, decimal commas and times as `2026-09-30 07:00:00`. One row per stored price interval of matched listings, oldest first per listing: `produkt_id`, `produkt`, `volum_ml`, `kjede`, `kilde`, `antall_i_pakke`, `gyldig_fra`, `sist_sett`, `hyllepris_kr`, `medlemspris_kr`, `medlemsprogram`, `tilbud` (in words, e.g. `3 for 2`), `tilbud_gyldig_fra`, `tilbud_gyldig_til`, `effektiv_enhetspris_kr`, `literpris_kr` (computed as in search), `pant_kr`, `tilgjengelig`, `mistenkelig`. The product and chain filters apply. `--fra`/`--til` keep intervals seen on those days (inclusive, Europe/Oslo). `--json` is a usage error.
 
 ---
 
@@ -705,7 +705,7 @@ tests/fixtures/<source>/...
 1. **M1 – Core search**: config, Kassalapp adapter, catalog + GTIN matching, SQLite with change-only history, pricing math, search with filters, table + JSON output, TTL fetching, degrade/warn.
    - **Right after M1 – source research** (done, §4.6): only Oda has a usable public source.
 2. **M2 – History**: verdict engine, deal detection, `tilbud`, sparklines, `historikk` chart, `eksporter`.
-   - Done: reference values (L30, M90, ATL, coverage) per listing (§7.6), the verdict rules, `PRISFALL`, `--sorter rabatt`, the Vurdering and Trend columns, `tilbud` and `historikk`. Left: `eksporter`.
+   - Done (2026-09-30). History is judged per listing rather than per `(product, chain)` (§7.6).
 3. **M3 – Direct adapters**: Oda (§4.6), merge rules. Rema and Coop offer adapters are dropped for lack of a public source; revisit if Tjek or the chains offer access.
 4. **M4 – Automation and release**: `planlegg` for all OSes, `overvak` + notifications, completions, cargo-dist releases, published JSON schema.
 

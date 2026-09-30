@@ -1,6 +1,6 @@
 //! Norwegian number formatting for human-readable output (SPEC §2). JSON never uses this.
 
-use crate::model::{Ml, Ore};
+use crate::model::{Ml, Offer, Ore};
 
 /// A non-breaking space as the thousands separator.
 const THOUSANDS_SEPARATOR: char = '\u{a0}';
@@ -10,6 +10,29 @@ pub fn kr(amount: Ore) -> String {
     let sign = if amount.0 < 0 { "-" } else { "" };
     let abs = amount.0.unsigned_abs();
     format!("{sign}{},{:02}", group_thousands(abs / 100), abs % 100)
+}
+
+/// An offer in words: `nå 15,90`, `3 for 2`, `2 for 50,00`, `30 % rabatt`,
+/// `3. stk gratis`, `2. stk til halv pris`.
+pub fn offer(offer: &Offer) -> String {
+    match *offer {
+        Offer::FixedPrice { price } => format!("nå {}", kr(price)),
+        Offer::NForM { n, m } => format!("{n} for {m}"),
+        Offer::NForSum { n, sum } => format!("{n} for {}", kr(sum)),
+        Offer::Percent { percent } => format!("{percent} % rabatt"),
+        Offer::NthItem {
+            n,
+            discount_percent: 100,
+        } => format!("{n}. stk gratis"),
+        Offer::NthItem {
+            n,
+            discount_percent: 50,
+        } => format!("{n}. stk til halv pris"),
+        Offer::NthItem {
+            n,
+            discount_percent,
+        } => format!("{n}. stk {discount_percent} % rabatt"),
+    }
 }
 
 const SPARK_LEVELS: [char; 8] = ['▁', '▂', '▃', '▄', '▅', '▆', '▇', '█'];
@@ -103,6 +126,29 @@ fn group_thousands(mut number: u64) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn offers_in_words() {
+        assert_eq!(offer(&Offer::FixedPrice { price: Ore(1590) }), "nå 15,90");
+        assert_eq!(offer(&Offer::NForM { n: 3, m: 2 }), "3 for 2");
+        assert_eq!(
+            offer(&Offer::NForSum {
+                n: 2,
+                sum: Ore(5000)
+            }),
+            "2 for 50,00"
+        );
+        assert_eq!(offer(&Offer::Percent { percent: 30 }), "30 % rabatt");
+        let nth = |n, discount_percent| {
+            offer(&Offer::NthItem {
+                n,
+                discount_percent,
+            })
+        };
+        assert_eq!(nth(3, 100), "3. stk gratis");
+        assert_eq!(nth(2, 50), "2. stk til halv pris");
+        assert_eq!(nth(2, 30), "2. stk 30 % rabatt");
+    }
 
     fn kr_values(values: &[Option<i64>]) -> Vec<Option<Ore>> {
         values.iter().map(|v| v.map(|kr| Ore(kr * 100))).collect()

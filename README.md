@@ -25,6 +25,7 @@ $ databrus monster ultra --storrelse 0,5
 $ databrus --json red bull --sukkerfri
 $ databrus tilbud                # dagens tilbud, beste vurdering først
 $ databrus historikk monster ultra white   # prisgraf per kjede
+$ databrus eksporter --excel > priser.csv  # all prishistorikk som CSV
 $ databrus planlegg installer --tid 07:00   # hent priser hver dag
 ```
 
