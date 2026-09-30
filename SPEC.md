@@ -424,8 +424,10 @@ Chain, source, container and membership values are stored as their public slugs 
 
 - `planlegg installer [--tid 07:00]` installs a daily `databrus oppdater --stille` job:
   - **Windows** (implemented): Task Scheduler via `schtasks.exe /create /xml` (task name `databrus-oppdater`). Runs as the current user while they are logged on, so no password is stored. Runs as soon as possible after a missed start, and also on battery. The first start is the next occurrence of `--tid`, so installing never triggers an immediate run. A `--konfig` path is passed on to the task as an absolute path.
-  - **Linux**: systemd user timer if available, otherwise a crontab entry.
-  - **macOS**: a launchd agent plist.
+  - **Linux**: a systemd user timer (`~/.config/systemd/user/databrus-oppdater.{service,timer}`, `OnCalendar` at `--tid`, `Persistent=true` so a missed run is caught up) when `systemctl --user` works, otherwise a crontab line marked `# databrus-oppdater`, with the output appended to `planlagt.log` in the data directory. Installing one removes the other. The rest of the crontab is kept as it is, and a crontab that can't be read (other than "no crontab") is an error rather than overwritten. A user timer only runs while the user is logged in unless lingering is enabled (`loginctl enable-linger`); `installer` says so. cron does not catch up missed runs.
+  - **macOS**: a launch agent `~/Library/LaunchAgents/io.github.mathiashagen.databrus-oppdater.plist` (`StartCalendarInterval`, output to `planlagt.log`), loaded with `launchctl bootstrap gui/<uid>` so desktop notifications can show. launchd runs a start missed during sleep on wake.
+  - Other systems get a clear error suggesting a cron line of their own.
+  - `installer` warns when the Kassalapp key or `DATABRUS_DATA_DIR` is only set in the shell's environment, since the scheduled job may not see it.
 - `planlegg status` shows whether it is installed, its time and command, and the last fetch per source with its result (from `fetch_log`).
 - `planlegg fjern` removes it.
 - `--stille` means no output except errors. Alerts (§7.7) are evaluated after every `oppdater`.
@@ -712,7 +714,7 @@ tests/fixtures/<source>/...
    - Done (2026-09-30). History is judged per listing rather than per `(product, chain)` (§7.6).
 3. **M3 – Direct adapters**: Oda (§4.6), merge rules. Rema and Coop offer adapters are dropped for lack of a public source; revisit if Tjek or the chains offer access.
 4. **M4 – Automation and release**: `planlegg` for all OSes, `overvak` + notifications, completions, cargo-dist releases, published JSON schema.
-   - Done: `planlegg` on Windows, `overvak` with notifications, the published JSON schema. Left: `planlegg` on Linux and macOS, cargo-dist releases.
+   - Done: `planlegg` on Windows, Linux and macOS, `overvak` with notifications, the published JSON schema. Left: cargo-dist releases.
 
 ---
 

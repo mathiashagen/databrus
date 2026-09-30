@@ -5,6 +5,7 @@ use owo_colors::OwoColorize;
 
 use crate::Context;
 use crate::cli::ScheduleCommand;
+use crate::config;
 use crate::error::{AppError, ExitStatus};
 use crate::output::format;
 use crate::schedule::{self, Job, TASK_NAME};
@@ -14,12 +15,17 @@ pub fn run(command: &ScheduleCommand, ctx: &Context) -> Result<ExitStatus, AppEr
     let scheduler = schedule::for_platform();
     match command {
         ScheduleCommand::Install { time } => {
-            let job = Job::for_current_exe(*time, ctx.global.config.as_deref())?;
-            scheduler.install(&job)?;
+            let log_file = ctx.paths.data_dir.join("planlagt.log");
+            let job = Job::for_current_exe(*time, ctx.global.config.as_deref(), log_file)?;
+            let notes = scheduler.install(&job)?;
             println!(
                 "installerte {TASK_NAME}: daglig kl. {}",
                 time.strftime("%H:%M")
             );
+            for note in notes {
+                println!("  {note}");
+            }
+            warn_about_environment(ctx);
             if is_build_output(&job.program) {
                 anstream::eprintln!(
                     "{} oppgaven kjører {}, som forsvinner ved `cargo clean` – \
@@ -78,6 +84,27 @@ fn status(scheduler: &dyn schedule::Scheduler, ctx: &Context) -> Result<(), AppE
         }
     }
     Ok(())
+}
+
+/// The scheduled job does not run in this shell, so settings that only live in its
+/// environment may not reach it.
+fn warn_about_environment(ctx: &Context) {
+    let set = |name: &str| std::env::var_os(name).is_some_and(|v| !v.is_empty());
+    let kassalapp = &ctx.config.sources.kassalapp;
+    if set(config::ENV_API_KEY) && kassalapp.enabled && kassalapp.api_key.is_empty() {
+        anstream::eprintln!(
+            "{} Kassalapp-nøkkelen er bare satt i miljøvariabelen {}, som den planlagte              hentingen kanskje ikke ser – lagre den med              `databrus konfig sett kilder.kassalapp.api_nokkel <NØKKEL>`",
+            "advarsel:".yellow(),
+            config::ENV_API_KEY
+        );
+    }
+    if set(config::ENV_DATA_DIR) {
+        anstream::eprintln!(
+            "{} {} er satt i dette skallet; den planlagte hentingen bruker kanskje              standardmappen i stedet",
+            "advarsel:".yellow(),
+            config::ENV_DATA_DIR
+        );
+    }
 }
 
 /// Whether the executable lives in a Cargo `target` directory.

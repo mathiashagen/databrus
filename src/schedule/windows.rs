@@ -10,13 +10,14 @@ use std::process::{Command, Output};
 use jiff::Zoned;
 use jiff::civil::{DateTime, Time};
 
+use super::formats::{element, escape, unescape};
 use super::{Installed, Job, Scheduler, TASK_NAME};
 use crate::error::AppError;
 
 pub struct TaskScheduler;
 
 impl Scheduler for TaskScheduler {
-    fn install(&self, job: &Job) -> Result<(), AppError> {
+    fn install(&self, job: &Job) -> Result<Vec<String>, AppError> {
         let now = Zoned::now().datetime();
         let xml = task_xml(job, start_boundary(job.time, now));
         // schtasks reads the definition from a file, which must be UTF-16 to match the
@@ -32,7 +33,8 @@ impl Scheduler for TaskScheduler {
             "/f".as_ref(),
         ]);
         let _ = std::fs::remove_file(&file);
-        check(&output?, "kunne ikke installere oppgaven")
+        check(&output?, "kunne ikke installere oppgaven")?;
+        Ok(Vec::new())
     }
 
     fn remove(&self) -> Result<bool, AppError> {
@@ -152,14 +154,6 @@ fn parse_installed(xml: &str) -> Installed {
     Installed { time, command }
 }
 
-/// The text of the first `<name>` element. Enough for the flat XML schtasks prints.
-fn element<'a>(xml: &'a str, name: &str) -> Option<&'a str> {
-    let open = format!("<{name}>");
-    let start = xml.find(&open)? + open.len();
-    let end = start + xml[start..].find(&format!("</{name}>"))?;
-    Some(xml[start..end].trim())
-}
-
 /// Quotes an argument the way the MSVC runtime splits command lines.
 fn quote_arg(arg: &str) -> String {
     if !arg.is_empty() && !arg.contains([' ', '\t', '"']) {
@@ -185,21 +179,6 @@ fn quote_arg(arg: &str) -> String {
     out.push_str(&"\\".repeat(backslashes * 2));
     out.push('"');
     out
-}
-
-fn escape(text: &str) -> String {
-    text.replace('&', "&amp;")
-        .replace('<', "&lt;")
-        .replace('>', "&gt;")
-        .replace('"', "&quot;")
-}
-
-fn unescape(text: &str) -> String {
-    text.replace("&lt;", "<")
-        .replace("&gt;", ">")
-        .replace("&quot;", "\"")
-        .replace("&apos;", "'")
-        .replace("&amp;", "&")
 }
 
 fn utf16_with_bom(text: &str) -> Vec<u8> {
@@ -239,6 +218,7 @@ mod tests {
             time: time(7, 0, 0, 0),
             program: PathBuf::from(program),
             args: args.iter().map(|a| a.to_string()).collect(),
+            log_file: PathBuf::from(r"C:\databrus\planlagt.log"),
         }
     }
 

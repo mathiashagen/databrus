@@ -10,7 +10,7 @@ om et tilbud faktisk er bra.
 > Europris og Engrossnett (via Kassalapp) og Oda (direkte, med kampanjer som «3 for 2»).
 > Kiwi, Rema og Coop har ingen offentlig priskilde og vises ikke. Tilbud vurderes mot lokal
 > prishistorikk, som trenger 14 dager før vurderingene blir annet enn `UKJENT` – installer
-> daglig henting med `databrus planlegg installer` (foreløpig bare Windows).
+> daglig henting med `databrus planlegg installer` (Windows, Linux og macOS).
 > Se [SPEC.md](SPEC.md) for full spesifikasjon.
 
 ## Kom i gang
