@@ -8,8 +8,9 @@ om et tilbud faktisk er bra.
 
 > **Status:** under utvikling. Søk virker med ferske priser for Meny, Spar, Joker, Bunnpris,
 > Europris og Engrossnett (via Kassalapp) og Oda (direkte, med kampanjer som «3 for 2»).
-> Kiwi, Rema og Coop har ingen offentlig priskilde og vises ikke. Tilbudsvurdering og
-> historikk kommer i M2.
+> Kiwi, Rema og Coop har ingen offentlig priskilde og vises ikke. Tilbud vurderes mot lokal
+> prishistorikk, som trenger 14 dager før vurderingene blir annet enn `UKJENT` – installer
+> daglig henting med `databrus planlegg installer` (foreløpig bare Windows).
 > Se [SPEC.md](SPEC.md) for full spesifikasjon.
 
 ## Kom i gang
@@ -22,6 +23,8 @@ $ databrus produkter --merke monster
 $ databrus oppdater              # hent ferske priser (skjer også automatisk ved søk)
 $ databrus monster ultra --storrelse 0,5
 $ databrus --json red bull --sukkerfri
+$ databrus tilbud                # dagens tilbud, beste vurdering først
+$ databrus planlegg installer --tid 07:00   # hent priser hver dag
 ```
 
 Kassalapp-kilden trenger en gratis API-nøkkel fra <https://kassal.app/api>:

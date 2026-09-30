@@ -80,7 +80,7 @@ async fn update_and_search_with_campaigns() {
         command
     };
 
-    let (update, search, table) = tokio::task::spawn_blocking(move || {
+    let (update, search, table, deals) = tokio::task::spawn_blocking(move || {
         let update = databrus(&dir, &["oppdater", "--kilde", "oda"]).assert();
         let search = databrus(
             &dir,
@@ -88,7 +88,8 @@ async fn update_and_search_with_campaigns() {
         )
         .assert();
         let table = databrus(&dir, &["--frakoblet", "--alle", "monster", "ultra"]).assert();
-        (update, search, table)
+        let deals = databrus(&dir, &["tilbud", "--frakoblet", "--alle", "--json"]).assert();
+        (update, search, table, deals)
     })
     .await
     .unwrap();
@@ -152,4 +153,26 @@ async fn update_and_search_with_campaigns() {
         .success()
         .stdout(predicate::str::contains("KAMPANJE 12stk"))
         .stdout(predicate::str::contains("4-pakning"));
+
+    // `tilbud`: exactly the campaign rows, in the same schema-valid document. Without
+    // history they are all UKJENT.
+    let output = deals.success().get_output().stdout.clone();
+    let deals: serde_json::Value = serde_json::from_slice(&output).unwrap();
+    let deal_rows = deals["resultater"].as_array().unwrap();
+    let campaigns = results
+        .iter()
+        .filter(|r| r["tilbudsmerke"] == "KAMPANJE")
+        .count();
+    assert!(campaigns > 0);
+    assert_eq!(deal_rows.len(), campaigns);
+    assert!(
+        deal_rows
+            .iter()
+            .all(|r| r["tilbudsmerke"] == "KAMPANJE" && r["vurdering"]["verdi"] == "UKJENT")
+    );
+    let errors: Vec<String> = validator
+        .iter_errors(&deals)
+        .map(|e| e.to_string())
+        .collect();
+    assert!(errors.is_empty(), "{errors:#?}");
 }

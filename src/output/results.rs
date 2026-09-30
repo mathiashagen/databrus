@@ -6,6 +6,7 @@ use comfy_table::{Attribute, Cell, CellAlignment, Color, Table};
 use jiff::Timestamp;
 
 use super::{format, table};
+use crate::history::deals;
 use crate::model::{DealBadge, PriceBasis, SearchResult, Verdict};
 use crate::pricing::effective_unit_price;
 use crate::search::ranking::{MAX_AGE_HOURS, SearchHits};
@@ -181,10 +182,19 @@ fn deal_text(row: &SearchResult) -> (String, bool) {
     let mut parts = Vec::new();
     let campaign = row.deal_badge == Some(DealBadge::Campaign);
     match row.deal_badge {
-        Some(DealBadge::Campaign) if row.min_quantity > row.pack_size => {
-            parts.push(format!("KAMPANJE {}stk", row.min_quantity));
+        Some(DealBadge::Campaign) => {
+            let mut text = String::from("KAMPANJE");
+            if row.min_quantity > row.pack_size {
+                text.push_str(&format!(" {}stk", row.min_quantity));
+            }
+            // Only with `tilbud --kommende`: the offer has not started yet.
+            if let Some(start) = row.offer.as_ref().and_then(|o| o.valid_from)
+                && start > deals::today_oslo()
+            {
+                text.push_str(&format!(" fra {}.{}.", start.day(), start.month()));
+            }
+            parts.push(text);
         }
-        Some(DealBadge::Campaign) => parts.push("KAMPANJE".into()),
         Some(DealBadge::PriceDrop) => parts.push("PRISFALL".into()),
         None => {}
     }
@@ -234,6 +244,15 @@ mod tests {
         assert_eq!(verdict_text(&row), "UKJENT");
         row.verdict.value = Verdict::Fake;
         assert_eq!(verdict_text(&row), "LURERI");
+    }
+
+    #[test]
+    fn upcoming_campaign_shows_its_start() {
+        let mut row = example().rows[0].clone();
+        if let Some(offer) = row.offer.as_mut() {
+            offer.valid_from = Some(jiff::civil::date(2099, 10, 2));
+        }
+        assert_eq!(deal_text(&row).0, "KAMPANJE 3stk fra 2.10.");
     }
 
     #[test]

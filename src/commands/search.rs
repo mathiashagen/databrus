@@ -58,7 +58,7 @@ pub async fn run(args: &SearchArgs, ctx: &Context) -> Result<ExitStatus, AppErro
     Ok(exit_status(ctx.global.strict, &hits, &statuses))
 }
 
-fn write_table(
+pub(super) fn write_table(
     hits: &SearchHits,
     statuses: &[SourceStatus],
     now: jiff::Timestamp,
@@ -88,7 +88,11 @@ fn no_hits(hits: &SearchHits) {
 }
 
 /// `--streng` exits with 2 when a source failed or a shown row is stale.
-fn exit_status(strict: bool, hits: &SearchHits, statuses: &[SourceStatus]) -> ExitStatus {
+pub(super) fn exit_status(
+    strict: bool,
+    hits: &SearchHits,
+    statuses: &[SourceStatus],
+) -> ExitStatus {
     let failed = statuses.iter().any(|s| s.status == SourceState::Failed);
     let stale = hits.rows.iter().any(|r| r.age_hours > STALE_HOURS);
     if strict && (failed || stale) {

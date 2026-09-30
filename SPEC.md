@@ -468,7 +468,11 @@ A listing is a deal if **either** of these holds:
 Member-only offers the user can't use show the `MEDLEM` marker but don't count as a deal for
 ranking unless the user has that membership.
 
-`tilbud` sorts by verdict (`SUPERT`, then `BRA`, then `MIDDELS`, then `LURERI`), then by per-liter price.
+`tilbud` sorts by verdict (`SUPERT`, then `BRA`, then `MIDDELS`, then `UKJENT`, then `LURERI`), then by
+per-liter price. `--sorter` changes the order within each verdict. Deals are picked before the
+cheapest listing per `(product, chain)`, so a single can on offer shows up even when the
+4-pack is cheaper per liter. With `--kommende`, an offer that has not started is priced as on its
+first day and marked `KAMPANJE fra 2.10.`.
 
 ### 7.9 History views
 
@@ -557,7 +561,9 @@ Each following line is `{"type":"resultat", ...same object as above...}`.
 ### 9.3 Other commands
 
 `tilbud`, `historikk`, `butikker`, `produkter` and `overvak liste` all support `--json` with the
-same envelope (`skjemaversjon`, `generert`) and a command-specific payload key. For `historikk`
+same envelope (`skjemaversjon`, `generert`) and a command-specific payload key. `tilbud` is the
+exception: its rows are search results, so it prints the search document unchanged
+(`sporring`, `resultater`) and the published schema covers it. For `historikk`
 that key is `serier` (per chain: a list of intervals plus the reference values).
 
 ---
@@ -694,7 +700,7 @@ tests/fixtures/<source>/...
 1. **M1 – Core search**: config, Kassalapp adapter, catalog + GTIN matching, SQLite with change-only history, pricing math, search with filters, table + JSON output, TTL fetching, degrade/warn.
    - **Right after M1 – source research** (done, §4.6): only Oda has a usable public source.
 2. **M2 – History**: verdict engine, deal detection, `tilbud`, sparklines, `historikk` chart, `eksporter`.
-   - Done: reference values (L30, M90, ATL, coverage) per `(product, chain)`, the verdict rules, `PRISFALL`, `--sorter rabatt` and the Vurdering column. The history of a `(product, chain)` is the lowest price among its listings at each moment, since that is what the ranking shows.
+   - Done: reference values (L30, M90, ATL, coverage) per `(product, chain)`, the verdict rules, `PRISFALL`, `--sorter rabatt`, the Vurdering column and `tilbud`. The history of a `(product, chain)` is the lowest price among its listings at each moment, since that is what the ranking shows.
 3. **M3 – Direct adapters**: Oda (§4.6), merge rules. Rema and Coop offer adapters are dropped for lack of a public source; revisit if Tjek or the chains offer access.
 4. **M4 – Automation and release**: `planlegg` for all OSes, `overvak` + notifications, completions, cargo-dist releases, published JSON schema.
 

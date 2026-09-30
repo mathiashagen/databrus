@@ -11,7 +11,8 @@ use crate::config::Config;
 use crate::db::{HistoricPrice, StoredPrice};
 use crate::history::{self, References, SeriesKey, deals};
 use crate::model::{
-    MembershipProgram, Offer, Ore, PriceBasis, Product, ProductSummary, SearchResult, VerdictInfo,
+    MembershipProgram, Offer, Ore, PriceBasis, Product, ProductSummary, SearchResult, Verdict,
+    VerdictInfo,
 };
 use crate::pricing::{self, PriceCalc, effective_unit_price};
 
@@ -79,7 +80,14 @@ pub fn rank(
             continue;
         }
 
-        let (calc, basis) = compute_price(price, filter.single_unit, &config.memberships, today);
+        // An upcoming offer is priced as on its first day.
+        let date = price
+            .offer
+            .as_ref()
+            .filter(|o| filter.upcoming && deals::campaign_upcoming(o, today))
+            .and_then(|o| o.valid_from)
+            .unwrap_or(today);
+        let (calc, basis) = compute_price(price, filter.single_unit, &config.memberships, date);
         let liter_price = pricing::liter_price(calc.unit_price, product.volume);
         if filter.max_price.is_some_and(|m| calc.unit_price > m)
             || filter.max_liter_price.is_some_and(|m| liter_price > m)
@@ -108,7 +116,7 @@ pub fn rank(
             .get(&(price.product.clone(), price.chain))
             .copied()
             .unwrap_or_default();
-        rows.push(build_result(
+        let row = build_result(
             price,
             product,
             &refs,
@@ -117,14 +125,24 @@ pub fn rank(
             liter_price,
             age_hours,
             config,
-            today,
-        ));
+            date,
+        );
+        // Before picking the cheapest per (product, chain): a single can on offer is a
+        // deal even when the 4-pack is cheaper per liter.
+        if filter.deals_only && row.deal_badge.is_none() {
+            continue;
+        }
+        rows.push(row);
     }
 
     if !filter.all {
         rows = cheapest_per_product_and_chain(rows);
     }
     sort_rows(&mut rows, filter.sort);
+    if filter.deals_only {
+        // Stable, so `--sorter` orders the rows within each verdict.
+        rows.sort_by_key(|r| verdict_order(r.verdict.value));
+    }
 
     let total = rows.len();
     if !filter.all {
@@ -181,15 +199,15 @@ fn build_result(
     liter_price: Ore,
     age_hours: u32,
     config: &Config,
-    today: Date,
+    date: Date,
 ) -> SearchResult {
     let active_offer = price
         .offer
         .clone()
-        .filter(|o| deals::campaign_active(o, today));
+        .filter(|o| deals::campaign_active(o, date));
     let deposit = pricing::deposit(product.volume, &config.deposit);
     let thresholds = &config.verdict;
-    let deal_badge = deals::deal_badge(active_offer.as_ref(), today, liter_price, refs, thresholds);
+    let deal_badge = deals::deal_badge(active_offer.as_ref(), date, liter_price, refs, thresholds);
     let verdict = history::assess(liter_price, deal_badge.is_some(), refs, thresholds);
     SearchResult {
         product: ProductSummary {
@@ -273,6 +291,17 @@ fn sort_rows(rows: &mut [SearchResult], sort: SortBy) {
             rows.sort_by_cached_key(|r| (r.effective_unit_price, r.liter_price, name(r)));
         }
         SortBy::Name => rows.sort_by_cached_key(|r| (name(r), r.liter_price)),
+    }
+}
+
+/// The order of verdicts in `tilbud`: the best deals first, the fake ones last.
+fn verdict_order(verdict: Verdict) -> u8 {
+    match verdict {
+        Verdict::Great => 0,
+        Verdict::Good => 1,
+        Verdict::Fair => 2,
+        Verdict::Unknown => 3,
+        Verdict::Fake => 4,
     }
 }
 
@@ -376,6 +405,43 @@ mod tests {
             now(),
             today(),
         )
+    }
+
+    /// `tilbud`: only deals, grouped by verdict.
+    fn deals(
+        prices: &[StoredPrice],
+        references: &[(&str, Chain, References)],
+        upcoming: bool,
+    ) -> SearchHits {
+        let catalog = Catalog::from_toml(CATALOG).unwrap();
+        let config = Config::default();
+        let mut filter = SearchFilter::from_args(&SearchArgs::default(), &config);
+        filter.deals_only = true;
+        filter.upcoming = upcoming;
+        let references = references
+            .iter()
+            .map(|(product, chain, refs)| ((ProductId((*product).into()), *chain), *refs))
+            .collect();
+        rank(
+            prices,
+            &references,
+            &catalog,
+            &filter,
+            &config,
+            now(),
+            today(),
+        )
+    }
+
+    fn fixed_price(price: &mut StoredPrice, kr: i64, from: Option<Date>) {
+        price.offer = Some(OfferInfo {
+            offer: Offer::FixedPrice {
+                price: Ore(kr * 100),
+            },
+            valid_from: from,
+            valid_to: None,
+            source_flagged: true,
+        });
     }
 
     /// Reference values in kroner per liter, with 30 days of coverage.
@@ -710,5 +776,64 @@ mod tests {
         let hits = search_with_history(&prices, &references, args);
         let order: Vec<_> = hits.rows.iter().map(|r| r.chain).collect();
         assert_eq!(order, [Chain::Spar, Chain::Meny, Chain::Joker]);
+    }
+    #[test]
+    fn deals_are_grouped_by_verdict_then_liter_price() {
+        let mut kiwi = price(1, WHITE, Chain::Kiwi, 2000); // 40 kr/l, campaign, no history
+        fixed_price(&mut kiwi, 20, None);
+        let meny = price(2, WHITE, Chain::Meny, 1750); // 35 kr/l, 30 % below the median
+        let spar = price(3, WHITE, Chain::Spar, 1500); // 30 kr/l, not a deal
+        let mut joker = price(4, RED_BULL, Chain::Joker, 1500); // 60 kr/l, campaign, SUPERT
+        fixed_price(&mut joker, 15, None);
+        let references = [
+            (WHITE, Chain::Meny, history(50, 50, 30)),
+            (WHITE, Chain::Spar, history(30, 30, 25)),
+            (RED_BULL, Chain::Joker, history(80, 80, 60)),
+        ];
+
+        let hits = deals(&[kiwi, meny, spar, joker], &references, false);
+        let rows: Vec<_> = hits
+            .rows
+            .iter()
+            .map(|r| (r.chain, r.verdict.value, r.deal_badge))
+            .collect();
+        assert_eq!(
+            rows,
+            [
+                (Chain::Meny, Verdict::Great, Some(DealBadge::PriceDrop)),
+                (Chain::Joker, Verdict::Great, Some(DealBadge::Campaign)),
+                (Chain::Kiwi, Verdict::Unknown, Some(DealBadge::Campaign)),
+            ]
+        );
+    }
+
+    #[test]
+    fn a_single_can_on_offer_is_a_deal_even_when_the_pack_is_cheaper() {
+        let mut single = price(1, WHITE, Chain::Kiwi, 2990);
+        fixed_price(&mut single, 25, None);
+        let mut four_pack = price(2, WHITE, Chain::Kiwi, 7960);
+        four_pack.pack_size = 4;
+
+        let hits = deals(&[single, four_pack], &[], false);
+        assert_eq!(hits.rows.len(), 1);
+        assert_eq!(hits.rows[0].pack_size, 1);
+        assert_eq!(hits.rows[0].effective_unit_price, Ore(2500));
+    }
+
+    #[test]
+    fn upcoming_offers_only_with_kommende() {
+        let mut later = price(1, WHITE, Chain::Kiwi, 2990);
+        fixed_price(&mut later, 19, Some(date(2026, 10, 2)));
+        let prices = [later];
+
+        assert!(deals(&prices, &[], false).rows.is_empty());
+        let hits = deals(&prices, &[], true);
+        let row = &hits.rows[0];
+        assert_eq!(row.effective_unit_price, Ore(1900));
+        assert_eq!(row.deal_badge, Some(DealBadge::Campaign));
+        assert_eq!(
+            row.offer.as_ref().and_then(|o| o.valid_from),
+            Some(date(2026, 10, 2))
+        );
     }
 }
