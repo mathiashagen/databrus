@@ -80,19 +80,27 @@ async fn update_and_search_with_campaigns() {
         command
     };
 
-    let (update, search, table, deals) = tokio::task::spawn_blocking(move || {
-        let update = databrus(&dir, &["oppdater", "--kilde", "oda"]).assert();
-        let search = databrus(
-            &dir,
-            &["--frakoblet", "--alle", "--json", "--butikk", "oda"],
-        )
-        .assert();
-        let table = databrus(&dir, &["--frakoblet", "--alle", "monster", "ultra"]).assert();
-        let deals = databrus(&dir, &["tilbud", "--frakoblet", "--alle", "--json"]).assert();
-        (update, search, table, deals)
-    })
-    .await
-    .unwrap();
+    let (update, search, table, deals, history, narrowed, ambiguous) =
+        tokio::task::spawn_blocking(move || {
+            let update = databrus(&dir, &["oppdater", "--kilde", "oda"]).assert();
+            let search = databrus(
+                &dir,
+                &["--frakoblet", "--alle", "--json", "--butikk", "oda"],
+            )
+            .assert();
+            let table = databrus(&dir, &["--frakoblet", "--alle", "monster", "ultra"]).assert();
+            let deals = databrus(&dir, &["tilbud", "--frakoblet", "--alle", "--json"]).assert();
+            let history = databrus(
+                &dir,
+                &["historikk", "monster-ultra-white-500-boks", "--json"],
+            )
+            .assert();
+            let narrowed = databrus(&dir, &["historikk", "monster", "ultra"]).assert();
+            let ambiguous = databrus(&dir, &["historikk", "monster"]).assert();
+            (update, search, table, deals, history, narrowed, ambiguous)
+        })
+        .await
+        .unwrap();
 
     update
         .success()
@@ -175,4 +183,26 @@ async fn update_and_search_with_campaigns() {
         .map(|e| e.to_string())
         .collect();
     assert!(errors.is_empty(), "{errors:#?}");
+
+    // `historikk` by id: one series for Oda, priced like the search row (26,64 kr/l).
+    let output = history.success().get_output().stdout.clone();
+    let history: serde_json::Value = serde_json::from_slice(&output).unwrap();
+    assert_eq!(history["produkt"]["id"], "monster-ultra-white-500-boks");
+    let series = history["serier"].as_array().unwrap();
+    assert_eq!(series.len(), 1);
+    assert_eq!(series[0]["kjede"], "oda");
+    assert_eq!(series[0]["literpris_ore"], 2664);
+    assert_eq!(series[0]["intervaller"][0]["literpris_ore"], 2664);
+
+    // Of the Monster Ultra products, only Ultra White has prices, so it is the one meant.
+    narrowed
+        .success()
+        .stdout(predicate::str::contains("Monster Ultra White 0,5 l"))
+        .stdout(predicate::str::contains("UKJENT"));
+
+    // Several products with prices match: the error lists them with their ids.
+    ambiguous
+        .code(1)
+        .stderr(predicate::str::contains("flere produkter passer"))
+        .stderr(predicate::str::contains("(monster-ultra-white-500-boks)"));
 }

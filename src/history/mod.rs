@@ -2,6 +2,7 @@
 
 pub mod deals;
 pub mod stats;
+pub mod trend;
 pub mod verdict;
 
 use std::collections::HashMap;
@@ -20,47 +21,122 @@ use crate::model::{Chain, Ore, ProductId};
 /// `last_seen`, and the time between is unknown (SPEC §7.2).
 const MAX_GAP: SignedDuration = SignedDuration::from_hours(3 * 24);
 
-/// History is kept per product and chain, across listings and sources.
-pub type SeriesKey = (ProductId, Chain);
+/// The price history of every listing: its series (see [`stats::merge`]) and the
+/// reference values computed from it.
+///
+/// History is kept per listing, not per (product, chain): a listing's history starts when
+/// it is first seen, so comparing a 4-pack seen today with a single can seen last week
+/// would look like a price drop that never happened.
+#[derive(Debug, Clone, Default)]
+pub struct History {
+    pub series: HashMap<i64, Vec<Interval>>,
+    pub references: HashMap<i64, References>,
+    /// The product and chain of each listing.
+    pub listings: HashMap<i64, (ProductId, Chain)>,
+}
 
-/// Reference values for every (product, chain) with history. `liter_price` gives the
-/// ranked liter price of a stored price on a date, or `None` to leave it out.
-pub fn references(
-    history: &[HistoricPrice],
-    now: Timestamp,
-    liter_price: impl Fn(&StoredPrice, Date) -> Option<Ore>,
-) -> HashMap<SeriesKey, References> {
-    let mut intervals: HashMap<SeriesKey, Vec<Interval>> = HashMap::new();
-    for listing in history.chunk_by(|a, b| a.price.listing_id == b.price.listing_id) {
-        for (i, entry) in listing.iter().enumerate() {
-            let price = &entry.price;
-            // Sold-out and suspicious prices are not prices anyone could pay.
-            if price.suspicious || price.available == Some(false) {
+impl History {
+    /// Builds the history from the stored intervals. `liter_price` gives the ranked liter
+    /// price of a stored price on a date, or `None` to leave it out.
+    pub fn build(
+        history: &[HistoricPrice],
+        now: Timestamp,
+        liter_price: impl Fn(&StoredPrice, Date) -> Option<Ore>,
+    ) -> Self {
+        let mut built = Self::default();
+        for listing in history.chunk_by(|a, b| a.price.listing_id == b.price.listing_id) {
+            let first = &listing[0].price;
+            let series = stats::merge(&intervals(listing, &liter_price));
+            if series.is_empty() {
                 continue;
             }
-            let Some(liter_price) = liter_price(price, oslo_date(entry.valid_from)) else {
-                continue;
-            };
-            let to = match listing.get(i + 1) {
-                Some(next) if next.valid_from.duration_since(price.last_seen) <= MAX_GAP => {
-                    next.valid_from
-                }
-                _ => price.last_seen,
-            };
-            intervals
-                .entry((price.product.clone(), price.chain))
-                .or_default()
-                .push(Interval {
-                    liter_price,
-                    from: entry.valid_from,
-                    to: to.max(entry.valid_from),
-                });
+            built
+                .references
+                .insert(first.listing_id, stats::compute(&series, now));
+            built.series.insert(first.listing_id, series);
+            built
+                .listings
+                .insert(first.listing_id, (first.product.clone(), first.chain));
         }
+        built
+    }
+
+    pub fn references(&self, listing_id: i64) -> References {
+        self.references
+            .get(&listing_id)
+            .copied()
+            .unwrap_or_default()
+    }
+
+    pub fn series(&self, listing_id: i64) -> &[Interval] {
+        self.series.get(&listing_id).map_or(&[], Vec::as_slice)
+    }
+
+    /// The listings of `product` at `chain` that have history.
+    pub fn listings_of(&self, product: &ProductId, chain: Chain) -> Vec<i64> {
+        let mut ids: Vec<i64> = self
+            .listings
+            .iter()
+            .filter(|(_, (p, c))| p == product && *c == chain)
+            .map(|(&id, _)| id)
+            .collect();
+        ids.sort_unstable();
+        ids
+    }
+
+    pub fn has_history(&self, product: &ProductId) -> bool {
+        self.listings.values().any(|(p, _)| p == product)
+    }
+
+    /// The Trend column: the price in `slots` slots over the 90-day window, or nothing
+    /// when there is too little history to show a trend (SPEC §7.9).
+    pub fn trend(
+        &self,
+        listing_id: i64,
+        now: Timestamp,
+        slots: usize,
+        min_coverage_days: u32,
+    ) -> Vec<Option<Ore>> {
+        if self.references(listing_id).coverage_days < min_coverage_days {
+            return Vec::new();
+        }
+        trend::slots(
+            self.series(listing_id),
+            stats::window_start(now),
+            now,
+            slots,
+        )
+    }
+}
+
+/// The intervals of one listing, oldest first.
+fn intervals(
+    listing: &[HistoricPrice],
+    liter_price: impl Fn(&StoredPrice, Date) -> Option<Ore>,
+) -> Vec<Interval> {
+    let mut intervals = Vec::new();
+    for (i, entry) in listing.iter().enumerate() {
+        let price = &entry.price;
+        // Sold-out and suspicious prices are not prices anyone could pay.
+        if price.suspicious || price.available == Some(false) {
+            continue;
+        }
+        let Some(liter_price) = liter_price(price, oslo_date(entry.valid_from)) else {
+            continue;
+        };
+        let to = match listing.get(i + 1) {
+            Some(next) if next.valid_from.duration_since(price.last_seen) <= MAX_GAP => {
+                next.valid_from
+            }
+            _ => price.last_seen,
+        };
+        intervals.push(Interval {
+            liter_price,
+            from: entry.valid_from,
+            to: to.max(entry.valid_from),
+        });
     }
     intervals
-        .into_iter()
-        .map(|(key, intervals)| (key, stats::compute(&stats::merge(&intervals), now)))
-        .collect()
 }
 
 fn oslo() -> TimeZone {
@@ -114,8 +190,7 @@ mod tests {
     }
 
     fn refs(history: &[HistoricPrice]) -> References {
-        let map = references(history, day(0), |p, _| Some(p.shelf_price));
-        map[&(ProductId("monster-ultra-white-05".into()), Chain::Meny)]
+        History::build(history, day(0), |p, _| Some(p.shelf_price)).references(1)
     }
 
     #[test]
@@ -148,13 +223,18 @@ mod tests {
     }
 
     #[test]
-    fn listings_of_the_same_product_and_chain_share_a_series() {
-        let refs = refs(&[
-            entry(1, 40, -30, 0),
-            entry(2, 35, -30, -10),
-            entry(2, 38, -10, 0),
-        ]);
-        // The cheaper listing wins at each moment: 35, then 38.
-        assert_eq!(refs.before_current, Some(Ore(3500)));
+    fn each_listing_has_its_own_history() {
+        let history = [
+            entry(1, 65, -30, 0),
+            entry(2, 45, -1, 0), // a 4-pack, first seen yesterday
+        ];
+        let built = History::build(&history, day(0), |p, _| Some(p.shelf_price));
+        // The 4-pack has no earlier price, so it is not a drop from 65.
+        assert_eq!(built.references(2).m90, None);
+        assert_eq!(built.references(2).before_current, None);
+        assert_eq!(
+            built.listings_of(&ProductId("monster-ultra-white-05".into()), Chain::Meny),
+            [1, 2]
+        );
     }
 }

@@ -1,5 +1,6 @@
 //! Output: table, JSON and NDJSON (SPEC §9, §11), and Norwegian number formatting.
 
+pub mod chart;
 pub mod format;
 pub mod json;
 pub mod results;

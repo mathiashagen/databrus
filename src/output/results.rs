@@ -1,6 +1,6 @@
 //! The search result as a table (SPEC §3.4, §11). All text in the table is Norwegian.
 //!
-//! The Trend column comes with the sparklines later in M2.
+//! The Trend column is left out when no row has enough history for it.
 
 use comfy_table::{Attribute, Cell, CellAlignment, Color, Table};
 use jiff::Timestamp;
@@ -14,6 +14,8 @@ use crate::sources::{SourceState, SourceStatus};
 
 /// Below this width the Pant column is dropped.
 const NARROW: u16 = 80;
+/// Below this width the Trend column is dropped.
+const WITHOUT_TREND: u16 = 100;
 /// Rows older than this show their age after the chain and are dimmed.
 const OLD_HOURS: u32 = 24;
 
@@ -27,6 +29,11 @@ pub fn table(hits: &SearchHits, color: bool, width: Option<u16>) -> Table {
     }
     headers.push("Tilbud");
     headers.push("Vurdering");
+    let trend =
+        width.is_none_or(|w| w >= WITHOUT_TREND) && hits.rows.iter().any(|r| !r.trend.is_empty());
+    if trend {
+        headers.push("Trend");
+    }
 
     let mut t = table::new(&headers);
     if let Some(width) = width {
@@ -58,9 +65,12 @@ pub fn table(hits: &SearchHits, color: bool, width: Option<u16>) -> Table {
         }
         cells.push(deal);
         cells.push(verdict.to_owned());
+        let verdict_column = cells.len() - 1;
+        if trend {
+            cells.push(format::sparkline(&row.trend));
+        }
 
         let dimmed = row.age_hours >= OLD_HOURS || !row.available;
-        let verdict_column = cells.len() - 1;
         let deal_column = verdict_column - 1;
         let cells: Vec<Cell> = cells
             .into_iter()
@@ -158,13 +168,9 @@ fn verdict_text(row: &SearchResult) -> &'static str {
     let is_deal = row.deal_badge.is_some();
     let below_median = row.verdict.m90_ore.is_some_and(|m90| row.liter_price < m90);
     match row.verdict.value {
-        Verdict::Unknown if is_deal => "UKJENT",
-        Verdict::Unknown => "–",
+        Verdict::Unknown if !is_deal => "–",
         _ if !is_deal && !below_median => "–",
-        Verdict::Great => "SUPERT",
-        Verdict::Good => "BRA",
-        Verdict::Fair => "MIDDELS",
-        Verdict::Fake => "LURERI",
+        verdict => verdict.label(),
     }
 }
 
@@ -253,6 +259,18 @@ mod tests {
             offer.valid_from = Some(jiff::civil::date(2099, 10, 2));
         }
         assert_eq!(deal_text(&row).0, "KAMPANJE 3stk fra 2.10.");
+    }
+
+    #[test]
+    fn trend_column_only_with_history_and_room() {
+        let mut hits = example();
+        assert!(!table(&hits, false, Some(120)).to_string().contains("Trend"));
+
+        hits.rows[0].trend = vec![Some(Ore(4000)), Some(Ore(3000))];
+        let wide = table(&hits, false, Some(120)).to_string();
+        assert!(wide.contains("Trend"));
+        assert!(wide.contains("█▁"));
+        assert!(!table(&hits, false, Some(99)).to_string().contains("Trend"));
     }
 
     #[test]

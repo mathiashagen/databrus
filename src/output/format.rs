@@ -12,6 +12,34 @@ pub fn kr(amount: Ore) -> String {
     format!("{sign}{},{:02}", group_thousands(abs / 100), abs % 100)
 }
 
+const SPARK_LEVELS: [char; 8] = ['▁', '▂', '▃', '▄', '▅', '▆', '▇', '█'];
+
+/// A sparkline, one character per value and a space where nothing is known. The scale
+/// spans at least 5 % of the highest price, centered, so a few øre up or down doesn't look
+/// like a big swing and a flat price sits in the middle (`▅▅▅▅▅▅`).
+pub fn sparkline(values: &[Option<Ore>]) -> String {
+    let known = values.iter().flatten().map(|o| o.0);
+    let (Some(low), Some(high)) = (known.clone().min(), known.max()) else {
+        return " ".repeat(values.len());
+    };
+    let span = (high - low).max(high.abs() / 20).max(1);
+    let bottom = i128::from(low) - i128::from(span - (high - low)) / 2;
+    values
+        .iter()
+        .map(|value| match value {
+            None => ' ',
+            Some(price) => {
+                let top = SPARK_LEVELS.len() as i128 - 1;
+                let level = crate::pricing::div_round(
+                    (i128::from(price.0) - bottom) * top,
+                    i128::from(span),
+                );
+                SPARK_LEVELS[usize::try_from(level.clamp(0, 7)).unwrap_or(0)]
+            }
+        })
+        .collect()
+}
+
 /// `500` → `0,5 l`, `330` → `0,33 l`, `1000` → `1 l`.
 pub fn liters(volume: Ml) -> String {
     let ml = volume.get();
@@ -75,6 +103,30 @@ fn group_thousands(mut number: u64) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn kr_values(values: &[Option<i64>]) -> Vec<Option<Ore>> {
+        values.iter().map(|v| v.map(|kr| Ore(kr * 100))).collect()
+    }
+
+    #[test]
+    fn sparkline_spans_low_to_high() {
+        let values = kr_values(&[Some(50), Some(50), Some(40), Some(30), None, Some(30)]);
+        assert_eq!(sparkline(&values), "██▅▁ ▁");
+    }
+
+    #[test]
+    fn flat_sparkline_sits_in_the_middle() {
+        assert_eq!(sparkline(&kr_values(&[Some(40); 6])), "▅▅▅▅▅▅");
+        // 10 øre on 40 kr is at most one step, not a swing from ▁ to █.
+        let values = [Some(Ore(4000)), Some(Ore(4010)), Some(Ore(4000))];
+        assert_eq!(sparkline(&values), "▄▅▄");
+    }
+
+    #[test]
+    fn empty_sparkline_is_blank() {
+        assert_eq!(sparkline(&[None, None]), "  ");
+        assert_eq!(sparkline(&[]), "");
+    }
 
     #[test]
     fn kroner() {

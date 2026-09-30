@@ -26,10 +26,10 @@ pub async fn run(args: &SearchArgs, ctx: &Context) -> Result<ExitStatus, AppErro
     super::require_price_data(&db)?;
 
     let now = model::now();
-    let references = ranking::references(&db.price_history()?, &catalog, &ctx.config, now);
+    let history = ranking::history(&db.price_history()?, &catalog, &ctx.config, now);
     let hits = ranking::rank(
         &db.latest_prices()?,
-        &references,
+        &history,
         &catalog,
         &filter,
         &ctx.config,

@@ -37,9 +37,9 @@ pub struct Interval {
     pub to: Timestamp,
 }
 
-/// Merges the intervals of several listings (say a single can and a 4-pack) into one
-/// series: at every moment the lowest known price, which is what the ranking shows.
-/// The result is sorted, has no overlaps, and neighbours with the same price are joined.
+/// Merges intervals into one series: at every moment the lowest known price. The result
+/// is sorted, has no overlaps, and neighbours with the same price are joined – e.g. when
+/// an offer changed without changing the effective price.
 pub fn merge(intervals: &[Interval]) -> Vec<Interval> {
     let mut bounds: Vec<Timestamp> = intervals.iter().flat_map(|i| [i.from, i.to]).collect();
     bounds.sort();
@@ -84,13 +84,19 @@ pub fn merge(intervals: &[Interval]) -> Vec<Interval> {
     joined
 }
 
+/// The start of the 90-day window that ends at `now`: midnight in Norway, 89 days before
+/// today.
+pub fn window_start(now: Timestamp) -> Timestamp {
+    start_of_day(oslo_date(now) - (WINDOW_DAYS - 1).days())
+}
+
 /// Computes the reference values from a merged series (see [`merge`]). The last interval
 /// is the current price.
 pub fn compute(series: &[Interval], now: Timestamp) -> References {
     let Some((current, earlier)) = series.split_last() else {
         return References::default();
     };
-    let window_start = start_of_day(oslo_date(now) - (WINDOW_DAYS - 1).days());
+    let window_start = window_start(now);
     let l30_start = start_of_day(oslo_date(current.from) - L30_DAYS.days());
 
     let l30 = earlier

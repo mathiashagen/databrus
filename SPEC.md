@@ -432,8 +432,11 @@ Chain, source, container and membership values are stored as their public slugs 
 
 ### 7.6 Deal verdict ("vurdering")
 
-Computed per `(product, chain)` from the history of the ranked price (the effective price,
-per-liter):
+Computed per **listing** from the history of the ranked price (the effective price,
+per-liter). A row is judged against the history of the listing it shows. History is not
+combined across the listings of a `(product, chain)` (say a single can and a 4-pack): a
+listing's history starts when a source first reports it, so a 4-pack first seen today would
+look like a drop from the single can's price even if it has been on the shelf all along.
 
 Reference values:
 - **L30**: the lowest price in the 30 days *before the current price began* (the EU Omnibus principle)
@@ -476,8 +479,8 @@ first day and marked `KAMPANJE fra 2.10.`.
 
 ### 7.9 History views
 
-- **Sparkline** (`Trend` column): per-liter price for that `(product, chain)` over the last 90 days, bucketed into 6–8 slots, drawn with `▁▂▃▄▅▆▇█`. Blank when coverage is below 14 days. Hidden when the terminal is narrower than the full table.
-- **`historikk <PRODUKT>`**: a Unicode (braille) line chart of per-liter price over time, one series per chain (colored, with a legend), plus a summary table per chain: now, L30, M90, ATL, verdict, days of coverage. `--dager` (default 90), `--kjede` to filter. Uses `textplots` or a small in-house braille renderer.
+- **Sparkline** (`Trend` column): per-liter price for the row's listing over the last 90 days, in 6 slots (the time-weighted average in each), drawn with `▁▂▃▄▅▆▇█`. The scale spans at least 5 % of the price, so small changes don't look like big swings and a flat price is `▅▅▅▅▅▅`. Blank when coverage is below 14 days. The column is dropped below 100 columns, and when no row has enough history. Not part of the JSON.
+- **`historikk <PRODUKT>`**: a Unicode (braille) line chart of per-liter price over time, one series per chain (colored, with a legend), plus a summary table per chain: now, L30, M90, ATL, verdict, days of coverage. `--dager` (default 90), `--kjede` to filter. Uses a small in-house braille renderer; prices are drawn as steps and gaps stay empty. Each chain shows the listing search would show today, or, when it has no current price, the listing seen most recently. The product is given by id or text. An exact name wins, then products with prices; if several still match, the command fails and lists them with their ids.
 - **`eksporter`**: CSV (UTF-8 with BOM for Excel compatibility, `;` as the delimiter and decimal commas when `--excel` is set; otherwise RFC 4180 with dots). One row per price interval: product, chain, source, gyldig_fra, sist_sett, prices, offer, pant.
 
 ---
@@ -564,7 +567,9 @@ Each following line is `{"type":"resultat", ...same object as above...}`.
 same envelope (`skjemaversjon`, `generert`) and a command-specific payload key. `tilbud` is the
 exception: its rows are search results, so it prints the search document unchanged
 (`sporring`, `resultater`) and the published schema covers it. For `historikk`
-that key is `serier` (per chain: a list of intervals plus the reference values).
+the content is `produkt`, `dager` and `serier`: per chain `kjede`, the current `literpris_ore`
+(`null` without a current price), `vurdering` (as in search) and `intervaller`
+(`fra`, `til`, `literpris_ore`).
 
 ---
 
@@ -700,7 +705,7 @@ tests/fixtures/<source>/...
 1. **M1 – Core search**: config, Kassalapp adapter, catalog + GTIN matching, SQLite with change-only history, pricing math, search with filters, table + JSON output, TTL fetching, degrade/warn.
    - **Right after M1 – source research** (done, §4.6): only Oda has a usable public source.
 2. **M2 – History**: verdict engine, deal detection, `tilbud`, sparklines, `historikk` chart, `eksporter`.
-   - Done: reference values (L30, M90, ATL, coverage) per `(product, chain)`, the verdict rules, `PRISFALL`, `--sorter rabatt`, the Vurdering column and `tilbud`. The history of a `(product, chain)` is the lowest price among its listings at each moment, since that is what the ranking shows.
+   - Done: reference values (L30, M90, ATL, coverage) per listing (§7.6), the verdict rules, `PRISFALL`, `--sorter rabatt`, the Vurdering and Trend columns, `tilbud` and `historikk`. Left: `eksporter`.
 3. **M3 – Direct adapters**: Oda (§4.6), merge rules. Rema and Coop offer adapters are dropped for lack of a public source; revisit if Tjek or the chains offer access.
 4. **M4 – Automation and release**: `planlegg` for all OSes, `overvak` + notifications, completions, cargo-dist releases, published JSON schema.
 

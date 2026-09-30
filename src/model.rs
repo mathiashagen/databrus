@@ -452,6 +452,19 @@ pub enum Verdict {
     Unknown,
 }
 
+impl Verdict {
+    /// The Norwegian name, as in JSON.
+    pub const fn label(self) -> &'static str {
+        match self {
+            Verdict::Great => "SUPERT",
+            Verdict::Good => "BRA",
+            Verdict::Fair => "MIDDELS",
+            Verdict::Fake => "LURERI",
+            Verdict::Unknown => "UKJENT",
+        }
+    }
+}
+
 /// Badge in the Tilbud column (SPEC §7.8).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, JsonSchema)]
 pub enum DealBadge {
@@ -557,6 +570,13 @@ pub struct SearchResult {
     pub last_seen: Timestamp,
     #[serde(rename = "alder_timer")]
     pub age_hours: u32,
+    /// The Trend column (SPEC §7.9): the liter price in a few slots over 90 days, empty
+    /// without enough history. Only for the table, so it is not part of the JSON.
+    #[serde(skip)]
+    pub trend: Vec<Option<Ore>>,
+    /// The stored listing behind the row, for `historikk`. Not part of the JSON.
+    #[serde(skip)]
+    pub listing_id: i64,
 }
 
 #[cfg(test)]
@@ -572,6 +592,20 @@ mod tests {
             assert_eq!(clap_name.as_deref(), Some(chain.slug()));
             let json = serde_json::to_string(&chain).unwrap();
             assert_eq!(json, format!("\"{}\"", chain.slug()));
+        }
+    }
+
+    #[test]
+    fn verdict_label_is_the_json_name() {
+        for verdict in [
+            Verdict::Great,
+            Verdict::Good,
+            Verdict::Fair,
+            Verdict::Fake,
+            Verdict::Unknown,
+        ] {
+            let json = serde_json::to_string(&verdict).unwrap();
+            assert_eq!(json, format!("\"{}\"", verdict.label()));
         }
     }
 

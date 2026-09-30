@@ -9,12 +9,15 @@ use super::{SearchFilter, SortBy};
 use crate::catalog::Catalog;
 use crate::config::Config;
 use crate::db::{HistoricPrice, StoredPrice};
-use crate::history::{self, References, SeriesKey, deals};
+use crate::history::{self, History, References, deals};
 use crate::model::{
     MembershipProgram, Offer, Ore, PriceBasis, Product, ProductSummary, SearchResult, Verdict,
     VerdictInfo,
 };
 use crate::pricing::{self, PriceCalc, effective_unit_price};
+
+/// Slots in the Trend column (SPEC §7.9 allows 6–8).
+pub const TREND_SLOTS: usize = 6;
 
 /// Prices older than this are hidden without `--alle` (SPEC §8).
 pub const MAX_AGE_HOURS: u32 = 14 * 24;
@@ -43,15 +46,15 @@ impl Hidden {
     }
 }
 
-/// Reference prices per (product, chain) from the stored history, for the price the
-/// ranking uses by default (effective price, with the user's memberships).
-pub fn references(
+/// The history of every listing from the stored intervals, for the price the ranking
+/// uses by default (effective price, with the user's memberships).
+pub fn history(
     history: &[HistoricPrice],
     catalog: &Catalog,
     config: &Config,
     now: Timestamp,
-) -> HashMap<SeriesKey, References> {
-    history::references(history, now, |price, date| {
+) -> History {
+    History::build(history, now, |price, date| {
         let product = catalog.find(&price.product)?;
         let (calc, _) = compute_price(price, false, &config.memberships, date);
         Some(pricing::liter_price(calc.unit_price, product.volume))
@@ -62,7 +65,7 @@ pub fn references(
 /// predictable in tests.
 pub fn rank(
     prices: &[StoredPrice],
-    references: &HashMap<SeriesKey, References>,
+    history: &History,
     catalog: &Catalog,
     filter: &SearchFilter,
     config: &Config,
@@ -112,14 +115,18 @@ pub fn rank(
             }
         }
 
-        let refs = references
-            .get(&(price.product.clone(), price.chain))
-            .copied()
-            .unwrap_or_default();
+        let refs = history.references(price.listing_id);
+        let trend = history.trend(
+            price.listing_id,
+            now,
+            TREND_SLOTS,
+            config.verdict.min_coverage_days,
+        );
         let row = build_result(
             price,
             product,
             &refs,
+            trend,
             calc,
             basis,
             liter_price,
@@ -194,6 +201,7 @@ fn build_result(
     price: &StoredPrice,
     product: &Product,
     refs: &References,
+    trend: Vec<Option<Ore>>,
     calc: PriceCalc,
     price_basis: PriceBasis,
     liter_price: Ore,
@@ -246,6 +254,8 @@ fn build_result(
         available: price.available != Some(false),
         last_seen: price.last_seen,
         age_hours,
+        trend,
+        listing_id: price.listing_id,
     }
 }
 
@@ -375,7 +385,7 @@ mod tests {
         let filter = SearchFilter::from_args(&args, config);
         rank(
             prices,
-            &HashMap::new(),
+            &History::default(),
             &catalog,
             &filter,
             config,
@@ -386,16 +396,16 @@ mod tests {
 
     fn search_with_history(
         prices: &[StoredPrice],
-        references: &[(&str, Chain, References)],
+        references: &[(i64, References)],
         args: SearchArgs,
     ) -> SearchHits {
         let catalog = Catalog::from_toml(CATALOG).unwrap();
         let config = Config::default();
         let filter = SearchFilter::from_args(&args, &config);
-        let references = references
-            .iter()
-            .map(|(product, chain, refs)| ((ProductId((*product).into()), *chain), *refs))
-            .collect();
+        let references = History {
+            references: references.iter().copied().collect(),
+            ..History::default()
+        };
         rank(
             prices,
             &references,
@@ -410,7 +420,7 @@ mod tests {
     /// `tilbud`: only deals, grouped by verdict.
     fn deals(
         prices: &[StoredPrice],
-        references: &[(&str, Chain, References)],
+        references: &[(i64, References)],
         upcoming: bool,
     ) -> SearchHits {
         let catalog = Catalog::from_toml(CATALOG).unwrap();
@@ -418,10 +428,10 @@ mod tests {
         let mut filter = SearchFilter::from_args(&SearchArgs::default(), &config);
         filter.deals_only = true;
         filter.upcoming = upcoming;
-        let references = references
-            .iter()
-            .map(|(product, chain, refs)| ((ProductId((*product).into()), *chain), *refs))
-            .collect();
+        let references = History {
+            references: references.iter().copied().collect(),
+            ..History::default()
+        };
         rank(
             prices,
             &references,
@@ -737,7 +747,7 @@ mod tests {
         // 60 kr/l against a median of 70 and L30 of 68: PRISFALL, and BRA.
         let hits = search_with_history(
             &[price(1, WHITE, Chain::Meny, 3000)],
-            &[(WHITE, Chain::Meny, history(68, 70, 55))],
+            &[(1, history(68, 70, 55))],
             SearchArgs::default(),
         );
         let row = &hits.rows[0];
@@ -765,10 +775,7 @@ mod tests {
             price(2, WHITE, Chain::Spar, 2500), // 50 kr/l, median 80: 37,5 % off
             price(3, RED_BULL, Chain::Joker, 500), // 20 kr/l, no history
         ];
-        let references = [
-            (WHITE, Chain::Meny, history(42, 42, 40)),
-            (WHITE, Chain::Spar, history(80, 80, 50)),
-        ];
+        let references = [(1, history(42, 42, 40)), (2, history(80, 80, 50))];
         let args = SearchArgs {
             sort: SortBy::Discount,
             ..SearchArgs::default()
@@ -786,9 +793,9 @@ mod tests {
         let mut joker = price(4, RED_BULL, Chain::Joker, 1500); // 60 kr/l, campaign, SUPERT
         fixed_price(&mut joker, 15, None);
         let references = [
-            (WHITE, Chain::Meny, history(50, 50, 30)),
-            (WHITE, Chain::Spar, history(30, 30, 25)),
-            (RED_BULL, Chain::Joker, history(80, 80, 60)),
+            (2, history(50, 50, 30)),
+            (3, history(30, 30, 25)),
+            (4, history(80, 80, 60)),
         ];
 
         let hits = deals(&[kiwi, meny, spar, joker], &references, false);

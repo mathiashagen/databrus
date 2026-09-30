@@ -24,6 +24,7 @@ $ databrus oppdater              # hent ferske priser (skjer også automatisk ve
 $ databrus monster ultra --storrelse 0,5
 $ databrus --json red bull --sukkerfri
 $ databrus tilbud                # dagens tilbud, beste vurdering først
+$ databrus historikk monster ultra white   # prisgraf per kjede
 $ databrus planlegg installer --tid 07:00   # hent priser hver dag
 ```
 
