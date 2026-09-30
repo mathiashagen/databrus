@@ -8,11 +8,10 @@ use jiff::civil::Date;
 use super::{SearchFilter, SortBy};
 use crate::catalog::Catalog;
 use crate::config::Config;
-use crate::db::StoredPrice;
-use crate::history::deals;
+use crate::db::{HistoricPrice, StoredPrice};
+use crate::history::{self, References, SeriesKey, deals};
 use crate::model::{
-    MembershipProgram, Offer, Ore, PriceBasis, Product, ProductSummary, SearchResult, Verdict,
-    VerdictInfo,
+    MembershipProgram, Offer, Ore, PriceBasis, Product, ProductSummary, SearchResult, VerdictInfo,
 };
 use crate::pricing::{self, PriceCalc, effective_unit_price};
 
@@ -43,10 +42,26 @@ impl Hidden {
     }
 }
 
+/// Reference prices per (product, chain) from the stored history, for the price the
+/// ranking uses by default (effective price, with the user's memberships).
+pub fn references(
+    history: &[HistoricPrice],
+    catalog: &Catalog,
+    config: &Config,
+    now: Timestamp,
+) -> HashMap<SeriesKey, References> {
+    history::references(history, now, |price, date| {
+        let product = catalog.find(&price.product)?;
+        let (calc, _) = compute_price(price, false, &config.memberships, date);
+        Some(pricing::liter_price(calc.unit_price, product.volume))
+    })
+}
+
 /// Filters, prices and ranks. `now` and `today` are passed in, so the result is
 /// predictable in tests.
 pub fn rank(
     prices: &[StoredPrice],
+    references: &HashMap<SeriesKey, References>,
     catalog: &Catalog,
     filter: &SearchFilter,
     config: &Config,
@@ -89,9 +104,14 @@ pub fn rank(
             }
         }
 
+        let refs = references
+            .get(&(price.product.clone(), price.chain))
+            .copied()
+            .unwrap_or_default();
         rows.push(build_result(
             price,
             product,
+            &refs,
             calc,
             basis,
             liter_price,
@@ -155,6 +175,7 @@ fn compute_price(
 fn build_result(
     price: &StoredPrice,
     product: &Product,
+    refs: &References,
     calc: PriceCalc,
     price_basis: PriceBasis,
     liter_price: Ore,
@@ -167,6 +188,9 @@ fn build_result(
         .clone()
         .filter(|o| deals::campaign_active(o, today));
     let deposit = pricing::deposit(product.volume, &config.deposit);
+    let thresholds = &config.verdict;
+    let deal_badge = deals::deal_badge(active_offer.as_ref(), today, liter_price, refs, thresholds);
+    let verdict = history::assess(liter_price, deal_badge.is_some(), refs, thresholds);
     SearchResult {
         product: ProductSummary {
             id: product.id.clone(),
@@ -191,15 +215,14 @@ fn build_result(
         price_basis,
         deposit,
         deposit_min_quantity: Ore(deposit.0 * i64::from(calc.min_quantity)),
-        deal_badge: deals::deal_badge(active_offer.as_ref(), today),
+        deal_badge,
         offer: active_offer,
-        // Verdicts and reference prices come with the history in M2.
         verdict: VerdictInfo {
-            value: Verdict::Unknown,
-            l30_ore: None,
-            m90_ore: None,
-            atl_ore: None,
-            coverage_days: 0,
+            value: verdict,
+            l30_ore: refs.l30,
+            m90_ore: refs.m90,
+            atl_ore: refs.atl,
+            coverage_days: refs.coverage_days,
         },
         price_range: None,
         available: price.available != Some(false),
@@ -230,8 +253,20 @@ fn sort_rows(rows: &mut [SearchResult], sort: SortBy) {
     // Stable order for equal prices: name, size, chain.
     let name = |r: &SearchResult| (r.product.name.to_lowercase(), r.product.volume, r.chain);
     match sort {
-        // Discount needs the 90-day median (M2); until then it sorts like liter price.
-        SortBy::LiterPrice | SortBy::Discount => {
+        // Largest discount against the 90-day median first; rows without a median last.
+        SortBy::Discount => rows.sort_by_cached_key(|r| {
+            let discount = r
+                .verdict
+                .m90_ore
+                .map(|m90| discount_basis_points(r.liter_price, m90));
+            (
+                std::cmp::Reverse(discount),
+                r.liter_price,
+                r.effective_unit_price,
+                name(r),
+            )
+        }),
+        SortBy::LiterPrice => {
             rows.sort_by_cached_key(|r| (r.liter_price, r.effective_unit_price, name(r)));
         }
         SortBy::Price => {
@@ -241,6 +276,14 @@ fn sort_rows(rows: &mut [SearchResult], sort: SortBy) {
     }
 }
 
+/// How far `price` is below `m90`, in hundredths of a percent (negative when above).
+fn discount_basis_points(price: Ore, m90: Ore) -> i64 {
+    if m90.0 <= 0 {
+        return 0;
+    }
+    pricing::div_round(i128::from(m90.0 - price.0) * 10_000, i128::from(m90.0))
+}
+
 #[cfg(test)]
 mod tests {
     use jiff::ToSpan;
@@ -248,7 +291,7 @@ mod tests {
 
     use super::*;
     use crate::cli::{ChainChoice, SearchArgs};
-    use crate::model::{Chain, DealBadge, MemberPrice, OfferInfo, ProductId, SourceId};
+    use crate::model::{Chain, DealBadge, MemberPrice, OfferInfo, ProductId, SourceId, Verdict};
 
     const CATALOG: &str = r#"
         [[produkt]]
@@ -301,7 +344,49 @@ mod tests {
     fn search(prices: &[StoredPrice], args: SearchArgs, config: &Config) -> SearchHits {
         let catalog = Catalog::from_toml(CATALOG).unwrap();
         let filter = SearchFilter::from_args(&args, config);
-        rank(prices, &catalog, &filter, config, now(), today())
+        rank(
+            prices,
+            &HashMap::new(),
+            &catalog,
+            &filter,
+            config,
+            now(),
+            today(),
+        )
+    }
+
+    fn search_with_history(
+        prices: &[StoredPrice],
+        references: &[(&str, Chain, References)],
+        args: SearchArgs,
+    ) -> SearchHits {
+        let catalog = Catalog::from_toml(CATALOG).unwrap();
+        let config = Config::default();
+        let filter = SearchFilter::from_args(&args, &config);
+        let references = references
+            .iter()
+            .map(|(product, chain, refs)| ((ProductId((*product).into()), *chain), *refs))
+            .collect();
+        rank(
+            prices,
+            &references,
+            &catalog,
+            &filter,
+            &config,
+            now(),
+            today(),
+        )
+    }
+
+    /// Reference values in kroner per liter, with 30 days of coverage.
+    fn history(l30: i64, m90: i64, atl: i64) -> References {
+        References {
+            l30: Some(Ore(l30 * 100)),
+            m90: Some(Ore(m90 * 100)),
+            atl: Some(Ore(atl * 100)),
+            before_current: Some(Ore(m90 * 100)),
+            coverage_days: 30,
+        }
     }
 
     fn chains(hits: &SearchHits) -> Vec<(Chain, i64)> {
@@ -580,5 +665,50 @@ mod tests {
         assert_eq!(json["brukt_pris"], "hyllepris");
         assert_eq!(json["vurdering"]["verdi"], "UKJENT");
         assert!(json["vurdering"].get("dekning_dager").is_some());
+    }
+    #[test]
+    fn verdict_and_price_drop_come_from_the_history() {
+        // 60 kr/l against a median of 70 and L30 of 68: PRISFALL, and BRA.
+        let hits = search_with_history(
+            &[price(1, WHITE, Chain::Meny, 3000)],
+            &[(WHITE, Chain::Meny, history(68, 70, 55))],
+            SearchArgs::default(),
+        );
+        let row = &hits.rows[0];
+        assert_eq!(row.deal_badge, Some(DealBadge::PriceDrop));
+        assert_eq!(row.verdict.value, Verdict::Good);
+        assert_eq!(row.verdict.m90_ore, Some(Ore(7000)));
+        assert_eq!(row.verdict.coverage_days, 30);
+    }
+
+    #[test]
+    fn without_history_the_verdict_is_unknown() {
+        let hits = search_with_history(
+            &[price(1, WHITE, Chain::Meny, 3000)],
+            &[],
+            SearchArgs::default(),
+        );
+        assert_eq!(hits.rows[0].verdict.value, Verdict::Unknown);
+        assert_eq!(hits.rows[0].deal_badge, None);
+    }
+
+    #[test]
+    fn discount_sort_puts_the_largest_drop_first() {
+        let prices = [
+            price(1, WHITE, Chain::Meny, 2000), // 40 kr/l, median 42: 5 % off
+            price(2, WHITE, Chain::Spar, 2500), // 50 kr/l, median 80: 37,5 % off
+            price(3, RED_BULL, Chain::Joker, 500), // 20 kr/l, no history
+        ];
+        let references = [
+            (WHITE, Chain::Meny, history(42, 42, 40)),
+            (WHITE, Chain::Spar, history(80, 80, 50)),
+        ];
+        let args = SearchArgs {
+            sort: SortBy::Discount,
+            ..SearchArgs::default()
+        };
+        let hits = search_with_history(&prices, &references, args);
+        let order: Vec<_> = hits.rows.iter().map(|r| r.chain).collect();
+        assert_eq!(order, [Chain::Spar, Chain::Meny, Chain::Joker]);
     }
 }

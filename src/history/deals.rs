@@ -1,20 +1,18 @@
 //! What counts as a deal (SPEC §7.8).
 //!
-//! KAMPANJE (the source flags an active offer) is in place. PRISFALL (≥ 10 % below the
-//! 90-day median) needs the history statistics and comes in M2.
+//! KAMPANJE: the source flags an active offer. PRISFALL: no offer, but the price is
+//! clearly below the 90-day median.
 
 use jiff::Timestamp;
 use jiff::civil::Date;
-use jiff::tz::TimeZone;
 
-use crate::model::{DealBadge, OfferInfo};
+use super::verdict::{Thresholds, at_least_percent_below};
+use super::{References, oslo_date};
+use crate::model::{DealBadge, OfferInfo, Ore};
 
 /// Today's date in Norway. Day boundaries always follow Europe/Oslo.
 pub fn today_oslo() -> Date {
-    let now = Timestamp::now();
-    now.in_tz("Europe/Oslo")
-        .unwrap_or_else(|_| now.to_zoned(TimeZone::UTC))
-        .date()
+    oslo_date(Timestamp::now())
 }
 
 /// Whether a source-flagged offer applies on `date` (both ends inclusive).
@@ -29,10 +27,23 @@ pub fn campaign_upcoming(offer: &OfferInfo, date: Date) -> bool {
     offer.source_flagged && offer.valid_from.is_some_and(|from| from > date)
 }
 
-pub fn deal_badge(offer: Option<&OfferInfo>, date: Date) -> Option<DealBadge> {
-    offer
-        .filter(|o| campaign_active(o, date))
-        .map(|_| DealBadge::Campaign)
+/// Whether a row is a deal, and which kind. PRISFALL needs enough history to trust the
+/// median.
+pub fn deal_badge(
+    offer: Option<&OfferInfo>,
+    date: Date,
+    liter_price: Ore,
+    references: &References,
+    thresholds: &Thresholds,
+) -> Option<DealBadge> {
+    if offer.is_some_and(|o| campaign_active(o, date)) {
+        return Some(DealBadge::Campaign);
+    }
+    let covered = references.coverage_days >= thresholds.min_coverage_days;
+    let dropped = references
+        .m90
+        .is_some_and(|m90| at_least_percent_below(liter_price, m90, thresholds.price_drop_percent));
+    (covered && dropped).then_some(DealBadge::PriceDrop)
 }
 
 #[cfg(test)]
@@ -66,9 +77,46 @@ mod tests {
         assert!(campaign_active(&offer(None, None, true), date(2026, 1, 1)));
     }
 
+    fn badge(
+        offer: Option<&OfferInfo>,
+        kr: i64,
+        m90: i64,
+        coverage_days: u32,
+    ) -> Option<DealBadge> {
+        let references = References {
+            m90: Some(Ore(m90 * 100)),
+            coverage_days,
+            ..References::default()
+        };
+        deal_badge(
+            offer,
+            date(2026, 1, 1),
+            Ore(kr * 100),
+            &references,
+            &Thresholds::default(),
+        )
+    }
+
     #[test]
     fn unflagged_is_not_a_campaign() {
         let o = offer(None, None, false);
-        assert_eq!(deal_badge(Some(&o), date(2026, 1, 1)), None);
+        assert_eq!(badge(Some(&o), 40, 40, 30), None);
+    }
+
+    #[test]
+    fn a_campaign_needs_no_history() {
+        let o = offer(None, None, true);
+        assert_eq!(badge(Some(&o), 40, 40, 0), Some(DealBadge::Campaign));
+    }
+
+    #[test]
+    fn price_drop_is_ten_percent_below_the_median() {
+        assert_eq!(badge(None, 36, 40, 14), Some(DealBadge::PriceDrop));
+        assert_eq!(badge(None, 37, 40, 14), None);
+    }
+
+    #[test]
+    fn price_drop_needs_coverage() {
+        assert_eq!(badge(None, 30, 40, 13), None);
     }
 }

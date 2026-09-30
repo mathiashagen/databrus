@@ -14,7 +14,7 @@ use std::time::Duration;
 
 use rusqlite::Connection;
 
-pub use read::{FetchLog, StoredPrice, UnmatchedListing};
+pub use read::{FetchLog, HistoricPrice, StoredPrice, UnmatchedListing};
 pub use write::{Change, PriceObservation};
 
 use crate::error::AppError;

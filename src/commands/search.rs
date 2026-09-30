@@ -12,7 +12,7 @@ use crate::model;
 use crate::output::json::{self, Envelope, Header};
 use crate::output::{self, OutputFormat, results, table};
 use crate::search::ranking::{self, SearchHits};
-use crate::search::{SearchContent, SearchFilter, SortBy};
+use crate::search::{SearchContent, SearchFilter};
 use crate::sources::{self, SourceState, SourceStatus};
 
 /// A row older than this counts as stale for `--streng` (SPEC §8).
@@ -20,20 +20,16 @@ const STALE_HOURS: u32 = 24;
 
 pub async fn run(args: &SearchArgs, ctx: &Context) -> Result<ExitStatus, AppError> {
     let filter = SearchFilter::from_args(args, &ctx.config);
-    if filter.sort == SortBy::Discount {
-        anstream::eprintln!(
-            "{} --sorter rabatt krever prishistorikk (kommer i M2) – sorterer etter literpris",
-            "info:".cyan().bold()
-        );
-    }
     let catalog = ctx.catalog()?;
     let mut db = ctx.open_database()?;
     let statuses = sources::refresh(&mut db, &ctx.config, &catalog, ctx.fetch_mode(), &[]).await?;
     super::require_price_data(&db)?;
 
     let now = model::now();
+    let references = ranking::references(&db.price_history()?, &catalog, &ctx.config, now);
     let hits = ranking::rank(
         &db.latest_prices()?,
+        &references,
         &catalog,
         &filter,
         &ctx.config,

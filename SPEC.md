@@ -694,6 +694,7 @@ tests/fixtures/<source>/...
 1. **M1 – Core search**: config, Kassalapp adapter, catalog + GTIN matching, SQLite with change-only history, pricing math, search with filters, table + JSON output, TTL fetching, degrade/warn.
    - **Right after M1 – source research** (done, §4.6): only Oda has a usable public source.
 2. **M2 – History**: verdict engine, deal detection, `tilbud`, sparklines, `historikk` chart, `eksporter`.
+   - Done: reference values (L30, M90, ATL, coverage) per `(product, chain)`, the verdict rules, `PRISFALL`, `--sorter rabatt` and the Vurdering column. The history of a `(product, chain)` is the lowest price among its listings at each moment, since that is what the ranking shows.
 3. **M3 – Direct adapters**: Oda (§4.6), merge rules. Rema and Coop offer adapters are dropped for lack of a public source; revisit if Tjek or the chains offer access.
 4. **M4 – Automation and release**: `planlegg` for all OSes, `overvak` + notifications, completions, cargo-dist releases, published JSON schema.
 

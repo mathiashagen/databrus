@@ -2,8 +2,8 @@
 source: src/output/results.rs
 expression: "table(&example(), false, Some(120)).to_string()"
 ---
- Produkt                Str.    Kjede        Pris   Kr/L   Pant  Tilbud        
- Monster Ultra White    0,5 l   Kiwi        15,90  31,80  +2,00  KAMPANJE 3stk 
- Monster Ultra White    0,5 l   Coop Extra  21,90  43,80  +2,00  MEDLEM 18,90  
- Monster Ultra White ?  0,5 l   Oda         22,40  44,80  +2,00                
- Red Bull Energy Drink  0,25 l  Joker 3d    24,90  99,60  +2,00  4-pakning
+ Produkt                Str.    Kjede        Pris   Kr/L   Pant  Tilbud         Vurdering 
+ Monster Ultra White    0,5 l   Kiwi        15,90  31,80  +2,00  KAMPANJE 3stk  UKJENT    
+ Monster Ultra White    0,5 l   Coop Extra  21,90  43,80  +2,00  MEDLEM 18,90   –         
+ Monster Ultra White ?  0,5 l   Oda         22,40  44,80  +2,00                 –         
+ Red Bull Energy Drink  0,25 l  Joker 3d    24,90  99,60  +2,00  4-pakning      –

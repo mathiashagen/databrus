@@ -86,6 +86,7 @@ pub(crate) fn example_hits() -> SearchHits {
     let filter = SearchFilter::from_args(&SearchArgs::default(), &Config::default());
     rank(
         &[campaign, member, pack, unverified, stale],
+        &std::collections::HashMap::new(),
         &catalog,
         &filter,
         &Config::default(),
