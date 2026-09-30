@@ -18,6 +18,3 @@ install-path = "CARGO_HOME"
 hosting = "github"
 # Whether to install an updater program
 install-updater = false
-# Temporarily build every artifact on pull requests, to check the macOS and Linux builds
-# before the first release. Remove (back to plan-only checks) once they pass.
-pr-run-mode = "upload"
